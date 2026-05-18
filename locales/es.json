@@ -1,0 +1,94 @@
+{
+  "app": {
+    "nombre": "ProFit Manager",
+    "slogan": "Tu coaching, sin WhatsApp ni hojas de cálculo."
+  },
+  "nav": {
+    "inicio": "Inicio",
+    "funcionalidades": "Funcionalidades",
+    "planes": "Planes",
+    "iniciar_sesion": "Iniciar sesión",
+    "empezar_gratis": "Empezar gratis"
+  },
+  "auth": {
+    "login": {
+      "titulo": "Bienvenido de vuelta",
+      "subtitulo": "Ingresa con tu cuenta de ProFit Manager",
+      "email": "Correo electrónico",
+      "contrasena": "Contraseña",
+      "olvidaste": "¿Olvidaste tu contraseña?",
+      "boton": "Iniciar sesión",
+      "sin_cuenta": "¿No tienes cuenta?",
+      "crear_cuenta": "Crear cuenta gratis",
+      "error_credenciales": "Email o contraseña incorrectos"
+    },
+    "registro": {
+      "titulo": "Crea tu cuenta gratis",
+      "subtitulo": "Empieza a gestionar a tus alumnos hoy",
+      "nombre": "Nombre",
+      "apellido": "Apellido",
+      "email": "Correo electrónico",
+      "contrasena": "Contraseña",
+      "confirmar": "Confirmar contraseña",
+      "pais": "País",
+      "zona_horaria": "Zona horaria",
+      "terminos": "Acepto los términos y la política de privacidad",
+      "boton": "Crear cuenta",
+      "ya_tienes": "¿Ya tienes cuenta?",
+      "error_email": "Este email ya está registrado"
+    }
+  },
+  "coach": {
+    "dashboard": "Dashboard",
+    "mis_alumnos": "Mis alumnos",
+    "rutinas": "Rutinas",
+    "planes_alimenticios": "Planes alimenticios",
+    "agenda": "Agenda",
+    "progreso": "Progreso",
+    "mi_perfil": "Mi perfil",
+    "mi_plan": "Mi plan",
+    "configuracion": "Configuración",
+    "nuevo_alumno": "Nuevo alumno",
+    "bienvenida": "Hola"
+  },
+  "alumno": {
+    "inicio": "Inicio",
+    "mi_rutina": "Mi rutina",
+    "mi_plan_alimenticio": "Mi plan alimenticio",
+    "mi_progreso": "Mi progreso",
+    "mi_agenda": "Mi agenda",
+    "mi_perfil": "Mi perfil",
+    "contactar_coach": "Contactar a mi coach"
+  },
+  "admin": {
+    "dashboard": "Dashboard",
+    "coaches": "Coaches",
+    "pagos": "Pagos",
+    "planes": "Planes",
+    "reportes": "Reportes",
+    "notificaciones": "Notificaciones",
+    "configuracion": "Configuración",
+    "registrar_pago": "Registrar pago"
+  },
+  "planes": {
+    "gratis": "Gratis",
+    "inicial": "Inicial",
+    "medio": "Medio",
+    "medio_plus": "Medio Plus",
+    "ilimitado": "Ilimitado",
+    "proximamente": "Próximamente",
+    "recomendado": "RECOMENDADO",
+    "mensual": "mes",
+    "anual": "año",
+    "ahorro": "Ahorras"
+  },
+  "errores": {
+    "PLAN_LIMIT_REACHED": "Alcanzaste el límite de alumnos de tu plan. Actualiza para agregar más.",
+    "READ_ONLY_MODE": "Tu plan está vencido. Contacta a soporte para renovar.",
+    "FEATURE_NOT_AVAILABLE": "Esta función no está disponible en tu plan actual.",
+    "ALUMNO_NO_PERTENECE_A_COACH": "No encontramos el recurso solicitado.",
+    "DATOS_INVALIDOS": "Los datos ingresados no son válidos.",
+    "NO_AUTORIZADO": "No tienes permisos para realizar esta acción."
+  },
+  "marca_agua": "Powered by ProFit Manager"
+}

@@ -1,0 +1,504 @@
+// ProFit Manager — Schema Prisma completo
+// Referencia: BASE_DE_DATOS.md
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ─────────────────────────────────────────────
+// ENUMS
+// ─────────────────────────────────────────────
+
+enum Role {
+  admin
+  coach
+  alumno
+}
+
+enum PlanActual {
+  gratis
+  inicial
+  medio
+  medio_plus
+  ilimitado
+}
+
+enum Periodicidad {
+  mensual
+  anual
+}
+
+enum EstadoPlan {
+  activo
+  vencido
+  solo_lectura
+}
+
+enum Objetivo {
+  hipertrofia
+  perdida_grasa
+  fuerza
+  resistencia
+  general
+}
+
+enum Genero {
+  M
+  F
+  otro
+}
+
+enum Modalidad {
+  online
+  presencial
+}
+
+enum EstadoCita {
+  agendada
+  completada
+  cancelada
+}
+
+enum MetodoPago {
+  transferencia
+  deposito
+  otro
+}
+
+enum MomentoDia {
+  desayuno
+  media_manana
+  almuerzo
+  merienda
+  cena
+}
+
+enum TipoNotificacion {
+  vencimiento
+  vencimiento_proximo
+  plan_activado
+  pago_confirmado
+  nueva_rutina
+  nuevo_plan_alimenticio
+  cita_agendada
+  cita_cancelada
+  medicion_registrada
+  alumno_archivado
+  pago_registrado
+  bienvenida
+  nueva_solicitud
+  solicitud_aprobada
+  solicitud_rechazada
+}
+
+enum EstadoSolicitud {
+  pendiente
+  aprobada
+  rechazada
+}
+
+// ─────────────────────────────────────────────
+// TABLAS PRINCIPALES
+// ─────────────────────────────────────────────
+
+model User {
+  id               String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  email            String    @unique @db.VarChar(255)
+  password_hash    String
+  role             Role
+  nombre           String    @db.VarChar(100)
+  apellido         String    @db.VarChar(100)
+  telefono         String?   @db.VarChar(30)
+  pais             String?   @db.Char(2)
+  zona_horaria     String?   @db.VarChar(60)
+  activo           Boolean   @default(true)
+  email_verificado Boolean   @default(false)
+  ultimo_login     DateTime? @db.Timestamptz
+  created_at       DateTime  @default(now()) @db.Timestamptz
+  updated_at       DateTime  @updatedAt @db.Timestamptz
+  deleted_at       DateTime? @db.Timestamptz
+
+  coach             Coach?
+  alumno            Alumno?
+  notificaciones    Notificacion[]
+  tokens            TokenVerificacion[]
+  mediciones_reg    Medicion[]      @relation("MedicionRegistradaPor")
+  pagos_reg         Pago[]          @relation("PagoRegistradoPor")
+  historial_cambios HistorialPlan[] @relation("CambiadoPor")
+  sessions          Session[]
+  accounts          Account[]
+
+  @@index([role])
+  @@map("users")
+}
+
+model Coach {
+  id                    String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  user_id               String        @unique @db.Uuid
+  plan_actual           PlanActual    @default(gratis)
+  periodicidad          Periodicidad?
+  fecha_inicio_plan     DateTime?     @db.Date
+  fecha_vencimiento     DateTime?     @db.Date
+  estado_plan           EstadoPlan    @default(activo)
+  logo_url              String?
+  google_calendar_token String?
+  bio                   String?
+  especialidad          String?       @db.VarChar(150)
+
+  // ── Perfil público (plan Inicial) ──────────────────
+  slug                  String?       @unique @db.VarChar(80)
+  perfil_publico_activo Boolean       @default(false)
+  foto_publica_url      String?
+  titulo_profesional    String?       @db.VarChar(200)
+  especialidades_tags   Json?         // String[]
+  anios_experiencia     Int?          @db.SmallInt
+  ciudad                String?       @db.VarChar(100)
+  instagram_url         String?       @db.VarChar(200)
+  cta_whatsapp_texto    String?       @db.VarChar(100)
+
+  created_at            DateTime      @default(now()) @db.Timestamptz
+  updated_at            DateTime      @updatedAt @db.Timestamptz
+
+  user                User                  @relation(fields: [user_id], references: [id], onDelete: Restrict)
+  alumnos             Alumno[]
+  rutinas             Rutina[]
+  planes_alimenticios PlanAlimenticio[]
+  citas               Cita[]
+  pagos               Pago[]
+  historial_planes    HistorialPlan[]
+  solicitudes         SolicitudInscripcion[]
+
+  @@index([estado_plan])
+  @@index([fecha_vencimiento])
+  @@map("coaches")
+}
+
+model SolicitudInscripcion {
+  id           String          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  coach_id     String          @db.Uuid
+  nombre       String          @db.VarChar(150)
+  email        String          @db.VarChar(255)
+  telefono     String?         @db.VarChar(30)
+  mensaje      String?         @db.VarChar(300)
+  estado       EstadoSolicitud @default(pendiente)
+  nota_interna String?         @db.VarChar(500)
+  alumno_id    String?         @db.Uuid
+  ip_origen    String?         @db.VarChar(45)
+  created_at   DateTime        @default(now()) @db.Timestamptz
+  updated_at   DateTime        @updatedAt @db.Timestamptz
+
+  coach  Coach   @relation(fields: [coach_id], references: [id], onDelete: Cascade)
+  alumno Alumno? @relation(fields: [alumno_id], references: [id], onDelete: SetNull)
+
+  @@index([coach_id, estado])
+  @@index([email, coach_id])
+  @@map("solicitudes_inscripcion")
+}
+
+model Alumno {
+  id               String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  user_id          String    @unique @db.Uuid
+  coach_id         String    @db.Uuid
+  identificacion   String?   @db.VarChar(30)
+  fecha_nacimiento DateTime? @db.Date
+  genero           Genero?
+  altura_cm        Int?      @db.SmallInt
+  peso_inicial_kg  Decimal?  @db.Decimal(5, 2)
+  objetivo         Objetivo?
+  fecha_inicio     DateTime? @db.Date
+  activo           Boolean   @default(true)
+  notas_medicas    String?
+  created_at       DateTime  @default(now()) @db.Timestamptz
+  updated_at       DateTime  @updatedAt @db.Timestamptz
+  deleted_at       DateTime? @db.Timestamptz
+
+  user    User            @relation(fields: [user_id], references: [id], onDelete: Restrict)
+  coach   Coach           @relation(fields: [coach_id], references: [id], onDelete: Restrict)
+  mediciones           Medicion[]
+  rutinas              Rutina[]
+  planes_alimenticios  PlanAlimenticio[]
+  citas                Cita[]
+  solicitud_origen     SolicitudInscripcion[]
+
+  @@index([coach_id])
+  @@index([coach_id, activo])
+  @@map("alumnos")
+}
+
+// ─────────────────────────────────────────────
+// TABLAS DE CONTENIDO
+// ─────────────────────────────────────────────
+
+model Rutina {
+  id                  String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  coach_id            String     @db.Uuid
+  alumno_id           String?    @db.Uuid
+  es_template         Boolean    @default(false)
+  es_template_sistema Boolean    @default(false)
+  plan_requerido      PlanActual?
+  objetivo            Objetivo?
+  nombre              String     @db.VarChar(200)
+  descripcion         String?
+  duracion_minutos    Int?       @db.SmallInt
+  dias_semana         Json?
+  activa              Boolean    @default(true)
+  created_at          DateTime   @default(now()) @db.Timestamptz
+  updated_at          DateTime   @updatedAt @db.Timestamptz
+  deleted_at          DateTime?  @db.Timestamptz
+
+  coach      Coach            @relation(fields: [coach_id], references: [id], onDelete: Restrict)
+  alumno     Alumno?          @relation(fields: [alumno_id], references: [id], onDelete: SetNull)
+  ejercicios EjercicioRutina[]
+
+  @@index([coach_id])
+  @@index([alumno_id])
+  @@index([es_template_sistema, objetivo])
+  @@map("rutinas")
+}
+
+model EjercicioRutina {
+  id                String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  rutina_id         String   @db.Uuid
+  orden             Int      @db.SmallInt
+  nombre            String   @db.VarChar(200)
+  series            Int?     @db.SmallInt
+  repeticiones      String?  @db.VarChar(20)
+  descanso_segundos Int?     @db.SmallInt
+  rpe               String?  @db.VarChar(10)
+  notas             String?
+  created_at        DateTime @default(now()) @db.Timestamptz
+  updated_at        DateTime @updatedAt @db.Timestamptz
+
+  rutina Rutina @relation(fields: [rutina_id], references: [id], onDelete: Cascade)
+
+  @@unique([rutina_id, orden])
+  @@index([rutina_id])
+  @@map("ejercicios_rutina")
+}
+
+model PlanAlimenticio {
+  id                  String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  coach_id            String     @db.Uuid
+  alumno_id           String?    @db.Uuid
+  es_template         Boolean    @default(false)
+  es_template_sistema Boolean    @default(false)
+  plan_requerido      PlanActual?
+  objetivo            Objetivo?
+  nombre              String     @db.VarChar(200)
+  calorias_objetivo   Int?       @db.SmallInt
+  activo              Boolean    @default(true)
+  created_at          DateTime   @default(now()) @db.Timestamptz
+  updated_at          DateTime   @updatedAt @db.Timestamptz
+  deleted_at          DateTime?  @db.Timestamptz
+
+  coach   Coach      @relation(fields: [coach_id], references: [id], onDelete: Restrict)
+  alumno  Alumno?    @relation(fields: [alumno_id], references: [id], onDelete: SetNull)
+  comidas ComidaPlan[]
+
+  @@index([coach_id])
+  @@index([alumno_id])
+  @@index([es_template_sistema, objetivo])
+  @@map("planes_alimenticios")
+}
+
+model ComidaPlan {
+  id              String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  plan_id         String     @db.Uuid
+  momento         MomentoDia
+  hora_sugerida   DateTime?  @db.Time
+  descripcion     String
+  calorias        Int?       @db.SmallInt
+  proteinas_g     Int?       @db.SmallInt
+  carbohidratos_g Int?       @db.SmallInt
+  grasas_g        Int?       @db.SmallInt
+  created_at      DateTime   @default(now()) @db.Timestamptz
+  updated_at      DateTime   @updatedAt @db.Timestamptz
+
+  plan PlanAlimenticio @relation(fields: [plan_id], references: [id], onDelete: Cascade)
+
+  @@index([plan_id])
+  @@map("comidas_plan")
+}
+
+model Medicion {
+  id               String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  alumno_id        String   @db.Uuid
+  registrado_por   String   @db.Uuid
+  fecha            DateTime @db.Date
+  peso_kg          Decimal? @db.Decimal(5, 2)
+  cintura_cm       Decimal? @db.Decimal(5, 2)
+  cadera_cm        Decimal? @db.Decimal(5, 2)
+  pecho_cm         Decimal? @db.Decimal(5, 2)
+  brazo_cm         Decimal? @db.Decimal(5, 2)
+  pierna_cm        Decimal? @db.Decimal(5, 2)
+  porcentaje_grasa Decimal? @db.Decimal(4, 2)
+  notas            String?
+  created_at       DateTime @default(now()) @db.Timestamptz
+  updated_at       DateTime @updatedAt @db.Timestamptz
+
+  alumno      Alumno @relation(fields: [alumno_id], references: [id], onDelete: Restrict)
+  registrador User   @relation("MedicionRegistradaPor", fields: [registrado_por], references: [id])
+
+  @@index([alumno_id, fecha(sort: Desc)])
+  @@map("mediciones")
+}
+
+// ─────────────────────────────────────────────
+// TABLAS OPERATIVAS
+// ─────────────────────────────────────────────
+
+model Cita {
+  id              String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  coach_id        String     @db.Uuid
+  alumno_id       String     @db.Uuid
+  titulo          String     @db.VarChar(200)
+  fecha_inicio    DateTime   @db.Timestamptz
+  fecha_fin       DateTime   @db.Timestamptz
+  modalidad       Modalidad
+  ubicacion       String?    @db.VarChar(300)
+  meet_link       String?
+  google_event_id String?    @db.VarChar(200)
+  estado          EstadoCita @default(agendada)
+  notas           String?
+  created_at      DateTime   @default(now()) @db.Timestamptz
+  updated_at      DateTime   @updatedAt @db.Timestamptz
+  deleted_at      DateTime?  @db.Timestamptz
+
+  coach  Coach  @relation(fields: [coach_id], references: [id], onDelete: Restrict)
+  alumno Alumno @relation(fields: [alumno_id], references: [id], onDelete: Restrict)
+
+  @@index([coach_id, fecha_inicio])
+  @@index([alumno_id])
+  @@map("citas")
+}
+
+model Pago {
+  id              String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  coach_id        String     @db.Uuid
+  monto           Decimal    @db.Decimal(10, 2)
+  moneda          String     @default("USD") @db.Char(3)
+  metodo          MetodoPago
+  fecha_pago      DateTime   @db.Date
+  periodo_desde   DateTime   @db.Date
+  periodo_hasta   DateTime   @db.Date
+  comprobante_url String?
+  registrado_por  String     @db.Uuid
+  notas           String?
+  created_at      DateTime   @default(now()) @db.Timestamptz
+  updated_at      DateTime   @updatedAt @db.Timestamptz
+
+  coach       Coach         @relation(fields: [coach_id], references: [id], onDelete: Restrict)
+  registrador User          @relation("PagoRegistradoPor", fields: [registrado_por], references: [id])
+  historial   HistorialPlan[]
+
+  @@index([coach_id, fecha_pago(sort: Desc)])
+  @@map("pagos")
+}
+
+// ─────────────────────────────────────────────
+// AUDITORÍA Y NOTIFICACIONES
+// ─────────────────────────────────────────────
+
+model HistorialPlan {
+  id                         String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  coach_id                   String    @db.Uuid
+  plan_anterior              String    @db.VarChar(50)
+  plan_nuevo                 String    @db.VarChar(50)
+  estado_anterior            String    @db.VarChar(50)
+  estado_nuevo               String    @db.VarChar(50)
+  fecha_vencimiento_anterior DateTime? @db.Date
+  fecha_vencimiento_nueva    DateTime? @db.Date
+  cambiado_por               String?   @db.Uuid
+  motivo                     String?
+  pago_id                    String?   @db.Uuid
+  created_at                 DateTime  @default(now()) @db.Timestamptz
+
+  coach Coach  @relation(fields: [coach_id], references: [id], onDelete: Restrict)
+  admin User?  @relation("CambiadoPor", fields: [cambiado_por], references: [id])
+  pago  Pago?  @relation(fields: [pago_id], references: [id])
+
+  @@index([coach_id, created_at(sort: Desc)])
+  @@map("historial_planes")
+}
+
+model Notificacion {
+  id         String           @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  user_id    String           @db.Uuid
+  tipo       TipoNotificacion
+  titulo     String           @db.VarChar(200)
+  mensaje    String
+  link       String?
+  leida      Boolean          @default(false)
+  created_at DateTime         @default(now()) @db.Timestamptz
+
+  user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@index([user_id, leida])
+  @@map("notificaciones")
+}
+
+model TokenVerificacion {
+  id         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  user_id    String   @db.Uuid
+  token      String   @unique
+  tipo       String   @db.VarChar(30)
+  expira_en  DateTime @db.Timestamptz
+  usado      Boolean  @default(false)
+  created_at DateTime @default(now()) @db.Timestamptz
+
+  user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@index([user_id])
+  @@index([expira_en])
+  @@map("tokens_verificacion")
+}
+
+// ─────────────────────────────────────────────
+// SESIONES NEXTAUTH (strategy: "database")
+// ─────────────────────────────────────────────
+
+model Session {
+  id            String   @id @default(cuid())
+  session_token String   @unique @map("sessionToken")
+  user_id       String   @db.Uuid @map("userId")
+  expires       DateTime @db.Timestamptz
+
+  user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@index([user_id])
+  @@map("sessions")
+}
+
+model Account {
+  id                  String  @id @default(cuid())
+  user_id             String  @db.Uuid @map("userId")
+  type                String
+  provider            String
+  provider_account_id String  @map("providerAccountId")
+  refresh_token       String?
+  access_token        String?
+  expires_at          Int?
+  token_type          String?
+  scope               String?
+  id_token            String?
+  session_state       String?
+
+  user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@unique([provider, provider_account_id])
+  @@index([user_id])
+  @@map("accounts")
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+  @@map("verification_tokens")
+}

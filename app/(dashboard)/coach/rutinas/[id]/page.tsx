@@ -1,0 +1,65 @@
+import { auth } from "@/lib/auth"
+import { prisma } from "@/lib/db"
+import { redirect, notFound } from "next/navigation"
+import Link from "next/link"
+import { ChevronLeft } from "lucide-react"
+import { RutinaForm } from "@/components/domain/RutinaForm"
+import { ExportarPDFBtn } from "@/components/domain/ExportarPDFBtn"
+
+export default async function EditarRutinaPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params
+  const session = await auth()
+  if (!session?.user.coachId) redirect("/login")
+
+  const rutina = await prisma.rutina.findFirst({
+    where: { id, coach_id: session.user.coachId, deleted_at: null },
+    include: { ejercicios: { orderBy: { orden: "asc" } } },
+  })
+  if (!rutina) notFound()
+
+  const alumnos = await prisma.alumno.findMany({
+    where: { coach_id: session.user.coachId, activo: true, deleted_at: null },
+    include: { user: { select: { nombre: true, apellido: true } } },
+  })
+
+  return (
+    <div className="animate-fade-in">
+      <div className="mb-6">
+        <Link href="/coach/rutinas" className="flex items-center gap-1.5 text-sm font-medium mb-4" style={{ color: "var(--foreground-muted)" }}>
+          <ChevronLeft size={16} />
+          Volver a rutinas
+        </Link>
+        <div className="flex items-start justify-between gap-4">
+          <div>
+            <h1 className="section-title">{rutina.nombre}</h1>
+            <p className="section-subtitle">Edita los datos y ejercicios de esta rutina</p>
+          </div>
+          <ExportarPDFBtn href={`/api/exportar/rutina/${id}`} label="Exportar PDF" />
+        </div>
+      </div>
+      <RutinaForm
+        rutinaId={id}
+        valorInicial={{
+          nombre: rutina.nombre,
+          descripcion: rutina.descripcion ?? "",
+          objetivo: rutina.objetivo ?? "",
+          dias_semana: rutina.dias_semana as string[],
+          duracion_minutos: rutina.duracion_minutos ?? undefined,
+          es_template: rutina.es_template,
+          alumno_id: rutina.alumno_id,
+          ejercicios: rutina.ejercicios.map((e) => ({
+            nombre: e.nombre,
+            series: e.series ?? 3,
+            repeticiones: e.repeticiones ?? "10",
+            descanso_segundos: e.descanso_segundos ?? 60,
+            rpe: e.rpe ?? "",
+            notas: e.notas ?? "",
+          })),
+        }}
+        alumnos={alumnos.map((a) => ({
+          id: a.id, nombre: a.user.nombre, apellido: a.user.apellido,
+        }))}
+      />
+    </div>
+  )
+}
