@@ -1,14 +1,32 @@
 import { TrendingUp, TrendingDown, Minus, type LucideIcon } from "lucide-react"
 import { cn } from "@/lib/utils"
 
-type StatVariant = "blue" | "green" | "orange" | "neutral" | "red"
+type StatVariant = "blue" | "green" | "orange" | "neutral" | "red" | "purple"
 
-const gradients: Record<StatVariant, string> = {
-  blue:    "linear-gradient(135deg, #2D7DF6, #1F66D9)",
-  green:   "linear-gradient(135deg, #22C55E, #16A34A)",
-  orange:  "linear-gradient(135deg, #F97316, #EA580C)",
-  red:     "linear-gradient(135deg, #EF4444, #DC2626)",
-  neutral: "",
+const GRADIENTS: Record<Exclude<StatVariant, "neutral">, string> = {
+  blue:   "linear-gradient(135deg, #2D7DF6 0%, #1656C4 100%)",
+  green:  "linear-gradient(135deg, #22C55E 0%, #15803D 100%)",
+  orange: "linear-gradient(135deg, #F97316 0%, #C2410C 100%)",
+  red:    "linear-gradient(135deg, #EF4444 0%, #B91C1C 100%)",
+  purple: "linear-gradient(135deg, #8B5CF6 0%, #6D28D9 100%)",
+}
+
+const NEUTRAL_ICON_BG: Record<StatVariant, string> = {
+  blue:    "var(--blue-bg)",
+  green:   "var(--green-bg)",
+  orange:  "var(--orange-bg)",
+  red:     "var(--red-bg)",
+  purple:  "var(--purple-bg)",
+  neutral: "var(--background-hover)",
+}
+
+const NEUTRAL_ICON_COLOR: Record<StatVariant, string> = {
+  blue:    "var(--blue)",
+  green:   "var(--green)",
+  orange:  "var(--orange)",
+  red:     "var(--red)",
+  purple:  "var(--purple)",
+  neutral: "var(--foreground-muted)",
 }
 
 interface StatCardProps {
@@ -22,94 +40,100 @@ interface StatCardProps {
 }
 
 export function StatCard({
-  titulo,
-  valor,
-  label,
-  icono: Icono,
-  variante = "neutral",
-  trend,
-  className,
+  titulo, valor, label, icono: Icono,
+  variante = "neutral", trend, className,
 }: StatCardProps) {
   const esColorido = variante !== "neutral"
-  const gradiente = gradients[variante]
 
   const TrendIcon =
-    trend === undefined ? null : trend > 0 ? TrendingUp : trend < 0 ? TrendingDown : Minus
+    trend === undefined ? null
+    : trend > 0 ? TrendingUp
+    : trend < 0 ? TrendingDown
+    : Minus
 
   return (
     <div
-      className={cn("rounded-2xl p-5 transition-all duration-200", className)}
+      className={cn("relative overflow-hidden rounded-2xl p-5 transition-all duration-200", className)}
       style={
         esColorido
-          ? { background: gradiente, color: "white", boxShadow: "var(--shadow-md)" }
+          ? {
+              background: GRADIENTS[variante as keyof typeof GRADIENTS],
+              boxShadow: "var(--shadow-md)",
+            }
           : {
               background: "var(--background-card)",
               border: "1px solid var(--border)",
               boxShadow: "var(--shadow-sm)",
-              color: "var(--foreground)",
             }
       }
     >
-      <div className="flex items-start justify-between mb-3">
+      {/* Orbe decorativo para cards coloreadas */}
+      {esColorido && (
+        <div
+          className="pointer-events-none absolute -right-8 -top-8 h-28 w-28 rounded-full opacity-20"
+          style={{ background: "radial-gradient(circle, white, transparent)" }}
+        />
+      )}
+
+      <div className="relative flex items-start gap-3.5">
+        {/* Ícono — izquierda */}
         <span
-          className="text-sm font-medium"
-          style={{ color: esColorido ? "rgba(255,255,255,0.85)" : "var(--foreground-muted)" }}
-        >
-          {titulo}
-        </span>
-        <span
-          className="flex h-9 w-9 items-center justify-center rounded-xl"
+          className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl"
           style={{
-            background: esColorido ? "rgba(255,255,255,0.2)" : "var(--blue-bg)",
-            color: esColorido ? "white" : "var(--blue)",
+            background: esColorido ? "rgba(255,255,255,0.22)" : NEUTRAL_ICON_BG[variante],
+            color:      esColorido ? "white"                  : NEUTRAL_ICON_COLOR[variante],
           }}
         >
-          <Icono size={18} />
+          <Icono size={20} />
         </span>
-      </div>
 
-      <div className="flex items-end justify-between">
-        <div>
+        {/* Contenido — derecha */}
+        <div className="flex-1 min-w-0">
           <p
-            className="text-3xl font-extrabold leading-none"
-            style={{ letterSpacing: "-0.03em", color: esColorido ? "white" : "var(--foreground)" }}
+            className="text-[11px] font-bold uppercase tracking-wider mb-1"
+            style={{ color: esColorido ? "rgba(255,255,255,0.72)" : "var(--foreground-muted)" }}
           >
-            {valor}
+            {titulo}
           </p>
+
+          <div className="flex items-end justify-between gap-2">
+            <p
+              className="text-2xl font-extrabold leading-none"
+              style={{
+                letterSpacing: "-0.03em",
+                color: esColorido ? "white" : "var(--foreground)",
+              }}
+            >
+              {valor}
+            </p>
+
+            {TrendIcon && trend !== undefined && (
+              <div
+                className="flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-semibold flex-shrink-0"
+                style={{
+                  background: esColorido
+                    ? "rgba(255,255,255,0.2)"
+                    : trend > 0 ? "var(--green-bg)" : trend < 0 ? "var(--red-bg)" : "var(--background-hover)",
+                  color: esColorido
+                    ? "white"
+                    : trend > 0 ? "var(--green)" : trend < 0 ? "var(--red)" : "var(--foreground-muted)",
+                }}
+              >
+                <TrendIcon size={11} />
+                <span>{Math.abs(trend)}%</span>
+              </div>
+            )}
+          </div>
+
           {label && (
             <p
-              className="mt-1 text-sm"
-              style={{ color: esColorido ? "rgba(255,255,255,0.75)" : "var(--foreground-muted)" }}
+              className="mt-0.5 text-xs"
+              style={{ color: esColorido ? "rgba(255,255,255,0.65)" : "var(--foreground-muted)" }}
             >
               {label}
             </p>
           )}
         </div>
-
-        {TrendIcon && trend !== undefined && (
-          <div
-            className="flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-semibold"
-            style={{
-              background: esColorido
-                ? "rgba(255,255,255,0.15)"
-                : trend > 0
-                ? "var(--green-bg)"
-                : trend < 0
-                ? "var(--red-bg)"
-                : "var(--background-hover)",
-              color: esColorido
-                ? "white"
-                : trend > 0
-                ? "var(--green)"
-                : trend < 0
-                ? "var(--red)"
-                : "var(--foreground-muted)",
-            }}
-          >
-            <TrendIcon size={12} />
-            <span>{Math.abs(trend)}%</span>
-          </div>
-        )}
       </div>
     </div>
   )

@@ -1,15 +1,10 @@
 import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/db"
 import { redirect } from "next/navigation"
-import Link from "next/link"
-import { Dumbbell, UtensilsCrossed, Plus, Lock } from "lucide-react"
-import { Badge } from "@/components/ui"
-import type { Objetivo } from "@prisma/client"
+import { Dumbbell, UtensilsCrossed, Info } from "lucide-react"
+import { AdminRutinaTemplateCards, AdminPlanTemplateCards } from "./AdminTemplateCards"
 
-const OBJETIVO_LABEL: Record<Objetivo, string> = {
-  hipertrofia: "Hipertrofia", perdida_grasa: "Pérdida de grasa",
-  fuerza: "Fuerza", resistencia: "Resistencia", general: "General",
-}
+export const metadata = { title: "Templates del sistema" }
 
 export default async function AdminPlanesPage() {
   const session = await auth()
@@ -32,103 +27,41 @@ export default async function AdminPlanesPage() {
     <div className="space-y-6 animate-fade-in">
       <div>
         <h1 className="section-title">Templates del sistema</h1>
-        <p className="section-subtitle">Rutinas y planes alimenticios disponibles para los coaches</p>
+        <p className="section-subtitle">Rutinas y planes alimenticios disponibles para los coaches con Plan Inicial</p>
+      </div>
+
+      {/* Aviso informativo */}
+      <div
+        className="flex items-start gap-3 rounded-2xl px-5 py-4"
+        style={{ background: "var(--blue-bg)", border: "1px solid var(--blue)22" }}
+      >
+        <Info size={16} className="flex-shrink-0 mt-0.5" style={{ color: "var(--blue)" }} />
+        <p className="text-sm" style={{ color: "var(--blue)" }}>
+          Los templates son creados por coaches con Plan Inicial. Desde aquí puedes ver y eliminar templates del sistema.
+          Para crear nuevos templates, usa una cuenta de coach con Plan Inicial y marca la rutina/plan como template.
+        </p>
       </div>
 
       {/* Rutinas template */}
       <section>
-        <div className="flex items-center justify-between mb-3">
-          <h2 className="text-base font-bold flex items-center gap-2" style={{ color: "var(--foreground)" }}>
-            <Dumbbell size={18} style={{ color: "var(--blue)" }} />
+        <div className="flex items-center gap-2 mb-3">
+          <Dumbbell size={18} style={{ color: "var(--blue)" }} />
+          <h2 className="text-base font-bold" style={{ color: "var(--foreground)" }}>
             Rutinas template ({rutinasTemplate.length})
           </h2>
-          <Link href="/coach/rutinas/nueva?template=true" className="btn-primary text-sm">
-            <Plus size={15} /> Nueva rutina template
-          </Link>
         </div>
-
-        {rutinasTemplate.length === 0 ? (
-          <div className="rounded-2xl p-8 text-center" style={{ background: "var(--background-card)", border: "1px solid var(--border)" }}>
-            <Dumbbell size={28} className="mx-auto mb-2" style={{ color: "var(--foreground-subtle)" }} />
-            <p className="text-sm" style={{ color: "var(--foreground-muted)" }}>No hay rutinas template aún</p>
-          </div>
-        ) : (
-          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-            {rutinasTemplate.map((r) => (
-              <Link
-                key={r.id}
-                href={`/coach/rutinas/${r.id}`}
-                className="rounded-2xl p-5 hover:bg-[var(--background-hover)] transition-colors"
-                style={{ background: "var(--background-card)", border: "1px solid var(--border)" }}
-              >
-                <div className="flex items-start gap-3">
-                  <span className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl" style={{ background: "var(--blue-bg)" }}>
-                    <Dumbbell size={18} style={{ color: "var(--blue)" }} />
-                  </span>
-                  <div className="flex-1 min-w-0">
-                    <p className="font-bold text-sm truncate" style={{ color: "var(--foreground)" }}>{r.nombre}</p>
-                    <p className="text-xs mt-0.5" style={{ color: "var(--foreground-muted)" }}>
-                      {r.ejercicios.length} ejercicios
-                    </p>
-                    <div className="flex gap-1.5 mt-2 flex-wrap">
-                      {r.objetivo && <Badge variant="blue">{OBJETIVO_LABEL[r.objetivo]}</Badge>}
-                      <Badge variant="neutral">
-                        <Lock size={10} className="mr-1" />
-                        Solo Plan Inicial
-                      </Badge>
-                    </div>
-                  </div>
-                </div>
-              </Link>
-            ))}
-          </div>
-        )}
+        <AdminRutinaTemplateCards rutinas={rutinasTemplate} />
       </section>
 
       {/* Planes alimenticios template */}
       <section>
-        <div className="flex items-center justify-between mb-3">
-          <h2 className="text-base font-bold flex items-center gap-2" style={{ color: "var(--foreground)" }}>
-            <UtensilsCrossed size={18} style={{ color: "var(--green)" }} />
+        <div className="flex items-center gap-2 mb-3">
+          <UtensilsCrossed size={18} style={{ color: "var(--green)" }} />
+          <h2 className="text-base font-bold" style={{ color: "var(--foreground)" }}>
             Planes alimenticios template ({planesTemplate.length})
           </h2>
-          <Link href="/coach/planes-alimenticios/nuevo?template=true" className="btn-primary text-sm">
-            <Plus size={15} /> Nuevo plan template
-          </Link>
         </div>
-
-        {planesTemplate.length === 0 ? (
-          <div className="rounded-2xl p-8 text-center" style={{ background: "var(--background-card)", border: "1px solid var(--border)" }}>
-            <UtensilsCrossed size={28} className="mx-auto mb-2" style={{ color: "var(--foreground-subtle)" }} />
-            <p className="text-sm" style={{ color: "var(--foreground-muted)" }}>No hay planes template aún</p>
-          </div>
-        ) : (
-          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-            {planesTemplate.map((p) => (
-              <Link
-                key={p.id}
-                href={`/coach/planes-alimenticios/${p.id}`}
-                className="rounded-2xl p-5 hover:bg-[var(--background-hover)] transition-colors"
-                style={{ background: "var(--background-card)", border: "1px solid var(--border)" }}
-              >
-                <div className="flex items-start gap-3">
-                  <span className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl" style={{ background: "var(--green-bg)" }}>
-                    <UtensilsCrossed size={18} style={{ color: "var(--green)" }} />
-                  </span>
-                  <div className="flex-1 min-w-0">
-                    <p className="font-bold text-sm truncate" style={{ color: "var(--foreground)" }}>{p.nombre}</p>
-                    <p className="text-xs mt-0.5" style={{ color: "var(--foreground-muted)" }}>
-                      {p.comidas.length} comidas · {p.calorias_objetivo ?? "—"} kcal
-                    </p>
-                    <div className="flex gap-1.5 mt-2 flex-wrap">
-                      {p.objetivo && <Badge variant="success">{OBJETIVO_LABEL[p.objetivo]}</Badge>}
-                    </div>
-                  </div>
-                </div>
-              </Link>
-            ))}
-          </div>
-        )}
+        <AdminPlanTemplateCards planes={planesTemplate} />
       </section>
     </div>
   )

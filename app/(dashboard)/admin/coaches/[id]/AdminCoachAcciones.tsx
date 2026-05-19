@@ -3,6 +3,7 @@
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { Loader2, UserCheck, UserX, ShieldOff, Shield } from "lucide-react"
+import { toast } from "sonner"
 
 interface Props {
   coachId: string
@@ -17,12 +18,20 @@ export function AdminCoachAcciones({ coachId, userActivo, estadoPlan }: Props) {
   async function accion(tipo: string, payload: object) {
     setCargando(tipo)
     try {
-      await fetch(`/api/admin/coaches/${coachId}`, {
+      const res = await fetch(`/api/admin/coaches/${coachId}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       })
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}))
+        toast.error(data.mensaje ?? "Error al realizar la acción")
+        return
+      }
+      toast.success("Cambio aplicado correctamente")
       router.refresh()
+    } catch {
+      toast.error("Error de conexión")
     } finally {
       setCargando(null)
     }

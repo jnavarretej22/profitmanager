@@ -268,22 +268,35 @@ export function RutinaForm({ rutinaId, valorInicial = {}, alumnos }: RutinaFormP
 
           {/* Días de la semana */}
           <div>
-            <label className="block text-sm font-semibold mb-2" style={{ color: "var(--foreground)" }}>Días de la semana</label>
+            <label className="block text-sm font-semibold mb-2.5" style={{ color: "var(--foreground)" }}>
+              Días de la semana
+              {dias.length > 0 && (
+                <span className="ml-2 text-xs font-normal" style={{ color: "var(--foreground-muted)" }}>
+                  {dias.length} día{dias.length !== 1 ? "s" : ""} seleccionado{dias.length !== 1 ? "s" : ""}
+                </span>
+              )}
+            </label>
             <div className="flex gap-2 flex-wrap">
-              {DIAS.map((d) => (
-                <button
-                  key={d}
-                  type="button"
-                  onClick={() => toggleDia(d)}
-                  className="flex h-9 w-9 items-center justify-center rounded-full text-xs font-bold transition-all"
-                  style={{
-                    background: dias.includes(d) ? "var(--blue)" : "var(--border)",
-                    color: dias.includes(d) ? "white" : "var(--foreground-muted)",
-                  }}
-                >
-                  {DIAS_LABEL[d]}
-                </button>
-              ))}
+              {DIAS.map((d) => {
+                const activo = dias.includes(d)
+                return (
+                  <button
+                    key={d}
+                    type="button"
+                    onClick={() => toggleDia(d)}
+                    className="flex h-9 w-9 items-center justify-center rounded-full text-xs font-extrabold transition-all duration-150"
+                    style={{
+                      background: activo ? "var(--blue)" : "transparent",
+                      color: activo ? "white" : "var(--foreground-muted)",
+                      border: activo ? "none" : "1.5px solid var(--border)",
+                      boxShadow: activo ? "0 3px 10px rgba(45,125,246,0.35)" : "none",
+                      transform: activo ? "scale(1.05)" : "scale(1)",
+                    }}
+                  >
+                    {DIAS_LABEL[d]}
+                  </button>
+                )
+              })}
             </div>
           </div>
 

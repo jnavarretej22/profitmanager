@@ -5,7 +5,7 @@ import Link from "next/link"
 import {
   Users, Dumbbell, Calendar,
   Plus, FileDown, Lock,
-  ChevronRight, Activity,
+  ChevronRight, Activity, Flame, Trophy, Zap,
 } from "lucide-react"
 import { StatCard, Avatar, Badge } from "@/components/ui"
 import { PlanFeatureService } from "@/lib/plan-features"
@@ -141,16 +141,20 @@ export default async function CoachDashboardPage() {
       {/* ── Welcome Banner ──────────────────────────────────────────────────── */}
       <div
         className="relative overflow-hidden rounded-2xl px-7 py-6"
-        style={{ background: "linear-gradient(135deg, #111827, #1e293b)" }}
+        style={{ background: "linear-gradient(135deg, #0F172A 0%, #1E293B 50%, #0F2240 100%)" }}
       >
-        {/* Orbe decorativo */}
+        {/* Orbes decorativos gym */}
         <div
-          className="pointer-events-none absolute -right-16 -top-16 h-64 w-64 rounded-full opacity-20"
+          className="pointer-events-none absolute -right-16 -top-16 h-64 w-64 rounded-full opacity-25"
           style={{ background: "radial-gradient(circle, #2D7DF6, transparent)" }}
         />
         <div
-          className="pointer-events-none absolute -bottom-10 left-1/3 h-40 w-40 rounded-full opacity-10"
+          className="pointer-events-none absolute -bottom-10 left-1/4 h-40 w-40 rounded-full opacity-15"
           style={{ background: "radial-gradient(circle, #F97316, transparent)" }}
+        />
+        <div
+          className="pointer-events-none absolute top-0 right-1/3 h-24 w-24 rounded-full opacity-10"
+          style={{ background: "radial-gradient(circle, #8B5CF6, transparent)" }}
         />
 
         <div className="relative z-10">
@@ -188,23 +192,23 @@ export default async function CoachDashboardPage() {
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
         <StatCard
           titulo="Alumnos activos"
-          valor={totalAlumnos}
-          label={`de ${limiteAlumnos} en tu plan`}
+          valor={`${totalAlumnos}/${limiteAlumnos}`}
+          label="en tu plan actual"
           icono={Users}
           variante="blue"
         />
         <StatCard
-          titulo="Rutinas asignadas"
+          titulo="Rutinas activas"
           valor={rutinas.length}
-          label="en curso"
+          label="en curso hoy"
           icono={Dumbbell}
           variante="green"
         />
         <StatCard
-          titulo="Mediciones esta semana"
+          titulo="Mediciones / semana"
           valor={medicionesEstaSemana}
-          label="registradas"
-          icono={Activity}
+          label="registradas esta semana"
+          icono={Flame}
           variante="orange"
         />
         <StatCard
@@ -212,6 +216,7 @@ export default async function CoachDashboardPage() {
           valor={citasProximas.length}
           label="agendadas"
           icono={Calendar}
+          variante="purple"
         />
       </div>
 
@@ -236,7 +241,7 @@ export default async function CoachDashboardPage() {
             bg="var(--purple-bg)"
           />
           <QuickAction
-            href="/coach/exportar"
+            href="/coach/rutinas"
             icono={FileDown}
             label="Exportar PDF"
             bloqueado={!tienePDF}

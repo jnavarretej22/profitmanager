@@ -5,6 +5,7 @@ import Link from "next/link"
 import { Calendar, CalendarPlus, Clock, Video, MapPin } from "lucide-react"
 import { Badge, EmptyState } from "@/components/ui"
 import { AgendaFiltros } from "./AgendaFiltros"
+import { AgendaMiniCalendar } from "./AgendaMiniCalendar"
 
 export default async function AgendaPage({
   searchParams,
@@ -54,14 +55,20 @@ export default async function AgendaPage({
         </Link>
       </div>
 
-      {/* Filtros */}
-      <AgendaFiltros alumnos={alumnos.map((a) => ({ id: a.id, nombre: `${a.user.nombre} ${a.user.apellido}` }))} />
+      {/* Mini calendario + Filtros */}
+      <div className="grid gap-4 lg:grid-cols-[280px_1fr]">
+        <AgendaMiniCalendar
+          fechasCitas={citas.map((c) => c.fecha_inicio.toISOString())}
+        />
+        <AgendaFiltros alumnos={alumnos.map((a) => ({ id: a.id, nombre: `${a.user.nombre} ${a.user.apellido}` }))} />
+      </div>
 
       {citas.length === 0 ? (
         <EmptyState
           icono={Calendar}
-          titulo="Sin citas"
-          subtitulo="Agenda una reunión con tus alumnos para hacer seguimiento."
+          titulo="Sin citas agendadas"
+          subtitulo="El seguimiento constante marca la diferencia. ¡Agenda tu primera reunión!"
+          variante="purple"
           cta={{ label: "Nueva cita", href: "/coach/agenda/nueva" }}
         />
       ) : (

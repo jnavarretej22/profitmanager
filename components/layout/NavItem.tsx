@@ -15,7 +15,10 @@ interface NavItemProps {
 
 export function NavItem({ href, icono: Icono, label, badge, onClick }: NavItemProps) {
   const pathname = usePathname()
-  const activo = pathname === href || (href !== "/" && pathname.startsWith(href))
+  const rutasRaiz = ["/admin", "/coach", "/alumno"]
+  const activo =
+    pathname === href ||
+    (!rutasRaiz.includes(href) && href !== "/" && pathname.startsWith(href + "/"))
 
   return (
     <Link

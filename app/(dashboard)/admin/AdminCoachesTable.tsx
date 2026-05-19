@@ -22,6 +22,7 @@ interface Props {
   coaches: CoachRow[]
   busqueda: string
   filtro: string
+  basePath?: string
 }
 
 const FILTROS = [
@@ -32,7 +33,7 @@ const FILTROS = [
   { val: "vencidos",   label: "Vencidos" },
 ]
 
-export function AdminCoachesTable({ coaches, busqueda, filtro }: Props) {
+export function AdminCoachesTable({ coaches, busqueda, filtro, basePath = "/admin" }: Props) {
   const router = useRouter()
   const sp = useSearchParams()
 
@@ -40,7 +41,7 @@ export function AdminCoachesTable({ coaches, busqueda, filtro }: Props) {
     const params = new URLSearchParams(sp.toString())
     if (valor) params.set(clave, valor)
     else params.delete(clave)
-    router.push(`/admin?${params.toString()}`)
+    router.push(`${basePath}?${params.toString()}`)
   }
 
   function diasParaVencer(fecha: Date | null): number | null {

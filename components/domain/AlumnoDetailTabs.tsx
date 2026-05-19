@@ -3,7 +3,7 @@
 import Link from "next/link"
 import { useState } from "react"
 import { useRouter } from "next/navigation"
-import { Trash2, Loader2, Dumbbell, UtensilsCrossed, BarChart2, Lock, Clock, RotateCcw } from "lucide-react"
+import { Trash2, Loader2, Dumbbell, UtensilsCrossed, BarChart2, Lock, Clock, Flame, Target, Zap, Plus } from "lucide-react"
 import { AlumnoForm } from "./AlumnoForm"
 import { MedicionForm, HistorialMediciones } from "./MedicionForm"
 import { Badge } from "@/components/ui"
@@ -11,12 +11,12 @@ import type { Medicion } from "@prisma/client"
 
 type Tab = "perfil" | "mediciones" | "rutina" | "plan_alimenticio" | "progreso"
 
-const TABS: { id: Tab; label: string }[] = [
-  { id: "perfil", label: "Perfil" },
-  { id: "mediciones", label: "Mediciones" },
-  { id: "rutina", label: "Rutina" },
-  { id: "plan_alimenticio", label: "Plan alimenticio" },
-  { id: "progreso", label: "Progreso" },
+const TABS: { id: Tab; label: string; icono: React.ElementType }[] = [
+  { id: "perfil",           label: "Perfil",           icono: Target },
+  { id: "mediciones",       label: "Mediciones",       icono: Flame },
+  { id: "rutina",           label: "Rutina",           icono: Dumbbell },
+  { id: "plan_alimenticio", label: "Nutrición",        icono: UtensilsCrossed },
+  { id: "progreso",         label: "Progreso",         icono: BarChart2 },
 ]
 
 const DIAS_LABEL: Record<string, string> = {
@@ -102,22 +102,23 @@ export function AlumnoDetailTabs({
     <div>
       {/* Tabs */}
       <div
-        className="flex overflow-x-auto border-b mb-5"
+        className="flex overflow-x-auto border-b mb-5 gap-1 px-0.5"
         style={{ borderColor: "var(--border)" }}
       >
-        {TABS.map(({ id, label }) => (
+        {TABS.map(({ id, label, icono: Icono }) => (
           <button
             key={id}
             onClick={() => setTabActiva(id)}
-            className="px-4 py-3 text-sm font-semibold whitespace-nowrap border-b-2 -mb-px transition-colors"
+            className="flex items-center gap-1.5 px-3.5 py-3 text-xs font-bold whitespace-nowrap border-b-2 -mb-px transition-all"
             style={{
               borderColor: tabActiva === id ? "var(--blue)" : "transparent",
               color: tabActiva === id ? "var(--blue)" : "var(--foreground-muted)",
             }}
           >
+            <Icono size={13} />
             {label}
             {id === "progreso" && !tieneGraficas && (
-              <Lock size={12} className="inline ml-1.5" style={{ color: "var(--orange)" }} />
+              <Lock size={11} className="ml-0.5" style={{ color: "var(--orange)" }} />
             )}
           </button>
         ))}
@@ -255,21 +256,48 @@ export function AlumnoDetailTabs({
                 </div>
                 <ul className="divide-y" style={{ borderColor: "var(--border)" }}>
                   {rutina.ejercicios.map((ej) => (
-                    <li key={ej.id} className="flex items-start gap-3 px-5 py-4">
+                    <li key={ej.id} className="flex items-start gap-3.5 px-5 py-4">
+                      {/* Número circular */}
                       <span
-                        className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-lg text-xs font-bold"
-                        style={{ background: "var(--blue-bg)", color: "var(--blue)" }}
+                        className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full text-xs font-extrabold"
+                        style={{
+                          background: "var(--blue)",
+                          color: "white",
+                          boxShadow: "0 2px 6px rgba(45,125,246,0.35)",
+                        }}
                       >
                         {ej.orden}
                       </span>
-                      <div className="flex-1">
-                        <p className="text-sm font-semibold" style={{ color: "var(--foreground)" }}>{ej.nombre}</p>
-                        <p className="text-xs mt-0.5" style={{ color: "var(--foreground-muted)" }}>
-                          {ej.series ?? "—"} series × {ej.repeticiones ?? "—"} reps
-                          {ej.descanso_segundos ? ` · ${ej.descanso_segundos}s descanso` : ""}
-                          {ej.rpe ? ` · RPE ${ej.rpe}` : ""}
-                        </p>
-                        {ej.notas && <p className="text-xs mt-0.5 italic" style={{ color: "var(--foreground-subtle)" }}>{ej.notas}</p>}
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-bold mb-2" style={{ color: "var(--foreground)" }}>{ej.nombre}</p>
+                        {/* Chips de métricas */}
+                        <div className="flex flex-wrap gap-1.5">
+                          {ej.series != null && (
+                            <span className="flex items-center gap-1 rounded-lg px-2.5 py-1 text-xs font-semibold" style={{ background: "var(--blue-bg)", color: "var(--blue)" }}>
+                              <Dumbbell size={10} /> {ej.series} series
+                            </span>
+                          )}
+                          {ej.repeticiones && (
+                            <span className="flex items-center gap-1 rounded-lg px-2.5 py-1 text-xs font-semibold" style={{ background: "var(--green-bg)", color: "var(--green)" }}>
+                              <Zap size={10} /> {ej.repeticiones} reps
+                            </span>
+                          )}
+                          {ej.descanso_segundos != null && (
+                            <span className="flex items-center gap-1 rounded-lg px-2.5 py-1 text-xs font-semibold" style={{ background: "var(--orange-bg)", color: "var(--orange)" }}>
+                              <Clock size={10} /> {ej.descanso_segundos}s
+                            </span>
+                          )}
+                          {ej.rpe && (
+                            <span className="flex items-center gap-1 rounded-lg px-2.5 py-1 text-xs font-semibold" style={{ background: "var(--purple-bg)", color: "var(--purple)" }}>
+                              <Target size={10} /> RPE {ej.rpe}
+                            </span>
+                          )}
+                        </div>
+                        {ej.notas && (
+                          <p className="text-xs mt-1.5 italic" style={{ color: "var(--foreground-subtle)" }}>
+                            💡 {ej.notas}
+                          </p>
+                        )}
                       </div>
                     </li>
                   ))}
@@ -281,14 +309,19 @@ export function AlumnoDetailTabs({
               className="rounded-2xl p-8 text-center"
               style={{ background: "var(--background-card)", border: "1px solid var(--border)" }}
             >
-              <Dumbbell size={32} className="mx-auto mb-3" style={{ color: "var(--foreground-subtle)" }} />
-              <p className="font-semibold mb-1" style={{ color: "var(--foreground)" }}>Sin rutina asignada</p>
+              <div className="relative mb-4 flex items-center justify-center">
+                <div className="absolute h-20 w-20 rounded-full" style={{ background: "rgba(45,125,246,0.10)" }} />
+                <span className="relative z-10 flex h-14 w-14 items-center justify-center rounded-2xl" style={{ background: "var(--blue-bg)" }}>
+                  <Dumbbell size={26} style={{ color: "var(--blue)" }} />
+                </span>
+              </div>
+              <p className="font-bold mb-1" style={{ color: "var(--foreground)" }}>Sin rutina asignada</p>
               <p className="text-sm mb-4" style={{ color: "var(--foreground-muted)" }}>
-                Crea una rutina y asígnala a este alumno.
+                ¡Dale forma al potencial de este alumno! Crea su primera rutina.
               </p>
               {!esSoloLectura && (
                 <Link href="/coach/rutinas/nueva" className="btn-primary text-sm">
-                  <Dumbbell size={14} /> Nueva rutina
+                  <Plus size={14} /> Nueva rutina
                 </Link>
               )}
             </div>
@@ -393,14 +426,19 @@ export function AlumnoDetailTabs({
               className="rounded-2xl p-8 text-center"
               style={{ background: "var(--background-card)", border: "1px solid var(--border)" }}
             >
-              <UtensilsCrossed size={32} className="mx-auto mb-3" style={{ color: "var(--foreground-subtle)" }} />
-              <p className="font-semibold mb-1" style={{ color: "var(--foreground)" }}>Sin plan alimenticio</p>
+              <div className="relative mb-4 flex items-center justify-center">
+                <div className="absolute h-20 w-20 rounded-full" style={{ background: "rgba(34,197,94,0.10)" }} />
+                <span className="relative z-10 flex h-14 w-14 items-center justify-center rounded-2xl" style={{ background: "var(--green-bg)" }}>
+                  <UtensilsCrossed size={26} style={{ color: "var(--green)" }} />
+                </span>
+              </div>
+              <p className="font-bold mb-1" style={{ color: "var(--foreground)" }}>Sin plan alimenticio</p>
               <p className="text-sm mb-4" style={{ color: "var(--foreground-muted)" }}>
-                Crea un plan nutricional para este alumno.
+                La nutrición es el 70% del resultado. ¡Crea el plan de este alumno!
               </p>
               {!esSoloLectura && (
                 <Link href="/coach/planes-alimenticios/nuevo" className="btn-primary text-sm">
-                  <UtensilsCrossed size={14} /> Nuevo plan
+                  <Plus size={14} /> Nuevo plan
                 </Link>
               )}
             </div>

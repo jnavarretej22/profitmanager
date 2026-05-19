@@ -1,7 +1,7 @@
 import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/db"
 import { redirect } from "next/navigation"
-import { Dumbbell, Clock } from "lucide-react"
+import { Dumbbell, Clock, Flame, Zap, Target, Timer } from "lucide-react"
 import { ExportarPDFBtn } from "@/components/domain/ExportarPDFBtn"
 import { Badge, EmptyState } from "@/components/ui"
 import type { Objetivo } from "@prisma/client"
@@ -91,24 +91,30 @@ export default async function MiRutinaPage() {
 
         {/* Días de la semana */}
         <div>
-          <p className="text-xs font-semibold mb-2" style={{ color: "var(--foreground-subtle)" }}>DÍAS DE ENTRENAMIENTO</p>
+          <p className="text-xs font-bold uppercase tracking-wider mb-3" style={{ color: "var(--foreground-subtle)" }}>
+            Días de entrenamiento
+          </p>
           <div className="flex flex-wrap gap-2">
             {["lunes","martes","miercoles","jueves","viernes","sabado","domingo"].map((d) => {
               const activo = dias.includes(d)
               const esHoy = d === diaHoy
               return (
-                <span
-                  key={d}
-                  className="rounded-xl px-3 py-1.5 text-xs font-bold"
-                  style={{
-                    background: esHoy && activo ? "var(--orange)" : activo ? "var(--blue)" : "var(--background)",
-                    color: activo ? "white" : "var(--foreground-subtle)",
-                    border: `1px solid ${activo ? "transparent" : "var(--border)"}`,
-                  }}
-                >
-                  {DIAS_LABEL[d]}
-                  {esHoy && " · Hoy"}
-                </span>
+                <div key={d} className="flex flex-col items-center gap-1">
+                  <span
+                    className="flex h-9 w-9 items-center justify-center rounded-full text-xs font-extrabold"
+                    style={{
+                      background: esHoy && activo ? "var(--orange)" : activo ? "var(--blue)" : "transparent",
+                      color: activo ? "white" : "var(--foreground-subtle)",
+                      border: activo ? "none" : "1.5px solid var(--border)",
+                      boxShadow: (esHoy && activo) ? "0 3px 10px rgba(249,115,22,0.4)" : activo ? "0 3px 10px rgba(45,125,246,0.3)" : "none",
+                    }}
+                  >
+                    {DIAS_LABEL[d]}
+                  </span>
+                  {esHoy && activo && (
+                    <span className="text-[9px] font-bold" style={{ color: "var(--orange)" }}>Hoy</span>
+                  )}
+                </div>
               )
             })}
           </div>
@@ -129,10 +135,14 @@ export default async function MiRutinaPage() {
         <ul className="divide-y" style={{ borderColor: "var(--border)" }}>
           {rutina.ejercicios.map((ej) => (
             <li key={ej.id} className="flex items-start gap-4 px-6 py-5">
-              {/* Número */}
+              {/* Número circular */}
               <span
-                className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-xl text-sm font-extrabold"
-                style={{ background: "var(--blue)", color: "white" }}
+                className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full text-sm font-extrabold"
+                style={{
+                  background: "var(--blue)",
+                  color: "white",
+                  boxShadow: "0 3px 8px rgba(45,125,246,0.4)",
+                }}
               >
                 {ej.orden}
               </span>
@@ -141,33 +151,21 @@ export default async function MiRutinaPage() {
                 <p className="font-bold mb-1" style={{ color: "var(--foreground)" }}>{ej.nombre}</p>
 
                 {/* Métricas en chips */}
-                <div className="flex flex-wrap gap-2 mb-1">
-                  <span
-                    className="rounded-lg px-2.5 py-1 text-xs font-semibold"
-                    style={{ background: "var(--blue-bg)", color: "var(--blue)" }}
-                  >
-                    {ej.series ?? "—"} series
+                <div className="flex flex-wrap gap-1.5 mb-1">
+                  <span className="flex items-center gap-1 rounded-lg px-2.5 py-1 text-xs font-semibold" style={{ background: "var(--blue-bg)", color: "var(--blue)" }}>
+                    <Dumbbell size={10} /> {ej.series ?? "—"} series
                   </span>
-                  <span
-                    className="rounded-lg px-2.5 py-1 text-xs font-semibold"
-                    style={{ background: "var(--green-bg)", color: "var(--green)" }}
-                  >
-                    {ej.repeticiones ?? "—"} reps
+                  <span className="flex items-center gap-1 rounded-lg px-2.5 py-1 text-xs font-semibold" style={{ background: "var(--green-bg)", color: "var(--green)" }}>
+                    <Zap size={10} /> {ej.repeticiones ?? "—"} reps
                   </span>
                   {ej.descanso_segundos != null && (
-                    <span
-                      className="rounded-lg px-2.5 py-1 text-xs font-semibold"
-                      style={{ background: "var(--orange-bg)", color: "var(--orange)" }}
-                    >
-                      {ej.descanso_segundos}s descanso
+                    <span className="flex items-center gap-1 rounded-lg px-2.5 py-1 text-xs font-semibold" style={{ background: "var(--orange-bg)", color: "var(--orange)" }}>
+                      <Timer size={10} /> {ej.descanso_segundos}s
                     </span>
                   )}
                   {ej.rpe && (
-                    <span
-                      className="rounded-lg px-2.5 py-1 text-xs font-semibold"
-                      style={{ background: "var(--purple-bg)", color: "var(--purple)" }}
-                    >
-                      RPE {ej.rpe}
+                    <span className="flex items-center gap-1 rounded-lg px-2.5 py-1 text-xs font-semibold" style={{ background: "var(--purple-bg)", color: "var(--purple)" }}>
+                      <Target size={10} /> RPE {ej.rpe}
                     </span>
                   )}
                 </div>

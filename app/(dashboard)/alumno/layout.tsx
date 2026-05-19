@@ -1,10 +1,11 @@
 import { redirect } from "next/navigation"
 import { auth, signOut } from "@/lib/auth"
 import { prisma } from "@/lib/db"
-import Link from "next/link"
 import { ThemeToggle } from "@/components/ui/ThemeToggle"
 import { Avatar, Brand } from "@/components/ui"
 import { WatermarkFooter, NotificacionesPanel } from "@/components/layout"
+import { NavItem } from "@/components/layout/NavItem"
+import { AlumnoMobileNav } from "./AlumnoMobileNav"
 import {
   LayoutDashboard, Dumbbell, UtensilsCrossed,
   TrendingUp, Calendar, User, LogOut,
@@ -12,12 +13,12 @@ import {
 } from "lucide-react"
 
 const NAV_ITEMS = [
-  { href: "/alumno",                  label: "Inicio",             icono: LayoutDashboard },
-  { href: "/alumno/mi-rutina",        label: "Mi rutina",          icono: Dumbbell },
+  { href: "/alumno",                     label: "Inicio",          icono: LayoutDashboard },
+  { href: "/alumno/mi-rutina",           label: "Mi rutina",       icono: Dumbbell },
   { href: "/alumno/mi-plan-alimenticio", label: "Mi alimentación", icono: UtensilsCrossed },
-  { href: "/alumno/mi-progreso",      label: "Mi progreso",        icono: TrendingUp },
-  { href: "/alumno/mi-agenda",        label: "Mi agenda",          icono: Calendar },
-  { href: "/alumno/perfil",           label: "Mi perfil",          icono: User },
+  { href: "/alumno/mi-progreso",         label: "Mi progreso",     icono: TrendingUp },
+  { href: "/alumno/mi-agenda",           label: "Mi agenda",       icono: Calendar },
+  { href: "/alumno/perfil",              label: "Mi perfil",       icono: User },
 ]
 
 export default async function AlumnoLayout({ children }: { children: React.ReactNode }) {
@@ -83,16 +84,8 @@ export default async function AlumnoLayout({ children }: { children: React.React
 
         {/* Nav */}
         <nav className="flex-1 overflow-y-auto py-4 px-3 space-y-0.5">
-          {NAV_ITEMS.map(({ href, label, icono: Icono }) => (
-            <Link
-              key={href}
-              href={href}
-              className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold transition-colors"
-              style={{ color: "var(--foreground-muted)" }}
-            >
-              <Icono size={18} />
-              {label}
-            </Link>
+          {NAV_ITEMS.map(({ href, label, icono }) => (
+            <NavItem key={href} href={href} icono={icono} label={label} />
           ))}
         </nav>
 
@@ -151,7 +144,16 @@ export default async function AlumnoLayout({ children }: { children: React.React
         className="lg:hidden fixed top-0 left-0 right-0 z-30 flex items-center justify-between px-4 py-3"
         style={{ background: "var(--background-card)", borderBottom: "1px solid var(--border)" }}
       >
-        <Brand size="sm" />
+        <div className="flex items-center gap-2">
+          <AlumnoMobileNav
+            coachNombre={coach.user.nombre}
+            coachApellido={coach.user.apellido}
+            coachEspecialidad={coach.especialidad ?? null}
+            whatsappLink={whatsappLink}
+            mailtoLink={mailtoLink}
+          />
+          <Brand size="sm" />
+        </div>
         <div className="flex items-center gap-2">
           <NotificacionesPanel notificacionesSinLeer={notifSinLeer} notificaciones={notificaciones} />
           <ThemeToggle />

@@ -42,8 +42,8 @@ export default async function AdminCoachDetallePage({ params }: { params: Promis
   return (
     <div className="space-y-5 animate-fade-in">
       {/* Breadcrumb */}
-      <Link href="/admin" className="flex items-center gap-1.5 text-sm font-medium" style={{ color: "var(--foreground-muted)" }}>
-        <ChevronLeft size={15} /> Volver al panel
+      <Link href="/admin/coaches" className="flex items-center gap-1.5 text-sm font-medium" style={{ color: "var(--foreground-muted)" }}>
+        <ChevronLeft size={15} /> Volver a coaches
       </Link>
 
       {/* Header del coach */}
