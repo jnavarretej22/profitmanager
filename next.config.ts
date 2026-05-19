@@ -28,6 +28,10 @@ const securityHeaders = [
 ]
 
 const nextConfig: NextConfig = {
+  // Prisma Client debe tratarse como módulo externo de Node.js
+  // Evita que Webpack intente bundlear el cliente nativo de Prisma
+  serverExternalPackages: ["@prisma/client", ".prisma/client"],
+
   async headers() {
     return [
       {
