@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { ChevronLeft, ChevronRight, X, Dumbbell, Clock, RotateCcw, Timer } from "lucide-react"
+import { ChevronLeft, ChevronRight, X, Dumbbell, Clock, RotateCcw, Timer, Coffee } from "lucide-react"
 
 interface Ejercicio {
   nombre:            string
@@ -13,13 +13,20 @@ interface Ejercicio {
   orden:             number
 }
 
+interface DiaRutina {
+  dia_semana:  string
+  nombre_foco: string | null
+  es_descanso: boolean
+  ejercicios:  Ejercicio[]
+}
+
 interface Rutina {
   id:               string
   nombre:           string
   objetivo:         string
-  dias_semana:      string[]
+  dias:             DiaRutina[]
   duracion_minutos: number | null
-  ejercicios:       Ejercicio[]
+  fecha_fin?:       string | null
 }
 
 interface Props {
@@ -71,14 +78,15 @@ function esHoy(date: Date, hoy: Date) {
   )
 }
 
-// ── Modal de detalle del día ────────────────────────────────────────────────
 function ModalDia({
   fecha,
   rutina,
+  dia,
   onCerrar,
 }: {
-  fecha:   Date
-  rutina:  Rutina
+  fecha:    Date
+  rutina:   Rutina
+  dia:      DiaRutina
   onCerrar: () => void
 }) {
   const fechaLabel = fecha.toLocaleDateString("es-EC", {
@@ -86,13 +94,11 @@ function ModalDia({
   })
 
   return (
-    // Backdrop
     <div
       className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4"
       style={{ background: "rgba(0,0,0,0.55)", backdropFilter: "blur(4px)" }}
       onClick={(e) => { if (e.target === e.currentTarget) onCerrar() }}
     >
-      {/* Panel */}
       <div
         className="w-full sm:max-w-md flex flex-col max-h-[90dvh] sm:max-h-[80vh]"
         style={{
@@ -109,7 +115,7 @@ function ModalDia({
 
         {/* Header */}
         <div
-          className="flex items-center justify-between px-5 py-4 border-b"
+          className="flex items-center justify-between px-5 py-4 border-b flex-shrink-0"
           style={{ borderColor: "var(--border)" }}
         >
           <div className="flex items-center gap-2.5">
@@ -124,7 +130,7 @@ function ModalDia({
                 {fechaLabel}
               </p>
               <p className="text-xs" style={{ color: "var(--foreground-muted)" }}>
-                {rutina.nombre}
+                {rutina.nombre}{dia.nombre_foco ? ` · ${dia.nombre_foco}` : ""}
               </p>
             </div>
           </div>
@@ -139,7 +145,7 @@ function ModalDia({
 
         {/* Meta */}
         <div
-          className="flex items-center gap-4 px-5 py-3 border-b flex-wrap"
+          className="flex items-center gap-4 px-5 py-3 border-b flex-wrap flex-shrink-0"
           style={{ borderColor: "var(--border)", background: "var(--gray-50)" }}
         >
           <span className="flex items-center gap-1.5 text-xs font-medium" style={{ color: "var(--foreground-muted)" }}>
@@ -154,19 +160,18 @@ function ModalDia({
           )}
           <span className="flex items-center gap-1.5 text-xs font-medium" style={{ color: "var(--foreground-muted)" }}>
             <Dumbbell size={12} />
-            {rutina.ejercicios.length} ejercicios
+            {dia.ejercicios.length} ejercicios
           </span>
         </div>
 
         {/* Lista ejercicios — scrollable */}
         <div className="overflow-y-auto flex-1 px-4 py-3 space-y-2">
-          {rutina.ejercicios.map((ej) => (
+          {dia.ejercicios.map((ej) => (
             <div
               key={ej.orden}
               className="flex gap-3 rounded-xl p-3"
               style={{ background: "var(--gray-50)", border: "1px solid var(--border)" }}
             >
-              {/* Número */}
               <span
                 className="h-6 w-6 rounded-full flex items-center justify-center text-[11px] font-bold flex-shrink-0 mt-0.5"
                 style={{ background: "var(--blue)", color: "white" }}
@@ -177,7 +182,6 @@ function ModalDia({
                 <p className="text-sm font-semibold" style={{ color: "var(--foreground)" }}>
                   {ej.nombre}
                 </p>
-                {/* Chips de datos */}
                 <div className="flex flex-wrap gap-1.5 mt-1.5">
                   {ej.series && (
                     <span
@@ -224,7 +228,7 @@ function ModalDia({
         </div>
 
         {/* Footer */}
-        <div className="px-4 py-3 border-t" style={{ borderColor: "var(--border)" }}>
+        <div className="px-4 py-3 border-t flex-shrink-0" style={{ borderColor: "var(--border)" }}>
           <button
             onClick={onCerrar}
             className="w-full py-2.5 rounded-xl text-sm font-semibold transition-colors"
@@ -238,14 +242,13 @@ function ModalDia({
   )
 }
 
-// ── Componente principal ────────────────────────────────────────────────────
 export function CalendarioRutina({ rutina }: Props) {
   const hoy  = new Date()
   const [anio, setAnio] = useState(hoy.getFullYear())
   const [mes,  setMes]  = useState(hoy.getMonth())
-  const [diaModal, setDiaModal] = useState<Date | null>(null)
+  const [diaModal, setDiaModal] = useState<{ fecha: Date; dia: DiaRutina } | null>(null)
 
-  const diasRutina = rutina?.dias_semana ?? []
+  const diasEntrenamiento = rutina?.dias.filter((d) => !d.es_descanso) ?? []
   const cuadricula = buildCuadricula(anio, mes)
 
   function navAnterior() {
@@ -255,14 +258,22 @@ export function CalendarioRutina({ rutina }: Props) {
     if (mes === 11) { setMes(0); setAnio(a => a + 1) } else setMes(m => m + 1)
   }
 
-  function tieneRutina(d: Date) { return diasRutina.includes(JS_DIA[d.getDay()]) }
-
-  function handleClick(celda: { date: Date; esDelMes: boolean }) {
-    if (!celda.esDelMes || !rutina || !tieneRutina(celda.date)) return
-    setDiaModal(celda.date)
+  function getDiaRutina(d: Date): DiaRutina | undefined {
+    if (rutina?.fecha_fin) {
+      const fin = new Date(rutina.fecha_fin + "T12:00:00")
+      if (d > fin) return undefined
+    }
+    const diaNombre = JS_DIA[d.getDay()]
+    return rutina?.dias.find((x) => x.dia_semana === diaNombre && !x.es_descanso)
   }
 
-  // Nombre corto del día en móvil (solo 1 letra) y desktop (3 letras)
+  function handleClick(celda: { date: Date; esDelMes: boolean }) {
+    if (!celda.esDelMes || !rutina) return
+    const dia = getDiaRutina(celda.date)
+    if (!dia) return
+    setDiaModal({ fecha: celda.date, dia })
+  }
+
   return (
     <>
       <div
@@ -273,7 +284,7 @@ export function CalendarioRutina({ rutina }: Props) {
           boxShadow:  "var(--shadow-sm)",
         }}
       >
-        {/* ── Header ──────────────────────────────────────── */}
+        {/* Header */}
         <div
           className="flex items-center justify-between px-4 sm:px-5 py-4 border-b"
           style={{ borderColor: "var(--border)" }}
@@ -284,12 +295,29 @@ export function CalendarioRutina({ rutina }: Props) {
             </h2>
             <p className="text-xs mt-0.5 truncate" style={{ color: "var(--foreground-muted)" }}>
               {rutina
-                ? `${rutina.nombre} · ${diasRutina.length} día${diasRutina.length !== 1 ? "s" : ""}/semana`
+                ? `${rutina.nombre} · ${diasEntrenamiento.length} día${diasEntrenamiento.length !== 1 ? "s" : ""}/semana`
                 : "Sin rutina asignada"}
             </p>
+            {rutina?.fecha_fin && (() => {
+              const fin     = new Date(rutina.fecha_fin + "T12:00:00")
+              const vencida = fin < new Date()
+              return (
+                <span
+                  className="inline-flex items-center gap-1 text-[11px] font-semibold mt-0.5 rounded-md px-1.5 py-0.5"
+                  style={{
+                    background: vencida ? "var(--red-bg, #FEF2F2)" : "var(--orange-bg)",
+                    color:      vencida ? "var(--red)" : "var(--orange)",
+                  }}
+                >
+                  <Coffee size={10} />
+                  {vencida
+                    ? "Vigencia vencida"
+                    : `Hasta el ${fin.toLocaleDateString("es-EC", { day: "numeric", month: "short", year: "numeric" })}`}
+                </span>
+              )
+            })()}
           </div>
 
-          {/* Navegación mes */}
           <div className="flex items-center gap-1 flex-shrink-0 ml-3">
             <button
               onClick={navAnterior}
@@ -316,25 +344,20 @@ export function CalendarioRutina({ rutina }: Props) {
           </div>
         </div>
 
-        {/* ── Cabecera días ────────────────────────────────── */}
-        <div
-          className="grid grid-cols-7 border-b"
-          style={{ borderColor: "var(--border)" }}
-        >
+        {/* Cabecera días */}
+        <div className="grid grid-cols-7 border-b" style={{ borderColor: "var(--border)" }}>
           {DIAS_CAB.map((d) => (
             <div
               key={d}
               className="py-2 text-center font-bold"
               style={{ color: "var(--foreground-muted)", fontSize: "11px" }}
             >
-              {/* 1 letra en móvil, 3 en desktop */}
               <span className="sm:hidden">{d[0]}</span>
               <span className="hidden sm:inline">{d}</span>
             </div>
           ))}
         </div>
 
-        {/* ── Sin rutina ────────────────────────────────────── */}
         {!rutina ? (
           <div className="py-12 text-center px-4">
             <Dumbbell size={26} className="mx-auto mb-2.5" style={{ color: "var(--foreground-subtle)" }} />
@@ -346,12 +369,12 @@ export function CalendarioRutina({ rutina }: Props) {
             </p>
           </div>
         ) : (
-          /* ── Cuadrícula ────────────────────────────────────── */
           <div className="grid grid-cols-7 gap-px p-2 sm:p-3">
             {cuadricula.map((celda, i) => {
-              const conRutina   = celda.esDelMes && tieneRutina(celda.date)
-              const hoyFlag     = esHoy(celda.date, hoy)
-              const clickable   = celda.esDelMes && conRutina
+              const diaRutina = celda.esDelMes ? getDiaRutina(celda.date) : undefined
+              const conRutina = !!diaRutina
+              const hoyFlag   = esHoy(celda.date, hoy)
+              const clickable = conRutina
 
               return (
                 <button
@@ -373,7 +396,6 @@ export function CalendarioRutina({ rutina }: Props) {
                     opacity:    !celda.esDelMes ? 0.3 : 1,
                   }}
                 >
-                  {/* Número del día */}
                   <span
                     className="text-xs sm:text-sm font-bold leading-none"
                     style={{
@@ -386,28 +408,24 @@ export function CalendarioRutina({ rutina }: Props) {
                     {celda.date.getDate()}
                   </span>
 
-                  {/* Etiqueta con nombre corto de la rutina */}
                   {conRutina && (
                     <span
                       className="mt-1 rounded-full font-bold leading-none truncate max-w-full"
                       style={{
-                        fontSize:   "8px",
-                        padding:    "1px 5px",
-                        background: hoyFlag ? "rgba(255,255,255,0.25)" : "var(--blue)",
-                        color:      "white",
-                        maxWidth:   "90%",
-                        display:    "block",
-                        textAlign:  "center",
-                        overflow:   "hidden",
-                        whiteSpace: "nowrap",
+                        fontSize:     "8px",
+                        padding:      "1px 5px",
+                        background:   hoyFlag ? "rgba(255,255,255,0.25)" : "var(--blue)",
+                        color:        "white",
+                        maxWidth:     "90%",
+                        display:      "block",
+                        textAlign:    "center",
+                        overflow:     "hidden",
+                        whiteSpace:   "nowrap",
                         textOverflow: "ellipsis",
                       }}
-                      title={rutina.nombre}
+                      title={diaRutina?.nombre_foco ?? rutina.nombre}
                     >
-                      {/* Máx 6 caracteres para que entre en celdas pequeñas */}
-                      {rutina.nombre.length > 6
-                        ? rutina.nombre.slice(0, 6).toUpperCase()
-                        : rutina.nombre.toUpperCase()}
+                      {(diaRutina?.nombre_foco ?? rutina.nombre).slice(0, 6).toUpperCase()}
                     </span>
                   )}
                 </button>
@@ -416,7 +434,7 @@ export function CalendarioRutina({ rutina }: Props) {
           </div>
         )}
 
-        {/* ── Leyenda ────────────────────────────────────────── */}
+        {/* Leyenda */}
         {rutina && (
           <div
             className="flex items-center gap-3 sm:gap-5 px-4 sm:px-5 py-2.5 border-t flex-wrap"
@@ -428,17 +446,21 @@ export function CalendarioRutina({ rutina }: Props) {
             </span>
             <span className="flex items-center gap-1.5 text-[11px]" style={{ color: "var(--foreground-muted)" }}>
               <span className="h-2.5 w-2.5 rounded-full" style={{ background: "var(--blue)" }} />
-              Entrenamiento · toca clic para ver
+              Entrenamiento · clic para ver ejercicios
+            </span>
+            <span className="flex items-center gap-1.5 text-[11px]" style={{ color: "var(--foreground-muted)" }}>
+              <Coffee size={10} />
+              Descanso
             </span>
           </div>
         )}
       </div>
 
-      {/* ── Modal de detalle ─────────────────────────────────── */}
       {diaModal && rutina && (
         <ModalDia
-          fecha={diaModal}
+          fecha={diaModal.fecha}
           rutina={rutina}
+          dia={diaModal.dia}
           onCerrar={() => setDiaModal(null)}
         />
       )}

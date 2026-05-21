@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server"
 import { z } from "zod"
 import { prisma } from "@/lib/db"
 import { getCoachAutenticado, requireModoActivo, errorResponse } from "@/lib/plan-guard"
+import type { Genero, Objetivo } from "@prisma/client"
 
 const editarAlumnoSchema = z.object({
   nombre: z.string().min(2).max(100).optional(),
@@ -38,12 +39,22 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
       mediciones: { orderBy: { fecha: "desc" } },
       rutinas: {
         where: { activa: true, deleted_at: null },
-        include: { ejercicios: { orderBy: { orden: "asc" } } },
-        take: 1,
+        include: {
+          dias: {
+            orderBy: { orden: "asc" },
+            include: { ejercicios: { orderBy: { orden: "asc" } } },
+          },
+        },
+        orderBy: { created_at: "desc" },
       },
       planes_alimenticios: {
         where: { activo: true, deleted_at: null },
-        include: { comidas: { orderBy: { momento: "asc" } } },
+        include: {
+          dias: {
+            orderBy: { orden: "asc" },
+            include: { comidas: { orderBy: { orden: "asc" } } },
+          },
+        },
         take: 1,
       },
     },
@@ -93,10 +104,10 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
     data: {
       ...(identificacion !== undefined && { identificacion }),
       ...(fecha_nacimiento && { fecha_nacimiento: new Date(fecha_nacimiento) }),
-      ...(genero && { genero: genero as never }),
+      ...(genero && { genero: genero as Genero }),
       ...(altura_cm && { altura_cm }),
       ...(peso_inicial_kg && { peso_inicial_kg }),
-      ...(objetivo && { objetivo: objetivo as never }),
+      ...(objetivo && { objetivo: objetivo as Objetivo }),
       ...(fecha_inicio && { fecha_inicio: new Date(fecha_inicio) }),
       ...(notas_medicas !== undefined && { notas_medicas }),
       ...(activo !== undefined && { activo }),

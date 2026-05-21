@@ -86,10 +86,11 @@ export function RegistrarPagoModal({ coaches }: { coaches: Coach[] }) {
       {abierto && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: "rgba(0,0,0,0.6)", backdropFilter: "blur(4px)" }}>
           <div
-            className="w-full max-w-lg max-h-[90vh] overflow-y-auto rounded-2xl p-6"
+            className="w-full max-w-lg max-h-[90vh] rounded-2xl flex flex-col"
             style={{ background: "var(--background-card)", border: "1px solid var(--border)", boxShadow: "var(--shadow-xl)" }}
           >
-            <div className="flex items-center justify-between mb-5">
+            {/* Header fijo — nunca se desplaza */}
+            <div className="flex items-center justify-between px-6 pt-6 pb-4 flex-shrink-0 border-b" style={{ borderColor: "var(--border)" }}>
               <h2 className="text-lg font-bold" style={{ color: "var(--foreground)", letterSpacing: "-0.02em" }}>
                 Registrar pago
               </h2>
@@ -98,6 +99,8 @@ export function RegistrarPagoModal({ coaches }: { coaches: Coach[] }) {
               </button>
             </div>
 
+            {/* Cuerpo desplazable */}
+            <div className="overflow-y-auto px-6 py-5 flex-1">
             {ok ? (
               <div className="py-8 text-center">
                 <DollarSign size={36} className="mx-auto mb-3" style={{ color: "var(--green)" }} />
@@ -183,6 +186,7 @@ export function RegistrarPagoModal({ coaches }: { coaches: Coach[] }) {
                 </div>
               </form>
             )}
+            </div>
           </div>
         </div>
       )}

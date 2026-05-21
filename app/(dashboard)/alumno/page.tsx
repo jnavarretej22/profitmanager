@@ -48,8 +48,13 @@ export default async function AlumnoDashboardPage() {
       mediciones: { orderBy: { fecha: "desc" }, take: 5 },
       rutinas: {
         where: { activa: true, deleted_at: null },
-        include: { ejercicios: { orderBy: { orden: "asc" } } },
-        take: 1,
+        include: {
+          dias: {
+            orderBy: { orden: "asc" },
+            include: { ejercicios: { orderBy: { orden: "asc" } } },
+          },
+        },
+        orderBy: { created_at: "desc" },
       },
       planes_alimenticios: {
         where: { activo: true, deleted_at: null },
@@ -65,7 +70,8 @@ export default async function AlumnoDashboardPage() {
 
   if (!alumno) redirect("/login")
 
-  const rutina = alumno.rutinas[0] ?? null
+  const rutinas = alumno.rutinas
+  const rutina = rutinas[0] ?? null
   const plan = alumno.planes_alimenticios[0] ?? null
   const proximaCita = alumno.citas[0] ?? null
   const ultimaMedicion = alumno.mediciones[0] ?? null
@@ -76,9 +82,12 @@ export default async function AlumnoDashboardPage() {
     ? Math.floor((ahora.getTime() - new Date(alumno.fecha_inicio).getTime()) / (7 * 24 * 60 * 60 * 1000))
     : 0
 
-  const diasRutina = (rutina?.dias_semana as string[]) ?? []
   const diaHoy = DIA_HOY[ahora.getDay()]
-  const tieneEntrenoHoy = diasRutina.includes(diaHoy)
+  // Buscar entrenamiento de hoy en cualquier rutina activa
+  const diaHoyData = rutinas
+    .map((r) => r.dias.find((d) => d.dia_semana === diaHoy && !d.es_descanso))
+    .find((d): d is NonNullable<typeof d> => !!d) ?? null
+  const tieneEntrenoHoy = !!diaHoyData
 
   return (
     <div className="space-y-6 animate-fade-in">
@@ -165,16 +174,21 @@ export default async function AlumnoDashboardPage() {
           id:               rutina.id,
           nombre:           rutina.nombre,
           objetivo:         rutina.objetivo ?? "general",
-          dias_semana:      rutina.dias_semana as string[],
           duracion_minutos: rutina.duracion_minutos,
-          ejercicios:       rutina.ejercicios.map((e) => ({
-            nombre:            e.nombre,
-            series:            e.series,
-            repeticiones:      e.repeticiones,
-            descanso_segundos: e.descanso_segundos,
-            rpe:               e.rpe,
-            notas:             e.notas,
-            orden:             e.orden,
+          fecha_fin:        rutina.fecha_fin?.toISOString().split("T")[0] ?? null,
+          dias:             rutina.dias.map((d) => ({
+            dia_semana:  d.dia_semana,
+            nombre_foco: d.nombre_foco,
+            es_descanso: d.es_descanso,
+            ejercicios:  d.ejercicios.map((e) => ({
+              nombre:            e.nombre,
+              series:            e.series,
+              repeticiones:      e.repeticiones,
+              descanso_segundos: e.descanso_segundos,
+              rpe:               e.rpe,
+              notas:             e.notas,
+              orden:             e.orden,
+            })),
           })),
         } : null}
       />
@@ -191,9 +205,16 @@ export default async function AlumnoDashboardPage() {
             className="flex items-center justify-between px-5 py-4 border-b"
             style={{ borderColor: "var(--border)" }}
           >
-            <h2 className="text-sm font-bold" style={{ color: "var(--foreground)" }}>Rutina actual</h2>
+            <div className="flex items-center gap-2">
+              <h2 className="text-sm font-bold" style={{ color: "var(--foreground)" }}>Rutina actual</h2>
+              {rutinas.length > 1 && (
+                <span className="text-[10px] font-bold uppercase tracking-wider rounded-full px-2 py-0.5" style={{ background: "var(--blue-bg)", color: "var(--blue)" }}>
+                  +{rutinas.length - 1} más
+                </span>
+              )}
+            </div>
             <Link href="/alumno/mi-rutina" className="flex items-center gap-1 text-xs font-semibold" style={{ color: "var(--blue)" }}>
-              Ver completa <ChevronRight size={14} />
+              Ver {rutinas.length > 1 ? "todas" : "completa"} <ChevronRight size={14} />
             </Link>
           </div>
 
@@ -206,35 +227,39 @@ export default async function AlumnoDashboardPage() {
                 <div>
                   <p className="font-bold" style={{ color: "var(--foreground)" }}>{rutina.nombre}</p>
                   <p className="text-xs" style={{ color: "var(--foreground-muted)" }}>
-                    {rutina.ejercicios.length} ejercicios
+                    {rutina.dias.reduce((acc, d) => acc + d.ejercicios.length, 0)} ejercicios
                     {rutina.duracion_minutos ? ` · ${rutina.duracion_minutos} min` : ""}
                   </p>
                 </div>
               </div>
               <div className="flex gap-1.5 flex-wrap mb-3">
-                {["lunes","martes","miercoles","jueves","viernes","sabado","domingo"].map((d) => (
-                  <span
-                    key={d}
-                    className="flex h-7 w-7 items-center justify-center rounded-full text-xs font-bold"
-                    style={{
-                      background: diasRutina.includes(d)
-                        ? d === diaHoy ? "var(--orange)" : "var(--blue)"
-                        : "var(--border)",
-                      color: diasRutina.includes(d) ? "white" : "var(--foreground-subtle)",
-                    }}
-                  >
-                    {DIAS_LABEL[d][0]}
-                  </span>
-                ))}
+                {["lunes","martes","miercoles","jueves","viernes","sabado","domingo"].map((d) => {
+                  const diaData = rutina.dias.find((x) => x.dia_semana === d)
+                  const activo = !!diaData && !diaData.es_descanso
+                  return (
+                    <span
+                      key={d}
+                      className="flex h-7 w-7 items-center justify-center rounded-full text-xs font-bold"
+                      style={{
+                        background: activo
+                          ? d === diaHoy ? "var(--orange)" : "var(--blue)"
+                          : "var(--border)",
+                        color: activo ? "white" : "var(--foreground-subtle)",
+                      }}
+                    >
+                      {DIAS_LABEL[d][0]}
+                    </span>
+                  )
+                })}
               </div>
-              {tieneEntrenoHoy && (
+              {tieneEntrenoHoy && diaHoyData && (
                 <div
                   className="flex items-center gap-2 rounded-xl px-3 py-2.5"
                   style={{ background: "var(--orange-bg)" }}
                 >
                   <span className="text-lg">🔥</span>
                   <p className="text-xs font-semibold" style={{ color: "var(--orange)" }}>
-                    ¡Hoy toca entrenar! Primer ejercicio: {rutina.ejercicios[0]?.nombre ?? "—"}
+                    ¡Hoy toca entrenar! Primer ejercicio: {diaHoyData.ejercicios[0]?.nombre ?? "—"}
                   </p>
                 </div>
               )}

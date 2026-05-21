@@ -18,7 +18,7 @@ interface RutinaTemplate {
   id: string
   nombre: string
   objetivo: Objetivo | null
-  ejercicios: { id: string }[]
+  dias: { ejercicios: { id: string }[] }[]
 }
 
 interface PlanTemplate {
@@ -26,13 +26,9 @@ interface PlanTemplate {
   nombre: string
   objetivo: Objetivo | null
   calorias_objetivo: number | null
-  comidas: { id: string }[]
+  dias: { comidas: { id: string }[] }[]
 }
 
-interface Props {
-  rutinas: RutinaTemplate[]
-  planes: PlanTemplate[]
-}
 
 function ConfirmarEliminarBtn({
   onConfirmar,
@@ -121,7 +117,7 @@ export function AdminRutinaTemplateCards({ rutinas }: { rutinas: RutinaTemplate[
                 />
               </div>
               <p className="text-xs mt-0.5" style={{ color: "var(--foreground-muted)" }}>
-                {r.ejercicios.length} ejercicio{r.ejercicios.length !== 1 ? "s" : ""}
+                {r.dias.reduce((acc, d) => acc + d.ejercicios.length, 0)} ejercicio{r.dias.reduce((acc, d) => acc + d.ejercicios.length, 0) !== 1 ? "s" : ""}
               </p>
               <div className="flex gap-1.5 mt-2 flex-wrap">
                 {r.objetivo && <Badge variant="blue">{OBJETIVO_LABEL[r.objetivo]}</Badge>}
@@ -181,9 +177,14 @@ export function AdminPlanTemplateCards({ planes }: { planes: PlanTemplate[] }) {
                   cargando={eliminando === p.id}
                 />
               </div>
-              <p className="text-xs mt-0.5" style={{ color: "var(--foreground-muted)" }}>
-                {p.comidas.length} comida{p.comidas.length !== 1 ? "s" : ""} · {p.calorias_objetivo ?? "—"} kcal
-              </p>
+              {(() => {
+                const totalComidas = p.dias.reduce((s, d) => s + d.comidas.length, 0)
+                return (
+                  <p className="text-xs mt-0.5" style={{ color: "var(--foreground-muted)" }}>
+                    {p.dias.length} días · {totalComidas} comida{totalComidas !== 1 ? "s" : ""} · {p.calorias_objetivo ?? "—"} kcal
+                  </p>
+                )
+              })()}
               <div className="flex gap-1.5 mt-2 flex-wrap">
                 {p.objetivo && <Badge variant="success">{OBJETIVO_LABEL[p.objetivo]}</Badge>}
               </div>

@@ -34,12 +34,22 @@ export default async function AlumnoDetailPage({
       mediciones: { orderBy: { fecha: "desc" } },
       rutinas: {
         where: { activa: true, deleted_at: null },
-        include: { ejercicios: { orderBy: { orden: "asc" } } },
-        take: 1,
+        include: {
+          dias: {
+            orderBy: { orden: "asc" },
+            include: { ejercicios: { orderBy: { orden: "asc" } } },
+          },
+        },
+        orderBy: { created_at: "desc" },
       },
       planes_alimenticios: {
         where: { activo: true, deleted_at: null },
-        include: { comidas: { orderBy: { momento: "asc" } } },
+        include: {
+          dias: {
+            orderBy: { orden: "asc" },
+            include: { comidas: { orderBy: { orden: "asc" } } },
+          },
+        },
         take: 1,
       },
     },
@@ -175,22 +185,51 @@ export default async function AlumnoDetailPage({
           activo: alumno.activo,
         }}
         mediciones={alumno.mediciones}
-        rutina={alumno.rutinas[0]
-          ? {
-              id: alumno.rutinas[0].id,
-              nombre: alumno.rutinas[0].nombre,
-              descripcion: alumno.rutinas[0].descripcion,
-              dias_semana: alumno.rutinas[0].dias_semana,
-              duracion_minutos: alumno.rutinas[0].duracion_minutos,
-              ejercicios: alumno.rutinas[0].ejercicios,
-            }
-          : null}
+        rutinas={alumno.rutinas.map((r) => ({
+          id:               r.id,
+          nombre:           r.nombre,
+          descripcion:      r.descripcion,
+          duracion_minutos: r.duracion_minutos,
+          objetivo:         r.objetivo,
+          dias: r.dias.map((d) => ({
+            id: d.id, dia_semana: d.dia_semana, nombre_foco: d.nombre_foco,
+            es_descanso: d.es_descanso, orden: d.orden,
+            ejercicios: d.ejercicios.map((e) => ({
+              id: e.id, orden: e.orden, nombre: e.nombre,
+              series: e.series, repeticiones: e.repeticiones,
+              peso_kg: e.peso_kg ? e.peso_kg.toString() : null,
+              descanso_segundos: e.descanso_segundos,
+              rpe: e.rpe, progresion: e.progresion, notas: e.notas,
+            })),
+          })),
+          fecha_fin: r.fecha_fin?.toISOString().split("T")[0] ?? null,
+        }))}
+        alumnoObjetivo={alumno.objetivo ?? undefined}
         plan={alumno.planes_alimenticios[0]
           ? {
-              id: alumno.planes_alimenticios[0].id,
-              nombre: alumno.planes_alimenticios[0].nombre,
+              id:                alumno.planes_alimenticios[0].id,
+              nombre:            alumno.planes_alimenticios[0].nombre,
               calorias_objetivo: alumno.planes_alimenticios[0].calorias_objetivo,
-              comidas: alumno.planes_alimenticios[0].comidas,
+              fecha_fin:         alumno.planes_alimenticios[0].fecha_fin?.toISOString().slice(0, 10) ?? null,
+              dias: alumno.planes_alimenticios[0].dias.map((d) => ({
+                id:          d.id,
+                dia_semana:  d.dia_semana,
+                nombre_foco: d.nombre_foco,
+                es_libre:    d.es_libre,
+                orden:       d.orden,
+                comidas: d.comidas.map((c) => ({
+                  id:              c.id,
+                  momento:         c.momento,
+                  hora_sugerida:   c.hora_sugerida
+                    ? new Date(c.hora_sugerida).toTimeString().slice(0, 5)
+                    : null,
+                  descripcion:     c.descripcion,
+                  calorias:        c.calorias,
+                  proteinas_g:     c.proteinas_g,
+                  carbohidratos_g: c.carbohidratos_g,
+                  grasas_g:        c.grasas_g,
+                })),
+              })),
             }
           : null}
         coachPlan={coach?.plan_actual ?? "gratis"}

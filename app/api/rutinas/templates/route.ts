@@ -17,12 +17,17 @@ export async function GET(req: NextRequest) {
   const templates = await prisma.rutina.findMany({
     where: {
       es_template: true,
-      coach_id: null as never, // templates del sistema: sin coach_id
+      es_template_sistema: true,
       deleted_at: null,
       activa: true,
       ...(objetivo ? { objetivo: objetivo as Objetivo } : {}),
     },
-    include: { ejercicios: { orderBy: { orden: "asc" } } },
+    include: {
+      dias: {
+        orderBy: { orden: "asc" },
+        include: { ejercicios: { orderBy: { orden: "asc" } } },
+      },
+    },
     orderBy: { nombre: "asc" },
   })
 

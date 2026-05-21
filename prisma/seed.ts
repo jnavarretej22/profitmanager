@@ -207,7 +207,7 @@ async function main() {
       objetivo: "hipertrofia" as const,
       descripcion: "Rutina de cuerpo completo 3 días a la semana. Ideal para comenzar con hipertrofia.",
       duracion_minutos: 60,
-      dias_semana: ["lunes", "miercoles", "viernes"],
+      dias_semana: ["lunes", "miercoles", "viernes"] as string[],
       plan_requerido: "inicial" as const,
       ejercicios: [
         { orden: 1, nombre: "Sentadilla con barra", series: 4, repeticiones: "8-10", descanso_segundos: 90, rpe: "7-8" },
@@ -263,10 +263,12 @@ async function main() {
     },
   ]
 
+  const ORDEN_DIAS_SEED = ["lunes","martes","miercoles","jueves","viernes","sabado","domingo"]
+
   for (const t of templateRutinas) {
-    const rutina = await prisma.rutina.create({
+    await prisma.rutina.create({
       data: {
-        coach_id: coach2.id, // el admin usa coach2 como propietario temporal en el seed
+        coach_id: coach2.id,
         es_template: true,
         es_template_sistema: true,
         plan_requerido: t.plan_requerido,
@@ -274,25 +276,155 @@ async function main() {
         nombre: t.nombre,
         descripcion: t.descripcion,
         duracion_minutos: t.duracion_minutos,
-        dias_semana: t.dias_semana,
+        dias: {
+          create: ORDEN_DIAS_SEED.map((dia, idx) => {
+            const esDiaActivo = t.dias_semana.includes(dia)
+            return {
+              dia_semana: dia as "lunes" | "martes" | "miercoles" | "jueves" | "viernes" | "sabado" | "domingo",
+              orden: idx + 1,
+              es_descanso: !esDiaActivo,
+              ejercicios: esDiaActivo
+                ? {
+                    create: t.ejercicios.map((e) => ({
+                      orden:             e.orden,
+                      nombre:            e.nombre,
+                      series:            e.series,
+                      repeticiones:      e.repeticiones,
+                      descanso_segundos: e.descanso_segundos,
+                      rpe:               (e as { rpe?: string }).rpe ?? null,
+                    })),
+                  }
+                : undefined,
+            }
+          }),
+        },
       },
     })
-
-    for (const e of t.ejercicios) {
-      await prisma.ejercicioRutina.create({
-        data: {
-          rutina_id: rutina.id,
-          orden: e.orden,
-          nombre: e.nombre,
-          series: e.series,
-          repeticiones: e.repeticiones,
-          descanso_segundos: e.descanso_segundos,
-          rpe: (e as { rpe?: string }).rpe ?? null,
-        },
-      })
-    }
   }
   console.log("✅ Templates de rutinas del sistema creados")
+
+  // ─── Templates de planes alimenticios (Plan Inicial) ─────────────────────────
+  type DiaSemana = "lunes"|"martes"|"miercoles"|"jueves"|"viernes"|"sabado"|"domingo"
+  type MomentoDia = "desayuno"|"media_manana"|"almuerzo"|"merienda"|"cena"
+
+  const templatePlanes = [
+    {
+      nombre:            "Plan Hipertrofia — Alta proteína",
+      objetivo:          "hipertrofia" as const,
+      calorias_objetivo: 2800,
+      plan_requerido:    "inicial" as const,
+      dias: ORDEN_DIAS_SEED.map((dia, idx) => ({
+        dia_semana:  dia as DiaSemana,
+        orden:       idx + 1,
+        es_libre:    dia === "domingo",
+        nombre_foco: dia === "domingo" ? null
+          : dia === "sabado" ? "Recarga de carbohidratos"
+          : "Entrenamiento — Alta proteína",
+        comidas: dia === "domingo" ? [] : [
+          {
+            orden: 1, momento: "desayuno" as MomentoDia,
+            hora_sugerida: new Date("1970-01-01T07:00:00"),
+            descripcion: "3 claras + 2 huevos revueltos con espinaca y tomate. 2 rebanadas pan integral. 1 taza avena con leche descremada.",
+            calorias: 480, proteinas_g: 38, carbohidratos_g: 55, grasas_g: 12,
+          },
+          {
+            orden: 2, momento: "media_manana" as MomentoDia,
+            hora_sugerida: new Date("1970-01-01T10:30:00"),
+            descripcion: "1 scoop de proteína en agua. 1 manzana. 20g almendras.",
+            calorias: 280, proteinas_g: 28, carbohidratos_g: 22, grasas_g: 10,
+          },
+          {
+            orden: 3, momento: "almuerzo" as MomentoDia,
+            hora_sugerida: new Date("1970-01-01T13:00:00"),
+            descripcion: "200g pechuga de pollo a la plancha. 1 taza arroz integral. Ensalada verde con aceite de oliva. 1 plátano maduro.",
+            calorias: 720, proteinas_g: 52, carbohidratos_g: 80, grasas_g: 14,
+          },
+          {
+            orden: 4, momento: "merienda" as MomentoDia,
+            hora_sugerida: new Date("1970-01-01T16:30:00"),
+            descripcion: "1 scoop proteína en leche. 2 galletas de arroz con mantequilla de maní.",
+            calorias: 350, proteinas_g: 30, carbohidratos_g: 28, grasas_g: 12,
+          },
+          {
+            orden: 5, momento: "cena" as MomentoDia,
+            hora_sugerida: new Date("1970-01-01T20:00:00"),
+            descripcion: "180g carne de res magra (lomo) a la plancha. 1 taza de papa cocinada. Brócoli salteado. Ensalada de tomate.",
+            calorias: 580, proteinas_g: 45, carbohidratos_g: 42, grasas_g: 18,
+          },
+        ],
+      })),
+    },
+    {
+      nombre:            "Plan Pérdida de Grasa — Déficit moderado",
+      objetivo:          "perdida_grasa" as const,
+      calorias_objetivo: 1800,
+      plan_requerido:    "inicial" as const,
+      dias: ORDEN_DIAS_SEED.map((dia, idx) => ({
+        dia_semana:  dia as DiaSemana,
+        orden:       idx + 1,
+        es_libre:    dia === "domingo",
+        nombre_foco: dia === "domingo" ? null
+          : dia === "sabado" ? "Recarga moderada"
+          : "Déficit calórico — Alta saciedad",
+        comidas: dia === "domingo" ? [] : [
+          {
+            orden: 1, momento: "desayuno" as MomentoDia,
+            hora_sugerida: new Date("1970-01-01T07:30:00"),
+            descripcion: "Yogur griego sin azúcar (200g) con 1/2 taza de avena y frutos rojos. 1 café negro.",
+            calorias: 320, proteinas_g: 22, carbohidratos_g: 38, grasas_g: 7,
+          },
+          {
+            orden: 2, momento: "media_manana" as MomentoDia,
+            hora_sugerida: new Date("1970-01-01T10:30:00"),
+            descripcion: "1 manzana verde. 15g nueces. Té verde sin azúcar.",
+            calorias: 175, proteinas_g: 3, carbohidratos_g: 22, grasas_g: 9,
+          },
+          {
+            orden: 3, momento: "almuerzo" as MomentoDia,
+            hora_sugerida: new Date("1970-01-01T13:00:00"),
+            descripcion: "160g pechuga de pollo o atún en agua. 1/2 taza arroz integral. Ensalada grande: lechuga, pepino, tomate, zanahoria rallada, limón.",
+            calorias: 480, proteinas_g: 42, carbohidratos_g: 40, grasas_g: 8,
+          },
+          {
+            orden: 4, momento: "merienda" as MomentoDia,
+            hora_sugerida: new Date("1970-01-01T16:30:00"),
+            descripcion: "Batido de proteína (1 scoop) con agua y 1/2 banano pequeño.",
+            calorias: 220, proteinas_g: 24, carbohidratos_g: 18, grasas_g: 3,
+          },
+          {
+            orden: 5, momento: "cena" as MomentoDia,
+            hora_sugerida: new Date("1970-01-01T19:30:00"),
+            descripcion: "150g tilapia o merluza al horno con limón. Ensalada de espinacas con aguacate (1/4). 1 taza de sopa de verduras.",
+            calorias: 380, proteinas_g: 35, carbohidratos_g: 20, grasas_g: 15,
+          },
+        ],
+      })),
+    },
+  ]
+
+  for (const t of templatePlanes) {
+    await prisma.planAlimenticio.create({
+      data: {
+        coach_id:          coach2.id,
+        es_template:       true,
+        plan_requerido:    t.plan_requerido,
+        objetivo:          t.objetivo,
+        nombre:            t.nombre,
+        calorias_objetivo: t.calorias_objetivo,
+        activo:            true,
+        dias: {
+          create: t.dias.map((d) => ({
+            dia_semana:  d.dia_semana,
+            orden:       d.orden,
+            es_libre:    d.es_libre,
+            nombre_foco: d.nombre_foco,
+            comidas: d.comidas.length > 0 ? { create: d.comidas } : undefined,
+          })),
+        },
+      },
+    })
+  }
+  console.log("✅ Templates de planes alimenticios creados")
 
   console.log("\n🎉 Seed completado exitosamente.")
   console.log("\nCredenciales de acceso:")

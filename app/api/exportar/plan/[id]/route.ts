@@ -17,7 +17,10 @@ export async function GET(
   const plan = await prisma.planAlimenticio.findUnique({
     where: { id },
     include: {
-      comidas: { orderBy: { momento: "asc" } },
+      dias: {
+        orderBy: { orden: "asc" },
+        include: { comidas: { orderBy: { orden: "asc" } } },
+      },
       coach: {
         include: { user: { select: { nombre: true, apellido: true } } },
       },
@@ -29,7 +32,6 @@ export async function GET(
 
   if (!plan) return NextResponse.json({ error: "NO_ENCONTRADO" }, { status: 404 })
 
-  // Verificar permisos (multi-tenant estricto — admin no tiene acceso a PDFs de coaches)
   if (session.user.role === "admin") {
     return NextResponse.json({ error: "NO_ENCONTRADO" }, { status: 404 })
   }
@@ -37,7 +39,6 @@ export async function GET(
     return NextResponse.json({ error: "NO_ENCONTRADO" }, { status: 404 })
   }
   if (session.user.role === "alumno") {
-    // 404 para no filtrar existencia (regla CLAUDE.md 6.5)
     if (!plan.alumno_id || plan.alumno?.user_id !== session.user.id) {
       return NextResponse.json({ error: "NO_ENCONTRADO" }, { status: 404 })
     }
@@ -55,25 +56,26 @@ export async function GET(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const doc = React.createElement(PlanAlimenticioPDF as any, {
     plan: {
-      nombre:             plan.nombre,
-      objetivo:           plan.objetivo,
-      calorias_objetivo:  plan.calorias_objetivo,
-      comidas: plan.comidas.map((c) => ({
-        momento:           c.momento,
-        hora_sugerida:     c.hora_sugerida ? String(c.hora_sugerida) : null,
-        descripcion:       c.descripcion,
-        calorias:          c.calorias,
-        proteinas_g:       c.proteinas_g,
-        carbohidratos_g:   c.carbohidratos_g,
-        grasas_g:          c.grasas_g,
+      nombre:            plan.nombre,
+      objetivo:          plan.objetivo,
+      calorias_objetivo: plan.calorias_objetivo,
+      dias: plan.dias.map((d) => ({
+        dia_semana:  d.dia_semana,
+        nombre_foco: d.nombre_foco,
+        es_libre:    d.es_libre,
+        comidas: d.comidas.map((c) => ({
+          momento:         c.momento,
+          hora_sugerida:   c.hora_sugerida ? String(c.hora_sugerida) : null,
+          descripcion:     c.descripcion,
+          calorias:        c.calorias,
+          proteinas_g:     c.proteinas_g,
+          carbohidratos_g: c.carbohidratos_g,
+          grasas_g:        c.grasas_g,
+        })),
       })),
     },
-    alumno: alumnoNombre,
-    coach: {
-      nombre:   plan.coach.user.nombre,
-      apellido: plan.coach.user.apellido,
-      logo_url: plan.coach.logo_url,
-    },
+    alumno:        alumnoNombre,
+    coach:         { nombre: plan.coach.user.nombre, apellido: plan.coach.user.apellido, logo_url: plan.coach.logo_url },
     marcaAgua,
     fechaGenerado,
   })

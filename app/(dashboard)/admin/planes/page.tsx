@@ -13,12 +13,16 @@ export default async function AdminPlanesPage() {
   const [rutinasTemplate, planesTemplate] = await Promise.all([
     prisma.rutina.findMany({
       where: { es_template: true, deleted_at: null },
-      include: { ejercicios: { select: { id: true } } },
+      include: {
+        dias: {
+          include: { ejercicios: { select: { id: true } } },
+        },
+      },
       orderBy: { created_at: "desc" },
     }),
     prisma.planAlimenticio.findMany({
       where: { es_template: true, deleted_at: null },
-      include: { comidas: { select: { id: true } } },
+      include: { dias: { include: { comidas: { select: { id: true } } } } },
       orderBy: { created_at: "desc" },
     }),
   ])

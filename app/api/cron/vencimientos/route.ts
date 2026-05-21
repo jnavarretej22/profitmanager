@@ -15,6 +15,28 @@ export async function GET(req: NextRequest) {
   }
 
   const ahora = new Date()
+
+  // ── Expirar rutinas cuya fecha_fin ya pasó ────────────────────────────────
+  const hoyFecha = new Date(ahora.toISOString().split("T")[0] + "T00:00:00.000Z")
+  await prisma.rutina.updateMany({
+    where: {
+      activa:    true,
+      alumno_id: { not: null },
+      fecha_fin: { lt: hoyFecha },
+    },
+    data: { activa: false },
+  })
+
+  // ── Expirar planes alimenticios cuya fecha_fin ya pasó ───────────────────
+  await prisma.planAlimenticio.updateMany({
+    where: {
+      activo:    true,
+      alumno_id: { not: null },
+      fecha_fin: { lt: hoyFecha },
+    },
+    data: { activo: false },
+  })
+
   // Período de gracia: 3 días después del vencimiento
   const limiteGracia = new Date(ahora.getTime() - 3 * 24 * 60 * 60 * 1000)
 

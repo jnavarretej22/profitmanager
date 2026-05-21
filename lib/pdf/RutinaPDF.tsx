@@ -1,8 +1,7 @@
 import {
-  Document, Page, Text, View, StyleSheet, Image, Font,
+  Document, Page, Text, View, StyleSheet, Image,
 } from "@react-pdf/renderer"
 
-// Colores
 const azul    = "#2D7DF6"
 const gris900 = "#111827"
 const gris700 = "#374151"
@@ -19,9 +18,9 @@ const OBJETIVO_LABEL: Record<string, string> = {
   general:       "General",
 }
 
-const DIA_LABEL: Record<string, string> = {
-  lunes: "Lun", martes: "Mar", miercoles: "Mié",
-  jueves: "Jue", viernes: "Vie", sabado: "Sáb", domingo: "Dom",
+const DIA_NOMBRE: Record<string, string> = {
+  lunes: "Lunes", martes: "Martes", miercoles: "Miércoles",
+  jueves: "Jueves", viernes: "Viernes", sabado: "Sábado", domingo: "Domingo",
 }
 
 const s = StyleSheet.create({
@@ -35,26 +34,33 @@ const s = StyleSheet.create({
   subtitulo:   { fontSize: 10, color: gris500 },
   seccion:     { marginBottom: 16 },
   secTitulo:   { fontSize: 11, fontWeight: "bold", color: azul, marginBottom: 8, textTransform: "uppercase", letterSpacing: 0.5 },
+  diaTitulo:   { fontSize: 10, fontWeight: "bold", color: gris900, marginBottom: 6, paddingBottom: 4, borderBottomWidth: 1, borderBottomColor: gris200 },
+  diaFoco:     { fontSize: 9, color: gris500, fontWeight: "normal" },
   row:         { flexDirection: "row", flexWrap: "wrap", gap: 8, marginBottom: 12 },
   pill:        { backgroundColor: "#EFF5FF", borderRadius: 4, paddingHorizontal: 8, paddingVertical: 3, fontSize: 9, color: azul },
-  table:       { borderWidth: 1, borderColor: gris200, borderRadius: 6, overflow: "hidden" },
+  table:       { borderWidth: 1, borderColor: gris200, borderRadius: 6, overflow: "hidden", marginBottom: 12 },
   tableHead:   { flexDirection: "row", backgroundColor: gris100, borderBottomWidth: 1, borderBottomColor: gris200 },
   tableRow:    { flexDirection: "row", borderBottomWidth: 1, borderBottomColor: gris200 },
   tableRowLast:{ flexDirection: "row" },
-  thOrden:     { width: "5%",  padding: "6 8", fontSize: 8, fontWeight: "bold", color: gris500 },
-  thNombre:    { width: "35%", padding: "6 8", fontSize: 8, fontWeight: "bold", color: gris500 },
-  thSeries:    { width: "12%", padding: "6 8", fontSize: 8, fontWeight: "bold", color: gris500 },
-  thReps:      { width: "15%", padding: "6 8", fontSize: 8, fontWeight: "bold", color: gris500 },
-  thDescanso:  { width: "15%", padding: "6 8", fontSize: 8, fontWeight: "bold", color: gris500 },
-  thRpe:       { width: "10%", padding: "6 8", fontSize: 8, fontWeight: "bold", color: gris500 },
-  thNotas:     { width: "8%",  padding: "6 8", fontSize: 8, fontWeight: "bold", color: gris500 },
-  tdOrden:     { width: "5%",  padding: "7 8", fontSize: 9, color: gris500 },
-  tdNombre:    { width: "35%", padding: "7 8", fontSize: 9, fontWeight: "bold", color: gris900 },
-  tdSeries:    { width: "12%", padding: "7 8", fontSize: 9, color: gris700 },
-  tdReps:      { width: "15%", padding: "7 8", fontSize: 9, color: gris700 },
-  tdDescanso:  { width: "15%", padding: "7 8", fontSize: 9, color: gris700 },
-  tdRpe:       { width: "10%", padding: "7 8", fontSize: 9, color: gris700 },
-  tdNotas:     { width: "8%",  padding: "7 8", fontSize: 8, color: gris500 },
+  thOrden:     { width: "4%",  padding: "6 6", fontSize: 8, fontWeight: "bold", color: gris500 },
+  thNombre:    { width: "24%", padding: "6 6", fontSize: 8, fontWeight: "bold", color: gris500 },
+  thSeries:    { width: "8%",  padding: "6 6", fontSize: 8, fontWeight: "bold", color: gris500 },
+  thReps:      { width: "10%", padding: "6 6", fontSize: 8, fontWeight: "bold", color: gris500 },
+  thCarga:     { width: "10%", padding: "6 6", fontSize: 8, fontWeight: "bold", color: gris500 },
+  thDescanso:  { width: "11%", padding: "6 6", fontSize: 8, fontWeight: "bold", color: gris500 },
+  thRpe:       { width: "8%",  padding: "6 6", fontSize: 8, fontWeight: "bold", color: gris500 },
+  thProg:      { width: "13%", padding: "6 6", fontSize: 8, fontWeight: "bold", color: gris500 },
+  thNotas:     { width: "12%", padding: "6 6", fontSize: 8, fontWeight: "bold", color: gris500 },
+  tdOrden:     { width: "4%",  padding: "7 6", fontSize: 9, color: gris500 },
+  tdNombre:    { width: "24%", padding: "7 6", fontSize: 9, fontWeight: "bold", color: gris900 },
+  tdSeries:    { width: "8%",  padding: "7 6", fontSize: 9, color: gris700 },
+  tdReps:      { width: "10%", padding: "7 6", fontSize: 9, color: gris700 },
+  tdCarga:     { width: "10%", padding: "7 6", fontSize: 9, fontWeight: "bold", color: "#EF4444" },
+  tdDescanso:  { width: "11%", padding: "7 6", fontSize: 9, color: gris700 },
+  tdRpe:       { width: "8%",  padding: "7 6", fontSize: 9, color: gris700 },
+  tdProg:      { width: "13%", padding: "7 6", fontSize: 8, color: azul },
+  tdNotas:     { width: "12%", padding: "7 6", fontSize: 8, color: gris500 },
+  descansoDia: { fontSize: 9, color: gris500, fontStyle: "italic", paddingVertical: 6 },
   footer:      { position: "absolute", bottom: 28, left: 40, right: 40, flexDirection: "row", justifyContent: "space-between", alignItems: "center", borderTopWidth: 1, borderTopColor: gris200, paddingTop: 8 },
   footerText:  { fontSize: 8, color: gris500 },
   watermark:   { fontSize: 8, color: naranja, fontWeight: "bold" },
@@ -65,9 +71,19 @@ interface Ejercicio {
   nombre: string
   series: number
   repeticiones: string
+  peso_kg: string | null
   descanso_segundos: number
   rpe: string | null
+  progresion: string | null
   notas: string | null
+}
+
+interface DiaRutina {
+  dia_semana: string
+  nombre_foco: string | null
+  es_descanso: boolean
+  orden: number
+  ejercicios: Ejercicio[]
 }
 
 interface Props {
@@ -75,18 +91,22 @@ interface Props {
     nombre: string
     descripcion: string | null
     objetivo: string | null
-    dias_semana: unknown
     duracion_minutos: number | null
-    ejercicios: Ejercicio[]
+    dias: DiaRutina[]
   }
-  alumno:   { nombre: string; apellido: string }
-  coach:    { nombre: string; apellido: string; logo_url: string | null }
-  marcaAgua: boolean
+  alumno:        { nombre: string; apellido: string }
+  coach:         { nombre: string; apellido: string; logo_url: string | null }
+  marcaAgua:     boolean
   fechaGenerado: string
 }
 
 export function RutinaPDF({ rutina, alumno, coach, marcaAgua, fechaGenerado }: Props) {
-  const dias = Array.isArray(rutina.dias_semana) ? (rutina.dias_semana as string[]) : []
+  const ORDEN_DIAS = ["lunes","martes","miercoles","jueves","viernes","sabado","domingo"]
+  const diasOrdenados = [...rutina.dias].sort(
+    (a, b) => ORDEN_DIAS.indexOf(a.dia_semana) - ORDEN_DIAS.indexOf(b.dia_semana)
+  )
+  const diasEntrenamiento = diasOrdenados.filter((d) => !d.es_descanso)
+  const totalEjercicios   = diasEntrenamiento.reduce((acc, d) => acc + d.ejercicios.length, 0)
 
   return (
     <Document>
@@ -113,10 +133,7 @@ export function RutinaPDF({ rutina, alumno, coach, marcaAgua, fechaGenerado }: P
         {/* Info rápida */}
         <View style={s.seccion}>
           <View style={s.row}>
-            {dias.length > 0 && dias.map((d) => (
-              <Text key={d} style={s.pill}>{DIA_LABEL[d] ?? d}</Text>
-            ))}
-            {rutina.duracion_minutos && (
+            {rutina.duracion_minutos != null && (
               <Text style={s.pill}>{rutina.duracion_minutos} min</Text>
             )}
             {rutina.objetivo && (
@@ -124,40 +141,65 @@ export function RutinaPDF({ rutina, alumno, coach, marcaAgua, fechaGenerado }: P
                 {OBJETIVO_LABEL[rutina.objetivo] ?? rutina.objetivo}
               </Text>
             )}
+            <Text style={s.pill}>{diasEntrenamiento.length} días de entrenamiento</Text>
+            <Text style={s.pill}>{totalEjercicios} ejercicios en total</Text>
           </View>
           {rutina.descripcion && (
             <Text style={{ fontSize: 9, color: gris700, lineHeight: 1.5 }}>{rutina.descripcion}</Text>
           )}
         </View>
 
-        {/* Tabla ejercicios */}
+        {/* Sección por día */}
         <View style={s.seccion}>
-          <Text style={s.secTitulo}>Ejercicios ({rutina.ejercicios.length})</Text>
-          <View style={s.table}>
-            <View style={s.tableHead}>
-              <Text style={s.thOrden}>#</Text>
-              <Text style={s.thNombre}>Ejercicio</Text>
-              <Text style={s.thSeries}>Series</Text>
-              <Text style={s.thReps}>Reps</Text>
-              <Text style={s.thDescanso}>Descanso</Text>
-              <Text style={s.thRpe}>RPE</Text>
-              <Text style={s.thNotas}>Notas</Text>
-            </View>
-            {rutina.ejercicios.map((ej, idx) => {
-              const isLast = idx === rutina.ejercicios.length - 1
-              return (
-                <View key={ej.orden} style={isLast ? s.tableRowLast : s.tableRow}>
-                  <Text style={s.tdOrden}>{ej.orden}</Text>
-                  <Text style={s.tdNombre}>{ej.nombre}</Text>
-                  <Text style={s.tdSeries}>{ej.series}</Text>
-                  <Text style={s.tdReps}>{ej.repeticiones}</Text>
-                  <Text style={s.tdDescanso}>{ej.descanso_segundos}s</Text>
-                  <Text style={s.tdRpe}>{ej.rpe ?? "—"}</Text>
-                  <Text style={s.tdNotas}>{ej.notas ?? "—"}</Text>
+          <Text style={s.secTitulo}>Programa semanal</Text>
+
+          {diasOrdenados.map((dia) => (
+            <View key={dia.dia_semana} style={{ marginBottom: 14 }}>
+              <Text style={s.diaTitulo}>
+                {DIA_NOMBRE[dia.dia_semana] ?? dia.dia_semana}
+                {dia.nombre_foco && !dia.es_descanso ? (
+                  <Text style={s.diaFoco}>  ·  {dia.nombre_foco}</Text>
+                ) : null}
+                {dia.es_descanso ? (
+                  <Text style={s.diaFoco}>  ·  Descanso</Text>
+                ) : null}
+              </Text>
+
+              {dia.es_descanso ? (
+                <Text style={s.descansoDia}>Día de descanso — recuperación activa.</Text>
+              ) : (
+                <View style={s.table}>
+                  <View style={s.tableHead}>
+                    <Text style={s.thOrden}>#</Text>
+                    <Text style={s.thNombre}>Ejercicio</Text>
+                    <Text style={s.thSeries}>Series</Text>
+                    <Text style={s.thReps}>Reps</Text>
+                    <Text style={s.thCarga}>Carga</Text>
+                    <Text style={s.thDescanso}>Descanso</Text>
+                    <Text style={s.thRpe}>RPE</Text>
+                    <Text style={s.thProg}>Progresión</Text>
+                    <Text style={s.thNotas}>Notas</Text>
+                  </View>
+                  {dia.ejercicios.map((ej, idx) => {
+                    const isLast = idx === dia.ejercicios.length - 1
+                    return (
+                      <View key={ej.orden} style={isLast ? s.tableRowLast : s.tableRow}>
+                        <Text style={s.tdOrden}>{ej.orden}</Text>
+                        <Text style={s.tdNombre}>{ej.nombre}</Text>
+                        <Text style={s.tdSeries}>{ej.series}</Text>
+                        <Text style={s.tdReps}>{ej.repeticiones}</Text>
+                        <Text style={s.tdCarga}>{ej.peso_kg ? `${ej.peso_kg} kg` : "—"}</Text>
+                        <Text style={s.tdDescanso}>{ej.descanso_segundos}s</Text>
+                        <Text style={s.tdRpe}>{ej.rpe ?? "—"}</Text>
+                        <Text style={s.tdProg}>{ej.progresion ?? "—"}</Text>
+                        <Text style={s.tdNotas}>{ej.notas ?? "—"}</Text>
+                      </View>
+                    )
+                  })}
                 </View>
-              )
-            })}
-          </View>
+              )}
+            </View>
+          ))}
         </View>
 
         {/* Footer */}

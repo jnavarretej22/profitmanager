@@ -13,7 +13,12 @@ export default async function EditarRutinaPage({ params }: { params: Promise<{ i
 
   const rutina = await prisma.rutina.findFirst({
     where: { id, coach_id: session.user.coachId, deleted_at: null },
-    include: { ejercicios: { orderBy: { orden: "asc" } } },
+    include: {
+      dias: {
+        orderBy: { orden: "asc" },
+        include: { ejercicios: { orderBy: { orden: "asc" } } },
+      },
+    },
   })
   if (!rutina) notFound()
 
@@ -40,20 +45,26 @@ export default async function EditarRutinaPage({ params }: { params: Promise<{ i
       <RutinaForm
         rutinaId={id}
         valorInicial={{
-          nombre: rutina.nombre,
-          descripcion: rutina.descripcion ?? "",
-          objetivo: rutina.objetivo ?? "",
-          dias_semana: rutina.dias_semana as string[],
+          nombre:           rutina.nombre,
+          descripcion:      rutina.descripcion ?? "",
+          objetivo:         rutina.objetivo ?? "",
           duracion_minutos: rutina.duracion_minutos ?? undefined,
-          es_template: rutina.es_template,
-          alumno_id: rutina.alumno_id,
-          ejercicios: rutina.ejercicios.map((e) => ({
-            nombre: e.nombre,
-            series: e.series ?? 3,
-            repeticiones: e.repeticiones ?? "10",
-            descanso_segundos: e.descanso_segundos ?? 60,
-            rpe: e.rpe ?? "",
-            notas: e.notas ?? "",
+          es_template:      rutina.es_template,
+          alumno_id:        rutina.alumno_id,
+          dias: rutina.dias.map((d) => ({
+            dia_semana:  d.dia_semana,
+            nombre_foco: d.nombre_foco,
+            es_descanso: d.es_descanso,
+            ejercicios:  d.ejercicios.map((e) => ({
+              nombre:            e.nombre,
+              series:            e.series ?? 3,
+              repeticiones:      e.repeticiones ?? "10",
+              peso_kg:           e.peso_kg ? e.peso_kg.toString() : "",
+              descanso_segundos: e.descanso_segundos ?? 60,
+              rpe:               e.rpe ?? "",
+              progresion:        e.progresion ?? "",
+              notas:             e.notas ?? "",
+            })),
           })),
         }}
         alumnos={alumnos.map((a) => ({

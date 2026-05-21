@@ -54,7 +54,10 @@ export default async function RutinasPage({
       ...(tipo === "template" ? { es_template: true } : tipo === "asignada" ? { es_template: false, alumno_id: { not: null } } : {}),
     },
     include: {
-      ejercicios: { orderBy: { orden: "asc" }, select: { id: true } },
+      dias: {
+        orderBy: { orden: "asc" },
+        include: { ejercicios: { select: { id: true } } },
+      },
       alumno: { include: { user: { select: { nombre: true, apellido: true } } } },
     },
     orderBy: { updated_at: "desc" },
@@ -141,7 +144,8 @@ export default async function RutinasPage({
       ) : (
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {rutinas.map((r) => {
-            const dias = (r.dias_semana as string[]) ?? []
+            const diasEntrenamiento = r.dias.filter((d) => !d.es_descanso)
+            const totalEjercicios = r.dias.reduce((acc, d) => acc + d.ejercicios.length, 0)
             return (
               <Link
                 key={r.id}
@@ -182,20 +186,24 @@ export default async function RutinasPage({
                 )}
 
                 {/* Días de la semana */}
-                {dias.length > 0 && (
+                {r.dias.length > 0 && (
                   <div className="flex flex-wrap gap-1 mb-3">
-                    {["lunes","martes","miercoles","jueves","viernes","sabado","domingo"].map((d) => (
-                      <span
-                        key={d}
-                        className="flex h-6 w-6 items-center justify-center rounded-full text-[10px] font-bold"
-                        style={{
-                          background: dias.includes(d) ? "var(--blue)" : "var(--border)",
-                          color: dias.includes(d) ? "white" : "var(--foreground-subtle)",
-                        }}
-                      >
-                        {DIAS_CORTO[d]}
-                      </span>
-                    ))}
+                    {["lunes","martes","miercoles","jueves","viernes","sabado","domingo"].map((d) => {
+                      const diaData = r.dias.find((x) => x.dia_semana === d)
+                      const activo = !!diaData && !diaData.es_descanso
+                      return (
+                        <span
+                          key={d}
+                          className="flex h-6 w-6 items-center justify-center rounded-full text-[10px] font-bold"
+                          style={{
+                            background: activo ? "var(--blue)" : "var(--border)",
+                            color: activo ? "white" : "var(--foreground-subtle)",
+                          }}
+                        >
+                          {DIAS_CORTO[d]}
+                        </span>
+                      )
+                    })}
                   </div>
                 )}
 
@@ -205,7 +213,7 @@ export default async function RutinasPage({
                   style={{ borderColor: "var(--border)" }}
                 >
                   <span className="text-xs" style={{ color: "var(--foreground-subtle)" }}>
-                    {r.ejercicios.length} ejercicio{r.ejercicios.length !== 1 ? "s" : ""}
+                    {diasEntrenamiento.length} día{diasEntrenamiento.length !== 1 ? "s" : ""} · {totalEjercicios} ejercicio{totalEjercicios !== 1 ? "s" : ""}
                     {r.duracion_minutos ? ` · ${r.duracion_minutos} min` : ""}
                   </span>
                   <ChevronRight size={14} style={{ color: "var(--foreground-subtle)" }} />

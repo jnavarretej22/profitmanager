@@ -95,15 +95,15 @@ export function CambiarPlanModal({ coachId, planActual, estadoActual, fechaVenci
           onClick={(e) => { if (e.target === e.currentTarget) setAbierto(false) }}
         >
           <div
-            className="w-full max-w-md rounded-2xl p-6 space-y-5"
+            className="w-full max-w-md rounded-2xl flex flex-col max-h-[90vh]"
             style={{
               background: "var(--background-card)",
               border:     "1px solid var(--border)",
               boxShadow:  "var(--shadow-lg)",
             }}
           >
-            {/* Header */}
-            <div className="flex items-center justify-between">
+            {/* Header fijo */}
+            <div className="flex items-center justify-between px-6 pt-6 pb-4 flex-shrink-0 border-b" style={{ borderColor: "var(--border)" }}>
               <h2 className="text-base font-bold" style={{ color: "var(--foreground)" }}>
                 Cambiar plan del coach
               </h2>
@@ -115,6 +115,9 @@ export function CambiarPlanModal({ coachId, planActual, estadoActual, fechaVenci
                 <X size={16} />
               </button>
             </div>
+
+            {/* Cuerpo desplazable */}
+            <div className="overflow-y-auto px-6 py-5 space-y-5 flex-1">
 
             {/* Selector de plan */}
             <div>
@@ -251,6 +254,7 @@ export function CambiarPlanModal({ coachId, planActual, estadoActual, fechaVenci
                   : "Guardar cambios"
                 }
               </button>
+            </div>
             </div>
           </div>
         </div>

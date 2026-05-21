@@ -13,7 +13,12 @@ export default async function EditarPlanPage({ params }: { params: Promise<{ id:
 
   const plan = await prisma.planAlimenticio.findFirst({
     where: { id, coach_id: session.user.coachId, deleted_at: null },
-    include: { comidas: { orderBy: { momento: "asc" } } },
+    include: {
+      dias: {
+        orderBy: { orden: "asc" },
+        include: { comidas: { orderBy: { orden: "asc" } } },
+      },
+    },
   })
   if (!plan) notFound()
 
@@ -40,21 +45,27 @@ export default async function EditarPlanPage({ params }: { params: Promise<{ id:
       <PlanAlimenticioForm
         planId={id}
         valorInicial={{
-          nombre: plan.nombre,
-          objetivo: plan.objetivo ?? "",
+          nombre:            plan.nombre,
+          objetivo:          plan.objetivo ?? "",
           calorias_objetivo: plan.calorias_objetivo ?? undefined,
-          es_template: plan.es_template,
-          alumno_id: plan.alumno_id,
-          comidas: plan.comidas.map((c) => ({
-            momento: c.momento as never,
-            hora_sugerida: c.hora_sugerida
-              ? new Date(c.hora_sugerida).toTimeString().slice(0, 5)
-              : "",
-            descripcion: c.descripcion,
-            calorias: c.calorias?.toString() ?? "",
-            proteinas_g: c.proteinas_g?.toString() ?? "",
-            carbohidratos_g: c.carbohidratos_g?.toString() ?? "",
-            grasas_g: c.grasas_g?.toString() ?? "",
+          es_template:       plan.es_template,
+          alumno_id:         plan.alumno_id,
+          fecha_fin:         plan.fecha_fin ? plan.fecha_fin.toISOString().slice(0, 10) : null,
+          dias: plan.dias.map((d) => ({
+            dia_semana:  d.dia_semana,
+            nombre_foco: d.nombre_foco,
+            es_libre:    d.es_libre,
+            comidas: d.comidas.map((c) => ({
+              momento:         c.momento,
+              hora_sugerida:   c.hora_sugerida
+                ? new Date(c.hora_sugerida).toTimeString().slice(0, 5)
+                : null,
+              descripcion:     c.descripcion,
+              calorias:        c.calorias?.toString() ?? "",
+              proteinas_g:     c.proteinas_g?.toString() ?? "",
+              carbohidratos_g: c.carbohidratos_g?.toString() ?? "",
+              grasas_g:        c.grasas_g?.toString() ?? "",
+            })),
           })),
         }}
         alumnos={alumnos.map((a) => ({ id: a.id, nombre: a.user.nombre, apellido: a.user.apellido }))}

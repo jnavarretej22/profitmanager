@@ -78,6 +78,16 @@ enum MomentoDia {
   cena
 }
 
+enum DiaSemana {
+  lunes
+  martes
+  miercoles
+  jueves
+  viernes
+  sabado
+  domingo
+}
+
 enum TipoNotificacion {
   vencimiento
   vencimiento_proximo
@@ -100,6 +110,12 @@ enum EstadoSolicitud {
   pendiente
   aprobada
   rechazada
+}
+
+enum EstadoSesion {
+  completada
+  parcial
+  no_realizada
 }
 
 // ─────────────────────────────────────────────
@@ -224,6 +240,8 @@ model Alumno {
   planes_alimenticios  PlanAlimenticio[]
   citas                Cita[]
   solicitud_origen     SolicitudInscripcion[]
+  sesiones_rutina      SesionRutinaLog[]
+  comidas_log          ComidaLog[]
 
   @@index([coach_id])
   @@index([coach_id, activo])
@@ -245,15 +263,15 @@ model Rutina {
   nombre              String     @db.VarChar(200)
   descripcion         String?
   duracion_minutos    Int?       @db.SmallInt
-  dias_semana         Json?
   activa              Boolean    @default(true)
+  fecha_fin           DateTime?  @db.Date
   created_at          DateTime   @default(now()) @db.Timestamptz
   updated_at          DateTime   @updatedAt @db.Timestamptz
   deleted_at          DateTime?  @db.Timestamptz
 
-  coach      Coach            @relation(fields: [coach_id], references: [id], onDelete: Restrict)
-  alumno     Alumno?          @relation(fields: [alumno_id], references: [id], onDelete: SetNull)
-  ejercicios EjercicioRutina[]
+  coach  Coach      @relation(fields: [coach_id], references: [id], onDelete: Restrict)
+  alumno Alumno?    @relation(fields: [alumno_id], references: [id], onDelete: SetNull)
+  dias   DiaRutina[]
 
   @@index([coach_id])
   @@index([alumno_id])
@@ -261,23 +279,44 @@ model Rutina {
   @@map("rutinas")
 }
 
-model EjercicioRutina {
-  id                String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  rutina_id         String   @db.Uuid
-  orden             Int      @db.SmallInt
-  nombre            String   @db.VarChar(200)
-  series            Int?     @db.SmallInt
-  repeticiones      String?  @db.VarChar(20)
-  descanso_segundos Int?     @db.SmallInt
-  rpe               String?  @db.VarChar(10)
-  notas             String?
-  created_at        DateTime @default(now()) @db.Timestamptz
-  updated_at        DateTime @updatedAt @db.Timestamptz
+model DiaRutina {
+  id          String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  rutina_id   String    @db.Uuid
+  dia_semana  DiaSemana
+  nombre_foco String?   @db.VarChar(100)
+  orden       Int       @db.SmallInt
+  es_descanso Boolean   @default(false)
+  created_at  DateTime  @default(now()) @db.Timestamptz
+  updated_at  DateTime  @updatedAt @db.Timestamptz
 
-  rutina Rutina @relation(fields: [rutina_id], references: [id], onDelete: Cascade)
+  rutina     Rutina            @relation(fields: [rutina_id], references: [id], onDelete: Cascade)
+  ejercicios EjercicioRutina[]
+  sesiones   SesionRutinaLog[]
 
-  @@unique([rutina_id, orden])
+  @@unique([rutina_id, dia_semana])
   @@index([rutina_id])
+  @@map("dias_rutina")
+}
+
+model EjercicioRutina {
+  id                String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  dia_rutina_id     String    @db.Uuid
+  orden             Int       @db.SmallInt
+  nombre            String    @db.VarChar(200)
+  series            Int?      @db.SmallInt
+  repeticiones      String?   @db.VarChar(20)
+  peso_kg           Decimal?  @db.Decimal(5, 2)
+  descanso_segundos Int?      @db.SmallInt
+  rpe               String?   @db.VarChar(10)
+  progresion        String?   @db.VarChar(80)
+  notas             String?
+  created_at        DateTime  @default(now()) @db.Timestamptz
+  updated_at        DateTime  @updatedAt @db.Timestamptz
+
+  dia_rutina DiaRutina @relation(fields: [dia_rutina_id], references: [id], onDelete: Cascade)
+
+  @@unique([dia_rutina_id, orden])
+  @@index([dia_rutina_id])
   @@map("ejercicios_rutina")
 }
 
@@ -292,13 +331,14 @@ model PlanAlimenticio {
   nombre              String     @db.VarChar(200)
   calorias_objetivo   Int?       @db.SmallInt
   activo              Boolean    @default(true)
+  fecha_fin           DateTime?  @db.Date
   created_at          DateTime   @default(now()) @db.Timestamptz
   updated_at          DateTime   @updatedAt @db.Timestamptz
   deleted_at          DateTime?  @db.Timestamptz
 
-  coach   Coach      @relation(fields: [coach_id], references: [id], onDelete: Restrict)
-  alumno  Alumno?    @relation(fields: [alumno_id], references: [id], onDelete: SetNull)
-  comidas ComidaPlan[]
+  coach  Coach      @relation(fields: [coach_id], references: [id], onDelete: Restrict)
+  alumno Alumno?    @relation(fields: [alumno_id], references: [id], onDelete: SetNull)
+  dias   DiaPlan[]
 
   @@index([coach_id])
   @@index([alumno_id])
@@ -306,9 +346,28 @@ model PlanAlimenticio {
   @@map("planes_alimenticios")
 }
 
+model DiaPlan {
+  id           String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  plan_id      String    @db.Uuid
+  dia_semana   DiaSemana
+  nombre_foco  String?   @db.VarChar(100)
+  es_libre     Boolean   @default(false)
+  orden        Int       @db.SmallInt
+  created_at   DateTime  @default(now()) @db.Timestamptz
+  updated_at   DateTime  @updatedAt @db.Timestamptz
+
+  plan    PlanAlimenticio @relation(fields: [plan_id], references: [id], onDelete: Cascade)
+  comidas ComidaPlan[]
+
+  @@unique([plan_id, dia_semana])
+  @@index([plan_id])
+  @@map("dias_plan")
+}
+
 model ComidaPlan {
   id              String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  plan_id         String     @db.Uuid
+  dia_plan_id     String     @db.Uuid
+  orden           Int        @db.SmallInt
   momento         MomentoDia
   hora_sugerida   DateTime?  @db.Time
   descripcion     String
@@ -319,9 +378,10 @@ model ComidaPlan {
   created_at      DateTime   @default(now()) @db.Timestamptz
   updated_at      DateTime   @updatedAt @db.Timestamptz
 
-  plan PlanAlimenticio @relation(fields: [plan_id], references: [id], onDelete: Cascade)
+  dia  DiaPlan     @relation(fields: [dia_plan_id], references: [id], onDelete: Cascade)
+  logs ComidaLog[]
 
-  @@index([plan_id])
+  @@index([dia_plan_id])
   @@map("comidas_plan")
 }
 
@@ -346,6 +406,47 @@ model Medicion {
 
   @@index([alumno_id, fecha(sort: Desc)])
   @@map("mediciones")
+}
+
+// ─────────────────────────────────────────────
+// FEEDBACK LOOP (lo único que el alumno escribe)
+// ─────────────────────────────────────────────
+
+model SesionRutinaLog {
+  id            String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  alumno_id     String       @db.Uuid
+  dia_rutina_id String       @db.Uuid
+  fecha         DateTime     @db.Date
+  estado        EstadoSesion @default(completada)
+  energia       Int?         @db.SmallInt
+  notas         String?
+  created_at    DateTime     @default(now()) @db.Timestamptz
+  updated_at    DateTime     @updatedAt @db.Timestamptz
+
+  alumno     Alumno    @relation(fields: [alumno_id], references: [id], onDelete: Cascade)
+  dia_rutina DiaRutina @relation(fields: [dia_rutina_id], references: [id], onDelete: Cascade)
+
+  @@unique([alumno_id, dia_rutina_id, fecha])
+  @@index([alumno_id, fecha(sort: Desc)])
+  @@map("sesiones_rutina_log")
+}
+
+model ComidaLog {
+  id             String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  alumno_id      String   @db.Uuid
+  comida_plan_id String   @db.Uuid
+  fecha          DateTime @db.Date
+  cumplida       Boolean  @default(true)
+  notas          String?
+  created_at     DateTime @default(now()) @db.Timestamptz
+  updated_at     DateTime @updatedAt @db.Timestamptz
+
+  alumno      Alumno     @relation(fields: [alumno_id], references: [id], onDelete: Cascade)
+  comida_plan ComidaPlan @relation(fields: [comida_plan_id], references: [id], onDelete: Cascade)
+
+  @@unique([alumno_id, comida_plan_id, fecha])
+  @@index([alumno_id, fecha(sort: Desc)])
+  @@map("comidas_log")
 }
 
 // ─────────────────────────────────────────────

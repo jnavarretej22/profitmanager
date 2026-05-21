@@ -91,11 +91,11 @@ export function ModalInscripcion({ slug, nombreCoach, cuposDisponibles }: Props)
           onClick={(e) => { if (e.target === e.currentTarget) cerrar() }}
         >
           <div
-            className="w-full sm:max-w-md rounded-t-3xl sm:rounded-2xl overflow-hidden"
-            style={{ background: "white", maxHeight: "95vh", overflowY: "auto" }}
+            className="w-full sm:max-w-md rounded-t-3xl sm:rounded-2xl flex flex-col"
+            style={{ background: "white", maxHeight: "95vh" }}
           >
-            {/* Header */}
-            <div className="flex items-center justify-between p-5 pb-3 border-b" style={{ borderColor: "#f3f4f6" }}>
+            {/* Header fijo */}
+            <div className="flex items-center justify-between p-5 pb-3 border-b flex-shrink-0" style={{ borderColor: "#f3f4f6" }}>
               <div>
                 <p className="font-extrabold text-base" style={{ color: "#111827" }}>Solicitar inscripción</p>
                 <p className="text-xs mt-0.5" style={{ color: "#6b7280" }}>Con {nombreCoach}</p>
@@ -109,8 +109,8 @@ export function ModalInscripcion({ slug, nombreCoach, cuposDisponibles }: Props)
               </button>
             </div>
 
-            {/* Contenido */}
-            <div className="p-5">
+            {/* Contenido desplazable */}
+            <div className="p-5 overflow-y-auto flex-1">
 
               {/* ── Formulario ── */}
               {(paso === "form" || paso === "enviando") && (

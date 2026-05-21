@@ -14,11 +14,13 @@ export async function GET(
 
   const { id } = await params
 
-  // Acceso: coach propietario o alumno asignado
   const rutina = await prisma.rutina.findUnique({
     where: { id },
     include: {
-      ejercicios: { orderBy: { orden: "asc" } },
+      dias: {
+        orderBy: { orden: "asc" },
+        include: { ejercicios: { orderBy: { orden: "asc" } } },
+      },
       coach: {
         include: {
           user: { select: { nombre: true, apellido: true } },
@@ -32,7 +34,6 @@ export async function GET(
 
   if (!rutina) return NextResponse.json({ error: "NO_ENCONTRADA" }, { status: 404 })
 
-  // Verificar permisos (multi-tenant estricto — admin no tiene acceso a PDFs de coaches)
   if (session.user.role === "admin") {
     return NextResponse.json({ error: "NO_ENCONTRADA" }, { status: 404 })
   }
@@ -40,7 +41,6 @@ export async function GET(
     return NextResponse.json({ error: "NO_ENCONTRADA" }, { status: 404 })
   }
   if (session.user.role === "alumno") {
-    // 404 para no filtrar existencia (regla CLAUDE.md 6.5)
     if (!rutina.alumno_id || rutina.alumno?.user_id !== session.user.id) {
       return NextResponse.json({ error: "NO_ENCONTRADA" }, { status: 404 })
     }
@@ -61,16 +61,23 @@ export async function GET(
       nombre:           rutina.nombre,
       descripcion:      rutina.descripcion,
       objetivo:         rutina.objetivo,
-      dias_semana:      rutina.dias_semana,
       duracion_minutos: rutina.duracion_minutos,
-      ejercicios:       rutina.ejercicios.map((e) => ({
-        orden:             e.orden,
-        nombre:            e.nombre,
-        series:            e.series ?? 3,
-        repeticiones:      e.repeticiones ?? "10",
-        descanso_segundos: e.descanso_segundos ?? 60,
-        rpe:               e.rpe,
-        notas:             e.notas,
+      dias: rutina.dias.map((d) => ({
+        dia_semana:  d.dia_semana,
+        nombre_foco: d.nombre_foco,
+        es_descanso: d.es_descanso,
+        orden:       d.orden,
+        ejercicios:  d.ejercicios.map((e) => ({
+          orden:             e.orden,
+          nombre:            e.nombre,
+          series:            e.series ?? 3,
+          repeticiones:      e.repeticiones ?? "10",
+          peso_kg:           e.peso_kg ? e.peso_kg.toString() : null,
+          descanso_segundos: e.descanso_segundos ?? 60,
+          rpe:               e.rpe,
+          progresion:        e.progresion,
+          notas:             e.notas,
+        })),
       })),
     },
     alumno: alumnoNombre,

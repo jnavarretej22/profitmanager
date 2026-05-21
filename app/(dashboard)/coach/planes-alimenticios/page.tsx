@@ -38,7 +38,9 @@ export default async function PlanesAlimenticiosPage({
       ...(tipo === "template" ? { es_template: true } : tipo === "asignada" ? { es_template: false, alumno_id: { not: null } } : {}),
     },
     include: {
-      comidas: { select: { calorias: true, proteinas_g: true, carbohidratos_g: true, grasas_g: true } },
+      dias: {
+        include: { comidas: { select: { calorias: true, proteinas_g: true, carbohidratos_g: true, grasas_g: true } } },
+      },
       alumno: { include: { user: { select: { nombre: true, apellido: true } } } },
     },
     orderBy: { updated_at: "desc" },
@@ -100,10 +102,11 @@ export default async function PlanesAlimenticiosPage({
       ) : (
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {planes.map((p) => {
-            const totalCal = p.comidas.reduce((s, c) => s + (c.calorias ?? 0), 0)
-            const totalProt = p.comidas.reduce((s, c) => s + (c.proteinas_g ?? 0), 0)
-            const totalCarbs = p.comidas.reduce((s, c) => s + (c.carbohidratos_g ?? 0), 0)
-            const totalGrasas = p.comidas.reduce((s, c) => s + (c.grasas_g ?? 0), 0)
+            const todasComidas = p.dias.flatMap((d) => d.comidas)
+            const totalCal    = todasComidas.reduce((s, c) => s + (c.calorias    ?? 0), 0)
+            const totalProt   = todasComidas.reduce((s, c) => s + (c.proteinas_g ?? 0), 0)
+            const totalCarbs  = todasComidas.reduce((s, c) => s + (c.carbohidratos_g ?? 0), 0)
+            const totalGrasas = todasComidas.reduce((s, c) => s + (c.grasas_g    ?? 0), 0)
 
             return (
               <Link
@@ -152,7 +155,7 @@ export default async function PlanesAlimenticiosPage({
 
                 <div className="mt-auto flex items-center justify-between pt-3 border-t" style={{ borderColor: "var(--border)" }}>
                   <span className="text-xs" style={{ color: "var(--foreground-subtle)" }}>
-                    {p.comidas.length} comida{p.comidas.length !== 1 ? "s" : ""}
+                    {p.dias.length} día{p.dias.length !== 1 ? "s" : ""} · {todasComidas.length} comida{todasComidas.length !== 1 ? "s" : ""}
                   </span>
                   <ChevronRight size={14} style={{ color: "var(--foreground-subtle)" }} />
                 </div>
