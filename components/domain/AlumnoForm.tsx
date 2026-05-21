@@ -176,10 +176,11 @@ export function AlumnoForm({ alumnoId, valorInicial = {}, onExito }: AlumnoFormP
       } else if (esEdicion) {
         router.push(`/coach/alumnos/${id}`)
       } else {
-        // Toast con CTA para asignar rutina inmediatamente — reduce fricción en el flujo principal del coach
-        toast.success("Alumno creado correctamente", {
-          description: `${form.nombre} ${form.apellido} ya está en tu lista`,
-          duration: 8000,
+        // Toast con CTA para asignar rutina inmediatamente — reduce fricción en el flujo principal del coach.
+        // El alumno activa su cuenta creando su propia contraseña al ingresar por primera vez a /login.
+        toast.success(`${form.nombre} fue registrado`, {
+          description: `Le enviamos un email para activar su cuenta — él crea su contraseña al ingresar.`,
+          duration: 9000,
           action: {
             label: "Asignar rutina ahora →",
             onClick: () => router.push(`/coach/rutinas/nueva?alumno_id=${id}`),

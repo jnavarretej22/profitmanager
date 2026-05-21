@@ -6,6 +6,7 @@ import { ChevronLeft } from "lucide-react"
 import { Avatar, Badge } from "@/components/ui"
 import { AlumnoDetailTabs } from "@/components/domain/AlumnoDetailTabs"
 import { GraficaProgreso } from "@/components/domain/GraficaProgreso"
+import { ReenviarBienvenidaBtn } from "./ReenviarBienvenidaBtn"
 import { formatFechaCorta } from "@/lib/utils"
 import { PlanFeatureService } from "@/lib/plan-features"
 import type { Objetivo } from "@prisma/client"
@@ -30,7 +31,7 @@ export default async function AlumnoDetailPage({
   const alumno = await prisma.alumno.findFirst({
     where: { id, coach_id: session.user.coachId, deleted_at: null },
     include: {
-      user: { select: { nombre: true, apellido: true, email: true, telefono: true } },
+      user: { select: { nombre: true, apellido: true, email: true, telefono: true, email_verificado: true } },
       mediciones: { orderBy: { fecha: "desc" } },
       rutinas: {
         where: { activa: true, deleted_at: null },
@@ -114,10 +115,23 @@ export default async function AlumnoDetailPage({
               )}
             </div>
 
-            <p className="text-sm mb-4" style={{ color: "var(--foreground-muted)" }}>
+            <p className="text-sm" style={{ color: "var(--foreground-muted)" }}>
               {alumno.user.email}
               {alumno.user.telefono && ` · ${alumno.user.telefono}`}
             </p>
+
+            {!alumno.user.email_verificado && (
+              <div className="flex items-center gap-3 mt-2 mb-4 flex-wrap">
+                <span
+                  className="text-xs font-medium px-2 py-0.5 rounded-full"
+                  style={{ background: "var(--orange-bg)", color: "var(--orange)" }}
+                >
+                  Cuenta no activada
+                </span>
+                <ReenviarBienvenidaBtn alumnoId={alumno.id} />
+              </div>
+            )}
+            {alumno.user.email_verificado && <div className="mb-4" />}
 
             {/* Métricas rápidas */}
             <div className="flex flex-wrap gap-5">

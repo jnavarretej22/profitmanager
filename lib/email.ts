@@ -14,7 +14,7 @@ export type EmailTemplate =
   | { tipo: "bienvenida-coach";         data: { nombre: string; email: string } }
   | { tipo: "verificacion-email";       data: { nombre: string; linkVerificacion: string } }
   | { tipo: "reset-contrasena";         data: { nombre: string; linkReset: string } }
-  | { tipo: "bienvenida-alumno";        data: { nombreAlumno: string; nombreCoach: string; email: string; passwordTemporal: string; linkDashboard: string } }
+  | { tipo: "bienvenida-alumno";        data: { nombreAlumno: string; nombreCoach: string; email: string; linkLogin: string } }
   | { tipo: "vencimiento-aviso";        data: { nombre: string; diasRestantes: number; fechaVencimiento: string } }
   | { tipo: "plan-activado";            data: { nombre: string; plan: string; fechaVencimiento: string } }
   | { tipo: "recordatorio-cita";        data: { nombre: string; titulo: string; fecha: string; hora: string; meetLink?: string } }
@@ -32,7 +32,7 @@ async function obtenerTemplate(template: EmailTemplate): Promise<{ subject: stri
     "bienvenida-coach":       "¡Bienvenido a ProFit Manager!",
     "verificacion-email":     "Verifica tu correo electrónico",
     "reset-contrasena":       "Restablecer tu contraseña",
-    "bienvenida-alumno":      "¡Tu solicitud fue aprobada! Aquí están tus credenciales",
+    "bienvenida-alumno":      "Activa tu cuenta en ProFit Manager",
     "vencimiento-aviso":      `Tu plan vence en ${(template.data as { diasRestantes: number }).diasRestantes} día(s)`,
     "plan-activado":          "¡Tu plan está activo!",
     "recordatorio-cita":      "Recordatorio: tienes una cita próxima",

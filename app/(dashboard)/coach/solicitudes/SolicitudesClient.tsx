@@ -4,7 +4,7 @@ import { useState } from "react"
 import { useRouter } from "next/navigation"
 import {
   CheckCircle2, XCircle, Clock, UserCheck, Mail,
-  Phone, MessageSquare, Loader2, ExternalLink, Copy, Check,
+  Phone, MessageSquare, Loader2, ExternalLink, Sparkles,
 } from "lucide-react"
 import { toast } from "sonner"
 
@@ -45,9 +45,7 @@ export function SolicitudesClient({ solicitudes, cuposDisponibles }: Props) {
   const [nota, setNota]         = useState("")
   const [notificar, setNotificar] = useState(true)
   const [cargando, setCargando] = useState(false)
-  const [credencial, setCredencial] = useState<{ email: string; password: string } | null>(null)
-  const [alumnoIdCreado, setAlumnoIdCreado] = useState<string | null>(null)
-  const [copiado, setCopiado]   = useState(false)
+  const [exito, setExito]       = useState<{ nombre: string; email: string; alumno_id: string } | null>(null)
   const router = useRouter()
 
   const filtradas = tab === "todas" ? solicitudes : solicitudes.filter((s) => s.estado === tab)
@@ -60,8 +58,7 @@ export function SolicitudesClient({ solicitudes, cuposDisponibles }: Props) {
     setModal({ solicitud, accion })
     setNota("")
     setNotificar(true)
-    setCredencial(null)
-    setAlumnoIdCreado(null)
+    setExito(null)
   }
 
   async function ejecutarAccion() {
@@ -84,9 +81,12 @@ export function SolicitudesClient({ solicitudes, cuposDisponibles }: Props) {
         return
       }
 
-      if (modal.accion === "aprobar" && data.credenciales) {
-        setCredencial(data.credenciales)
-        setAlumnoIdCreado(data.alumno_id ?? null)
+      if (modal.accion === "aprobar" && data.alumno_id) {
+        setExito({
+          nombre:    modal.solicitud.nombre,
+          email:     modal.solicitud.email,
+          alumno_id: data.alumno_id,
+        })
         toast.success(`¡${modal.solicitud.nombre} fue registrado como alumno!`)
       } else {
         toast.success(modal.accion === "aprobar" ? "Solicitud aprobada" : "Solicitud rechazada")
@@ -100,18 +100,9 @@ export function SolicitudesClient({ solicitudes, cuposDisponibles }: Props) {
     }
   }
 
-  async function copiarCredencial() {
-    if (!credencial) return
-    await navigator.clipboard.writeText(`Email: ${credencial.email}\nContraseña: ${credencial.password}`)
-    setCopiado(true)
-    toast.success("Credenciales copiadas")
-    setTimeout(() => setCopiado(false), 2500)
-  }
-
   function cerrarModal() {
     setModal(null)
-    setCredencial(null)
-    setAlumnoIdCreado(null)
+    setExito(null)
   }
 
   return (
@@ -179,7 +170,7 @@ export function SolicitudesClient({ solicitudes, cuposDisponibles }: Props) {
         <div
           className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4"
           style={{ background: "rgba(0,0,0,0.5)", backdropFilter: "blur(4px)" }}
-          onClick={(e) => { if (e.target === e.currentTarget && !credencial) cerrarModal() }}
+          onClick={(e) => { if (e.target === e.currentTarget && !exito) cerrarModal() }}
         >
           <div
             className="w-full sm:max-w-md rounded-t-3xl sm:rounded-2xl overflow-hidden"
@@ -187,8 +178,8 @@ export function SolicitudesClient({ solicitudes, cuposDisponibles }: Props) {
           >
             <div className="p-5 border-b" style={{ borderColor: "var(--border)" }}>
               <p className="font-extrabold text-base" style={{ color: "var(--foreground)" }}>
-                {credencial
-                  ? "✅ Alumno creado exitosamente"
+                {exito
+                  ? "✅ Alumno registrado"
                   : modal.accion === "aprobar"
                   ? `¿Aprobar a ${modal.solicitud.nombre}?`
                   : `¿Rechazar a ${modal.solicitud.nombre}?`
@@ -197,39 +188,32 @@ export function SolicitudesClient({ solicitudes, cuposDisponibles }: Props) {
             </div>
 
             <div className="p-5 space-y-4">
-              {/* Credenciales creadas */}
-              {credencial ? (
+              {/* Éxito post-aprobación */}
+              {exito ? (
                 <>
                   <p className="text-sm" style={{ color: "var(--foreground-muted)" }}>
-                    El alumno fue registrado. Comparte estas credenciales temporales con él para que pueda acceder a su dashboard.
+                    <strong style={{ color: "var(--foreground)" }}>{exito.nombre}</strong> ya tiene cuenta en ProFit Manager.
                   </p>
                   <div
-                    className="rounded-xl p-4 space-y-3"
-                    style={{ background: "var(--green-bg)", border: "1px solid #bbf7d0" }}
+                    className="rounded-xl p-4 flex gap-3"
+                    style={{ background: "var(--blue-bg)", border: "1px solid var(--blue)" }}
                   >
-                    <div>
-                      <p className="text-[11px] font-bold uppercase tracking-wide" style={{ color: "#16a34a" }}>Email</p>
-                      <p className="text-sm font-mono font-bold" style={{ color: "var(--foreground)" }}>{credencial.email}</p>
-                    </div>
-                    <div>
-                      <p className="text-[11px] font-bold uppercase tracking-wide" style={{ color: "#16a34a" }}>Contraseña temporal</p>
-                      <p className="text-lg font-mono font-extrabold tracking-widest" style={{ color: "var(--foreground)" }}>{credencial.password}</p>
+                    <Sparkles size={18} style={{ color: "var(--blue)", flexShrink: 0, marginTop: 2 }} />
+                    <div className="space-y-1.5">
+                      <p className="text-sm font-bold" style={{ color: "var(--blue)" }}>
+                        Le enviamos un email para activar su cuenta
+                      </p>
+                      <p className="text-xs" style={{ color: "var(--foreground)" }}>
+                        Al ingresar por primera vez a <strong>profitmanager.app/login</strong> con su email <strong style={{ fontFamily: "monospace" }}>{exito.email}</strong>, la app le pedirá crear su propia contraseña. Solo el alumno la conocerá.
+                      </p>
                     </div>
                   </div>
-                  <p className="text-xs" style={{ color: "var(--foreground-muted)" }}>
-                    📧 También le enviamos un email al alumno con estas credenciales. Recomiéndale que cambie su contraseña al ingresar.
-                  </p>
-                  <div className="flex gap-2">
-                    <button onClick={copiarCredencial} className="btn-secondary flex-1 justify-center gap-2">
-                      {copiado ? <><Check size={14} /> Copiado</> : <><Copy size={14} /> Copiar credenciales</>}
-                    </button>
-                    <a
-                      href={`/coach/alumnos/${alumnoIdCreado}`}
-                      className="btn-primary flex-1 justify-center gap-2"
-                    >
-                      <ExternalLink size={14} /> Ver perfil del alumno
-                    </a>
-                  </div>
+                  <a
+                    href={`/coach/alumnos/${exito.alumno_id}`}
+                    className="btn-primary w-full justify-center gap-2"
+                  >
+                    <ExternalLink size={14} /> Ver perfil del alumno
+                  </a>
                   <button onClick={cerrarModal} className="w-full text-center text-xs py-2" style={{ color: "var(--foreground-muted)" }}>
                     Cerrar
                   </button>
@@ -252,8 +236,8 @@ export function SolicitudesClient({ solicitudes, cuposDisponibles }: Props) {
                   {cuposDisponibles > 0 && (
                     <>
                       <p className="text-sm" style={{ color: "var(--foreground-muted)" }}>
-                        Se creará una cuenta de alumno automáticamente para <strong>{modal.solicitud.nombre}</strong> ({modal.solicitud.email}).
-                        Recibirá un email con sus credenciales de acceso.
+                        Se creará una cuenta de alumno para <strong>{modal.solicitud.nombre}</strong> ({modal.solicitud.email}).
+                        Recibirá un email con un enlace para que él mismo cree su contraseña al ingresar por primera vez.
                       </p>
                       <div>
                         <label className="block text-xs font-semibold mb-1.5" style={{ color: "var(--foreground-muted)" }}>

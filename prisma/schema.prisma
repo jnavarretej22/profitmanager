@@ -125,7 +125,9 @@ enum EstadoSesion {
 model User {
   id               String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   email            String    @unique @db.VarChar(255)
-  password_hash    String
+  // Nullable: cuando un coach crea un alumno, queda en null hasta que el alumno
+  // configure su contraseña mediante el flujo de primer acceso (token por email).
+  password_hash    String?
   role             Role
   nombre           String    @db.VarChar(100)
   apellido         String    @db.VarChar(100)

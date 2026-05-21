@@ -4,7 +4,6 @@ import { prisma } from "@/lib/db"
 import { z } from "zod"
 import { LIMITES_ALUMNOS } from "@/lib/plan-features"
 import { enviarEmail } from "@/lib/email"
-import bcrypt from "bcryptjs"
 
 const schema = z.discriminatedUnion("accion", [
   z.object({
@@ -100,27 +99,24 @@ export async function PATCH(
     )
   }
 
-  // Generar contraseña temporal
-  const passwordTemporal = Math.random().toString(36).slice(-8) + Math.random().toString(36).slice(-4).toUpperCase() + "!"
-  const passwordHash     = await bcrypt.hash(passwordTemporal, 12)
-
   // Separar nombre/apellido (heurístico: primer token = nombre, resto = apellido)
   const partes   = solicitud.nombre.trim().split(/\s+/)
   const nombre   = partes[0]
   const apellido = partes.slice(1).join(" ") || "-"
 
-  // Crear user + alumno en una transacción
+  // Crear user + alumno en una transacción. Sin password_hash: el alumno la
+  // creará al ingresar por primera vez a /login (flujo de primer acceso).
   const alumnoCreado = await prisma.$transaction(async (tx) => {
     const nuevoUser = await tx.user.create({
       data: {
-        email:           solicitud.email,
-        password_hash:   passwordHash,
-        role:            "alumno",
+        email:            solicitud.email,
+        password_hash:    null,
+        role:             "alumno",
         nombre,
         apellido,
-        telefono:        solicitud.telefono ?? null,
-        email_verificado:false,
-        activo:          true,
+        telefono:         solicitud.telefono ?? null,
+        email_verificado: false,
+        activo:           true,
       },
     })
 
@@ -152,34 +148,27 @@ export async function PATCH(
       },
     })
 
-    return { alumno: nuevoAlumno, user: nuevoUser, passwordTemporal }
+    return { alumno: nuevoAlumno, user: nuevoUser }
   })
 
-  // Email de bienvenida con credenciales al alumno
-  const baseUrl = process.env.NEXTAUTH_URL ?? "http://localhost:3000"
+  // Email de bienvenida (sin credenciales — el alumno activa su cuenta en /login).
+  const baseUrl     = process.env.NEXTAUTH_URL ?? "http://localhost:3000"
   const coachNombre = await prisma.user.findFirst({
-    where: { coach: { id: solicitud.coach_id } },
+    where:  { coach: { id: solicitud.coach_id } },
     select: { nombre: true },
   })
   await enviarEmail(solicitud.email, {
     tipo: "bienvenida-alumno",
     data: {
-      nombreAlumno:     nombre,
-      nombreCoach:      coachNombre?.nombre ?? "Tu coach",
-      email:            solicitud.email,
-      passwordTemporal: alumnoCreado.passwordTemporal,
-      linkDashboard:    `${baseUrl}/alumno`,
+      nombreAlumno: nombre,
+      nombreCoach:  coachNombre?.nombre ?? "Tu coach",
+      email:        solicitud.email,
+      linkLogin:    `${baseUrl}/login`,
     },
   }).catch(() => {}) // no bloquear si falla
 
   return NextResponse.json({
     ok:        true,
     alumno_id: alumnoCreado.alumno.id,
-    // Retornamos la contraseña temporal para que el coach pueda compartirla si es necesario
-    // En producción se enviará por email y no se retornaría aquí
-    credenciales: {
-      email:    solicitud.email,
-      password: alumnoCreado.passwordTemporal,
-    },
   })
 }

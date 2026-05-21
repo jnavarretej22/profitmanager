@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
 import { z } from "zod"
-import bcrypt from "bcryptjs"
 import { prisma } from "@/lib/db"
 import { getCoachAutenticado, requireModoActivo, requireLimiteAlumnos, errorResponse } from "@/lib/plan-guard"
 import { enviarEmail } from "@/lib/email"
@@ -86,15 +85,12 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "EMAIL_DUPLICADO", mensaje: "Este email ya está registrado" }, { status: 409 })
   }
 
-  // Crear usuario con contraseña temporal
-  const tempPassword = Math.random().toString(36).slice(2, 10)
-  const password_hash = await bcrypt.hash(tempPassword, 12)
-
-  // Crear usuario primero y luego el alumno (evita conflicto de tipos Prisma unchecked)
+  // Sin password_hash: el alumno la creará en su primer ingreso a /login.
+  // Ver app/(auth)/login/page.tsx + /api/auth/setup-password.
   const nuevoUser = await prisma.user.create({
     data: {
       email,
-      password_hash,
+      password_hash: null,
       role: "alumno" as Role,
       nombre,
       apellido,
@@ -137,18 +133,19 @@ export async function POST(req: NextRequest) {
     })
   }
 
-  // Email de bienvenida al alumno (no bloquea la respuesta)
+  // Email de bienvenida al alumno (no bloquea la respuesta).
+  // El alumno crea su contraseña al ingresar a /login por primera vez.
   const nombreCoach = coachUser?.user
     ? `${coachUser.user.nombre} ${coachUser.user.apellido}`
     : "tu entrenador"
+  const baseUrl = process.env.NEXTAUTH_URL ?? ""
   enviarEmail(email, {
     tipo: "bienvenida-alumno",
     data: {
-      nombreAlumno:     nombre,
+      nombreAlumno: nombre,
       nombreCoach,
-      email:            body.email ?? "",
-      passwordTemporal: "(ver email de acceso)",
-      linkDashboard:    `${process.env.NEXTAUTH_URL ?? ""}/alumno`,
+      email,
+      linkLogin:    `${baseUrl}/login`,
     },
   }).catch(console.error)
 

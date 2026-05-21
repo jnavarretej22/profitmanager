@@ -27,6 +27,12 @@ export async function POST(req: NextRequest) {
     select: { password_hash: true },
   })
   if (!user) return NextResponse.json({ error: "NO_ENCONTRADO" }, { status: 404 })
+  if (!user.password_hash) {
+    return NextResponse.json(
+      { error: "PASSWORD_NO_CONFIGURADA", mensaje: "Tu cuenta no tiene contraseña aún. Cierra sesión e ingresa con tu email para configurarla." },
+      { status: 400 },
+    )
+  }
 
   const correcto = await bcrypt.compare(parsed.data.password_actual, user.password_hash)
   if (!correcto) {

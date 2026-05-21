@@ -38,6 +38,11 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
 
         if (!user || !user.activo) return null
 
+        // Si no tiene password_hash, la cuenta fue creada por el coach y aún no
+        // pasó por el flujo de primer acceso. El form de login debió detectarlo
+        // vía /api/auth/check-email y forzar el setup antes de intentar login.
+        if (!user.password_hash) return null
+
         const passwordOk = await bcrypt.compare(password, user.password_hash)
         if (!passwordOk) return null
 
