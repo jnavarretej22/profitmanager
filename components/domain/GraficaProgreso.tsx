@@ -184,7 +184,7 @@ export function GraficaProgreso({ alumnoId, tieneGraficas, mini = false }: Props
               onClick={() => { setMetrica(m.value); setModoMulti(false) }}
               className="text-xs px-2.5 py-1 rounded-full font-semibold transition-colors"
               style={{
-                background: metrica === m.value && !modoMulti ? "var(--blue)" : "var(--gray-100)",
+                background: metrica === m.value && !modoMulti ? "var(--blue)" : "var(--background-hover)",
                 color:      metrica === m.value && !modoMulti ? "white" : "var(--foreground-muted)",
               }}
             >
@@ -195,7 +195,7 @@ export function GraficaProgreso({ alumnoId, tieneGraficas, mini = false }: Props
             onClick={() => setModoMulti(true)}
             className="text-xs px-2.5 py-1 rounded-full font-semibold transition-colors"
             style={{
-              background: modoMulti ? "var(--purple)" : "var(--gray-100)",
+              background: modoMulti ? "var(--purple)" : "var(--background-hover)",
               color:      modoMulti ? "white" : "var(--foreground-muted)",
             }}
           >

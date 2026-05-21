@@ -23,7 +23,7 @@ const FEATURES_TABLA = [
 
 function CeldaFeature({ valor }: { valor: boolean | string }) {
   if (valor === true)  return <CheckCircle2 size={16} style={{ color: "var(--green)" }} />
-  if (valor === false) return <XCircle      size={16} style={{ color: "var(--gray-400)" }} />
+  if (valor === false) return <XCircle      size={16} style={{ color: "var(--foreground-subtle)" }} />
   return <span className="text-xs font-medium" style={{ color: "var(--foreground-muted)" }}>{valor}</span>
 }
 
@@ -111,7 +111,7 @@ export default async function MiPlanPage() {
               {totalAlumnos} / {limiteAlumnos}
             </span>
           </div>
-          <div className="h-2 rounded-full overflow-hidden" style={{ background: "var(--gray-200)" }}>
+          <div className="h-2 rounded-full overflow-hidden" style={{ background: "var(--border)" }}>
             <div
               className="h-full rounded-full transition-all"
               style={{

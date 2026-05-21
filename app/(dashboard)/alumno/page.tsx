@@ -5,7 +5,7 @@ import Link from "next/link"
 import {
   Dumbbell, UtensilsCrossed, Calendar,
   ChevronRight, Clock, Video, BarChart2,
-  TrendingUp, Activity,
+  TrendingUp, Activity, Flame,
 } from "lucide-react"
 import { Avatar, Badge, StatCard } from "@/components/ui"
 import { PlanFeatureService } from "@/lib/plan-features"
@@ -77,6 +77,33 @@ export default async function AlumnoDashboardPage() {
   const ultimaMedicion = alumno.mediciones[0] ?? null
   const tieneGraficas = PlanFeatureService.tieneFeature(alumno.coach.plan_actual, "graficas_progreso")
 
+  // Streak: días consecutivos con al menos una sesión completada,
+  // contados desde hoy o ayer (no se rompe si todavía no entrena hoy).
+  const logsCompletadas = await prisma.sesionRutinaLog.findMany({
+    where:    { alumno_id: alumno.id, estado: "completada" },
+    select:   { fecha: true },
+    orderBy:  { fecha: "desc" },
+    take:     365,
+  })
+  const fechasCompletadas = new Set(
+    logsCompletadas.map((l) => l.fecha.toISOString().slice(0, 10)),
+  )
+  let streak = 0
+  {
+    const cursor = new Date()
+    cursor.setHours(0, 0, 0, 0)
+    const hoyStr = cursor.toISOString().slice(0, 10)
+    // Si hoy aún no completó, empezar a contar desde ayer (no rompe la racha)
+    if (!fechasCompletadas.has(hoyStr)) {
+      cursor.setDate(cursor.getDate() - 1)
+    }
+    while (fechasCompletadas.has(cursor.toISOString().slice(0, 10))) {
+      streak++
+      cursor.setDate(cursor.getDate() - 1)
+    }
+  }
+  const entrenadoHoy = fechasCompletadas.has(new Date().toISOString().slice(0, 10))
+
   const ahora = new Date()
   const semanas = alumno.fecha_inicio
     ? Math.floor((ahora.getTime() - new Date(alumno.fecha_inicio).getTime()) / (7 * 24 * 60 * 60 * 1000))
@@ -123,11 +150,30 @@ export default async function AlumnoDashboardPage() {
               Coach: {alumno.coach.user.nombre} {alumno.coach.user.apellido}
             </p>
 
-            <div className="flex flex-wrap gap-5">
+            <div className="flex flex-wrap gap-5 items-center">
+              {streak > 0 && (
+                <div
+                  className="flex items-center gap-2 rounded-xl px-3 py-2"
+                  style={{ background: "rgba(249,115,22,0.18)", border: "1px solid rgba(249,115,22,0.35)" }}
+                  title={entrenadoHoy ? "Racha en curso" : "No rompas la racha: entrena hoy"}
+                >
+                  <Flame size={18} style={{ color: "#FB923C" }} />
+                  <div>
+                    <p className="text-xl font-extrabold text-white leading-none" style={{ letterSpacing: "-0.02em" }}>
+                      {streak}
+                    </p>
+                    <p className="text-[10px] uppercase tracking-wider font-semibold" style={{ color: "rgba(255,255,255,0.6)" }}>
+                      {streak === 1 ? "día seguido" : "días seguidos"}
+                    </p>
+                  </div>
+                </div>
+              )}
               {[
                 { label: "Semanas activo", valor: semanas.toString() },
                 { label: "Mediciones", valor: alumno.mediciones.length.toString() },
-                ...(tieneEntrenoHoy ? [{ label: "Hoy es día de entrenamiento 🔥", valor: "" }] : []),
+                ...(tieneEntrenoHoy && !entrenadoHoy
+                  ? [{ label: "Hoy es día de entrenamiento 🔥", valor: "" }]
+                  : []),
               ].map(({ label, valor }) => (
                 <div key={label}>
                   {valor && (

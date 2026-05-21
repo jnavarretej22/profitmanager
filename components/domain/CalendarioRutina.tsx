@@ -110,7 +110,7 @@ function ModalDia({
       >
         {/* Handle móvil */}
         <div className="flex justify-center pt-3 pb-1 sm:hidden">
-          <div className="h-1 w-10 rounded-full" style={{ background: "var(--gray-300)" }} />
+          <div className="h-1 w-10 rounded-full" style={{ background: "var(--border-strong)" }} />
         </div>
 
         {/* Header */}
@@ -137,7 +137,7 @@ function ModalDia({
           <button
             onClick={onCerrar}
             className="h-8 w-8 flex items-center justify-center rounded-xl transition-colors flex-shrink-0"
-            style={{ color: "var(--foreground-muted)", background: "var(--gray-100)" }}
+            style={{ color: "var(--foreground-muted)", background: "var(--background-hover)" }}
           >
             <X size={16} />
           </button>
@@ -146,7 +146,7 @@ function ModalDia({
         {/* Meta */}
         <div
           className="flex items-center gap-4 px-5 py-3 border-b flex-wrap flex-shrink-0"
-          style={{ borderColor: "var(--border)", background: "var(--gray-50)" }}
+          style={{ borderColor: "var(--border)", background: "var(--background)" }}
         >
           <span className="flex items-center gap-1.5 text-xs font-medium" style={{ color: "var(--foreground-muted)" }}>
             <RotateCcw size={12} />
@@ -170,7 +170,7 @@ function ModalDia({
             <div
               key={ej.orden}
               className="flex gap-3 rounded-xl p-3"
-              style={{ background: "var(--gray-50)", border: "1px solid var(--border)" }}
+              style={{ background: "var(--background)", border: "1px solid var(--border)" }}
             >
               <span
                 className="h-6 w-6 rounded-full flex items-center justify-center text-[11px] font-bold flex-shrink-0 mt-0.5"
@@ -232,7 +232,7 @@ function ModalDia({
           <button
             onClick={onCerrar}
             className="w-full py-2.5 rounded-xl text-sm font-semibold transition-colors"
-            style={{ background: "var(--gray-100)", color: "var(--foreground)" }}
+            style={{ background: "var(--background-hover)", color: "var(--foreground)" }}
           >
             Cerrar
           </button>
@@ -322,7 +322,7 @@ export function CalendarioRutina({ rutina }: Props) {
             <button
               onClick={navAnterior}
               className="h-8 w-8 flex items-center justify-center rounded-xl transition-colors"
-              style={{ color: "var(--foreground-muted)", background: "var(--gray-100)" }}
+              style={{ color: "var(--foreground-muted)", background: "var(--background-hover)" }}
               aria-label="Mes anterior"
             >
               <ChevronLeft size={15} />
@@ -336,7 +336,7 @@ export function CalendarioRutina({ rutina }: Props) {
             <button
               onClick={navSiguiente}
               className="h-8 w-8 flex items-center justify-center rounded-xl transition-colors"
-              style={{ color: "var(--foreground-muted)", background: "var(--gray-100)" }}
+              style={{ color: "var(--foreground-muted)", background: "var(--background-hover)" }}
               aria-label="Mes siguiente"
             >
               <ChevronRight size={15} />

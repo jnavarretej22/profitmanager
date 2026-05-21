@@ -2,10 +2,11 @@ import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/db"
 import { redirect } from "next/navigation"
 import Link from "next/link"
-import { Users, Plus, Search, ChevronRight, Lock } from "lucide-react"
+import { Users, Plus, ChevronRight, Lock } from "lucide-react"
 import { Avatar, Badge, EmptyState } from "@/components/ui"
 import { PlanFeatureService } from "@/lib/plan-features"
 import { formatFechaCorta } from "@/lib/utils"
+import { FiltrosAlumnos } from "./FiltrosAlumnos"
 import type { Objetivo } from "@prisma/client"
 
 const OBJETIVO_LABEL: Record<Objetivo, string> = {
@@ -111,41 +112,7 @@ export default async function AlumnosPage({
       )}
 
       {/* Filtros y buscador */}
-      <form method="GET" className="flex flex-col gap-3 sm:flex-row">
-        <div className="relative flex-1">
-          <Search
-            size={16}
-            className="absolute left-3 top-1/2 -translate-y-1/2"
-            style={{ color: "var(--foreground-subtle)" }}
-          />
-          <input
-            type="text"
-            name="q"
-            defaultValue={q}
-            placeholder="Buscar por nombre..."
-            className="input-base pl-9"
-          />
-        </div>
-
-        <select name="objetivo" defaultValue={objetivo ?? ""} className="input-base sm:w-48">
-          <option value="">Todos los objetivos</option>
-          <option value="hipertrofia">Hipertrofia</option>
-          <option value="perdida_grasa">Pérdida de grasa</option>
-          <option value="fuerza">Fuerza</option>
-          <option value="resistencia">Resistencia</option>
-          <option value="general">General</option>
-        </select>
-
-        <select name="estado" defaultValue={estado ?? ""} className="input-base sm:w-40">
-          <option value="">Activos e inactivos</option>
-          <option value="activo">Solo activos</option>
-          <option value="archivado">Archivados</option>
-        </select>
-
-        <button type="submit" className="btn-secondary">
-          Filtrar
-        </button>
-      </form>
+      <FiltrosAlumnos />
 
       {/* Lista */}
       {alumnos.length === 0 ? (

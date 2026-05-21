@@ -8,19 +8,19 @@ export const metadata: Metadata = {
 
 export default function PrivacidadPage() {
   return (
-    <div className="min-h-screen" style={{ background: "var(--gray-50)" }}>
+    <div className="min-h-screen" style={{ background: "var(--background)" }}>
       <div className="max-w-3xl mx-auto px-5 py-12">
         <div className="mb-10">
           <Link href="/" className="text-sm font-semibold" style={{ color: "var(--blue)" }}>← Inicio</Link>
-          <h1 className="text-3xl font-extrabold mt-4" style={{ color: "var(--gray-900)", letterSpacing: "-0.02em" }}>
+          <h1 className="text-3xl font-extrabold mt-4" style={{ color: "var(--foreground)", letterSpacing: "-0.02em" }}>
             Política de Privacidad
           </h1>
-          <p className="text-sm mt-2" style={{ color: "var(--gray-500)" }}>
+          <p className="text-sm mt-2" style={{ color: "var(--foreground-muted)" }}>
             Última actualización: 18 de mayo de 2026 · Cumple con LOPDP Ecuador
           </p>
         </div>
 
-        <div className="space-y-8 text-sm" style={{ color: "var(--gray-700)", lineHeight: "1.7" }}>
+        <div className="space-y-8 text-sm" style={{ color: "var(--foreground-secondary)", lineHeight: "1.7" }}>
           <Seccion titulo="1. Responsable del tratamiento">
             <p><strong>ProFit Manager S.A.S.</strong></p>
             <p>RUC: 1792345678001</p>
@@ -114,7 +114,7 @@ export default function PrivacidadPage() {
 function Seccion({ titulo, children }: { titulo: string; children: React.ReactNode }) {
   return (
     <div>
-      <h2 className="text-base font-bold mb-3" style={{ color: "var(--gray-900)" }}>{titulo}</h2>
+      <h2 className="text-base font-bold mb-3" style={{ color: "var(--foreground)" }}>{titulo}</h2>
       <div className="space-y-2">{children}</div>
     </div>
   )

@@ -68,7 +68,7 @@ export default async function MiPerfilPublicoPage() {
               <div
                 key={f.titulo}
                 className="rounded-xl p-4"
-                style={{ background: "var(--gray-50)", border: "1px solid var(--border)" }}
+                style={{ background: "var(--background)", border: "1px solid var(--border)" }}
               >
                 <span className="text-2xl">{f.icon}</span>
                 <p className="text-sm font-bold mt-2" style={{ color: "var(--foreground)" }}>{f.titulo}</p>

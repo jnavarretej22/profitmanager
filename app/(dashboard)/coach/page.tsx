@@ -9,6 +9,7 @@ import {
 } from "lucide-react"
 import { StatCard, Avatar, Badge } from "@/components/ui"
 import { PlanFeatureService } from "@/lib/plan-features"
+import { PerfilPublicoWidget } from "./PerfilPublicoWidget"
 import type { Objetivo } from "@prisma/client"
 
 // ─── Colores por objetivo ─────────────────────────────────────────────────────
@@ -250,6 +251,13 @@ export default async function CoachDashboardPage() {
           />
         </div>
       </div>
+
+      {/* ── Widget: Perfil público / Upsell ───────────────────────────────── */}
+      <PerfilPublicoWidget
+        plan={coach.plan_actual as "gratis" | "inicial"}
+        slug={coach.slug ?? null}
+        perfilPublicoActivo={coach.perfil_publico_activo}
+      />
 
       {/* ── Grids principales ─────────────────────────────────────────────── */}
       <div className="grid gap-5 lg:grid-cols-2">

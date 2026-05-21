@@ -8,20 +8,20 @@ export const metadata: Metadata = {
 
 export default function TerminosPage() {
   return (
-    <div className="min-h-screen" style={{ background: "var(--gray-50)" }}>
+    <div className="min-h-screen" style={{ background: "var(--background)" }}>
       <div className="max-w-3xl mx-auto px-5 py-12">
         {/* Header */}
         <div className="mb-10">
           <Link href="/" className="text-sm font-semibold" style={{ color: "var(--blue)" }}>← Inicio</Link>
-          <h1 className="text-3xl font-extrabold mt-4" style={{ color: "var(--gray-900)", letterSpacing: "-0.02em" }}>
+          <h1 className="text-3xl font-extrabold mt-4" style={{ color: "var(--foreground)", letterSpacing: "-0.02em" }}>
             Términos y Condiciones
           </h1>
-          <p className="text-sm mt-2" style={{ color: "var(--gray-500)" }}>
+          <p className="text-sm mt-2" style={{ color: "var(--foreground-muted)" }}>
             Última actualización: 18 de mayo de 2026
           </p>
         </div>
 
-        <div className="prose-content space-y-8" style={{ color: "var(--gray-700)", lineHeight: "1.7" }}>
+        <div className="prose-content space-y-8" style={{ color: "var(--foreground-secondary)", lineHeight: "1.7" }}>
           <Seccion titulo="1. Aceptación de los términos">
             Al acceder y utilizar la plataforma ProFit Manager (en adelante, &ldquo;la Plataforma&rdquo;), el usuario (en
             adelante, &ldquo;Coach&rdquo;) acepta estar sujeto a los presentes Términos y Condiciones. Si no acepta estos
@@ -102,7 +102,7 @@ export default function TerminosPage() {
 function Seccion({ titulo, children }: { titulo: string; children: React.ReactNode }) {
   return (
     <div>
-      <h2 className="text-base font-bold mb-3" style={{ color: "var(--gray-900)" }}>{titulo}</h2>
+      <h2 className="text-base font-bold mb-3" style={{ color: "var(--foreground)" }}>{titulo}</h2>
       <div className="text-sm space-y-2">{children}</div>
     </div>
   )

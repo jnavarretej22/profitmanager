@@ -4,6 +4,7 @@ import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { z } from "zod"
 import { Loader2, Save } from "lucide-react"
+import { toast } from "sonner"
 
 const alumnoSchema = z.object({
   nombre: z.string().min(2, "Mínimo 2 caracteres"),
@@ -169,7 +170,23 @@ export function AlumnoForm({ alumnoId, valorInicial = {}, onExito }: AlumnoFormP
       }
 
       const id = esEdicion ? alumnoId : data.alumno.id
-      onExito ? onExito(id) : router.push(`/coach/alumnos/${id}`)
+
+      if (onExito) {
+        onExito(id)
+      } else if (esEdicion) {
+        router.push(`/coach/alumnos/${id}`)
+      } else {
+        // Toast con CTA para asignar rutina inmediatamente — reduce fricción en el flujo principal del coach
+        toast.success("Alumno creado correctamente", {
+          description: `${form.nombre} ${form.apellido} ya está en tu lista`,
+          duration: 8000,
+          action: {
+            label: "Asignar rutina ahora →",
+            onClick: () => router.push(`/coach/rutinas/nueva?alumno_id=${id}`),
+          },
+        })
+        router.push(`/coach/alumnos/${id}`)
+      }
     } catch {
       setErrorGeneral("Error de conexión. Intenta de nuevo.")
     } finally {

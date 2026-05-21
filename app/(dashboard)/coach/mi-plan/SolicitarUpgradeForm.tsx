@@ -31,7 +31,7 @@ function CopyField({ label, valor }: { label: string; valor: string }) {
   return (
     <div
       className="flex items-center justify-between px-4 py-3 rounded-xl"
-      style={{ background: "var(--gray-100)" }}
+      style={{ background: "var(--background-hover)" }}
     >
       <div>
         <p className="text-xs font-medium" style={{ color: "var(--foreground-muted)" }}>{label}</p>

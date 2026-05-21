@@ -84,8 +84,8 @@ export default async function AlumnoLayout({ children }: { children: React.React
 
         {/* Nav */}
         <nav className="flex-1 overflow-y-auto py-4 px-3 space-y-0.5">
-          {NAV_ITEMS.map(({ href, label, icono }) => (
-            <NavItem key={href} href={href} icono={icono} label={label} />
+          {NAV_ITEMS.map(({ href, label, icono: Icono }) => (
+            <NavItem key={href} href={href} icon={<Icono size={18} strokeWidth={2} />} label={label} />
           ))}
         </nav>
 

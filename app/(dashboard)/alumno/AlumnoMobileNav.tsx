@@ -64,11 +64,11 @@ export function AlumnoMobileNav({
             </div>
 
             <nav className="flex-1 overflow-y-auto py-4 px-3 space-y-0.5">
-              {NAV_ITEMS.map(({ href, label, icono }) => (
+              {NAV_ITEMS.map(({ href, label, icono: Icono }) => (
                 <NavItem
                   key={href}
                   href={href}
-                  icono={icono}
+                  icon={<Icono size={18} strokeWidth={2} />}
                   label={label}
                   onClick={() => setAbierto(false)}
                 />

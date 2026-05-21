@@ -85,20 +85,23 @@ export function Sidebar({
       {/* Navegación */}
       <nav className="flex-1 overflow-y-auto px-3 pb-4">
         <div className="space-y-0.5">
-          {navItems.map((item) => (
-            <NavItem
-              key={item.href}
-              href={item.href}
-              icono={item.icono}
-              label={item.label}
-              onClick={onCerrar}
-              badge={
-                item.href === "/coach/solicitudes" && solicitudesPendientes > 0
-                  ? solicitudesPendientes
-                  : undefined
-              }
-            />
-          ))}
+          {navItems.map((item) => {
+            const Icono = item.icono
+            return (
+              <NavItem
+                key={item.href}
+                href={item.href}
+                icon={<Icono size={18} strokeWidth={2} />}
+                label={item.label}
+                onClick={onCerrar}
+                badge={
+                  item.href === "/coach/solicitudes" && solicitudesPendientes > 0
+                    ? solicitudesPendientes
+                    : undefined
+                }
+              />
+            )
+          })}
         </div>
       </nav>
 

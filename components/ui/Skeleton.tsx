@@ -7,7 +7,7 @@ export function Skeleton({ className = "", style }: SkeletonProps) {
   return (
     <div
       className={`animate-pulse rounded-xl ${className}`}
-      style={{ background: "var(--gray-200)", ...style }}
+      style={{ background: "var(--border)", ...style }}
     />
   )
 }

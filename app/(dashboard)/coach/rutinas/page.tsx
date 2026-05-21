@@ -5,6 +5,7 @@ import Link from "next/link"
 import { Plus, Dumbbell, ChevronRight, Users, BookOpen } from "lucide-react"
 import { Badge, EmptyState } from "@/components/ui"
 import { PlanFeatureService } from "@/lib/plan-features"
+import { FiltrosRutinas } from "./FiltrosRutinas"
 import type { Objetivo } from "@prisma/client"
 
 const OBJETIVO_LABEL: Record<Objetivo, string> = {
@@ -82,38 +83,7 @@ export default async function RutinasPage({
       </div>
 
       {/* Filtros */}
-      <form method="GET" className="flex flex-wrap gap-2">
-        {[
-          { label: "Todas", tipo: "", objetivo: "" },
-          { label: "Asignadas", tipo: "asignada", objetivo: "" },
-          { label: "Templates", tipo: "template", objetivo: "" },
-        ].map((f) => (
-          <button
-            key={f.tipo}
-            type="submit"
-            name="tipo"
-            value={f.tipo}
-            className="rounded-xl px-3 py-1.5 text-xs font-semibold transition-all"
-            style={{
-              background: (tipo ?? "") === f.tipo ? "var(--blue)" : "var(--background-card)",
-              color: (tipo ?? "") === f.tipo ? "white" : "var(--foreground-muted)",
-              border: `1px solid ${(tipo ?? "") === f.tipo ? "var(--blue)" : "var(--border)"}`,
-            }}
-          >
-            {f.label}
-          </button>
-        ))}
-
-        <select name="objetivo" defaultValue={objetivo ?? ""} className="input-base py-1.5 text-xs ml-auto">
-          <option value="">Todos los objetivos</option>
-          <option value="hipertrofia">Hipertrofia</option>
-          <option value="perdida_grasa">Pérdida de grasa</option>
-          <option value="fuerza">Fuerza</option>
-          <option value="resistencia">Resistencia</option>
-          <option value="general">General</option>
-        </select>
-        <button type="submit" className="btn-secondary text-xs py-1.5">Filtrar</button>
-      </form>
+      <FiltrosRutinas />
 
       {/* Banner templates bloqueados */}
       {!tieneTemplates && (

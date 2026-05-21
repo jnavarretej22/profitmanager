@@ -5,6 +5,8 @@ import Link from "next/link"
 import { ChevronLeft } from "lucide-react"
 import { RutinaForm } from "@/components/domain/RutinaForm"
 import { ExportarPDFBtn } from "@/components/domain/ExportarPDFBtn"
+import { PlanFeatureService } from "@/lib/plan-features"
+import { GuardarComoTemplateBtn } from "./GuardarComoTemplateBtn"
 
 export default async function EditarRutinaPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
@@ -21,6 +23,17 @@ export default async function EditarRutinaPage({ params }: { params: Promise<{ i
     },
   })
   if (!rutina) notFound()
+
+  const coach = await prisma.coach.findUnique({
+    where:  { id: session.user.coachId },
+    select: { plan_actual: true, estado_plan: true },
+  })
+
+  const mostrarBotonTemplate = !rutina.es_template && coach?.estado_plan !== "solo_lectura"
+  const tieneFeatureTemplates = PlanFeatureService.tieneFeature(
+    coach?.plan_actual ?? "gratis",
+    "templates_rutinas",
+  )
 
   const alumnos = await prisma.alumno.findMany({
     where: { coach_id: session.user.coachId, activo: true, deleted_at: null },
@@ -39,7 +52,16 @@ export default async function EditarRutinaPage({ params }: { params: Promise<{ i
             <h1 className="section-title">{rutina.nombre}</h1>
             <p className="section-subtitle">Edita los datos y ejercicios de esta rutina</p>
           </div>
-          <ExportarPDFBtn href={`/api/exportar/rutina/${id}`} label="Exportar PDF" />
+          <div className="flex flex-wrap items-center gap-2">
+            {mostrarBotonTemplate && (
+              <GuardarComoTemplateBtn
+                rutinaId={id}
+                nombreSugerido={rutina.nombre}
+                tieneFeature={tieneFeatureTemplates}
+              />
+            )}
+            <ExportarPDFBtn href={`/api/exportar/rutina/${id}`} label="Exportar PDF" />
+          </div>
         </div>
       </div>
       <RutinaForm

@@ -86,6 +86,7 @@ export default async function AdminCoachDetallePage({ params }: { params: Promis
             planActual={coach.plan_actual}
             estadoActual={coach.estado_plan}
             fechaVencimiento={coach.fecha_vencimiento ? coach.fecha_vencimiento.toISOString() : null}
+            alumnosActivos={alumnosActivos.length}
           />
           <AdminCoachAcciones coachId={coach.id} userActivo={coach.user.activo} estadoPlan={coach.estado_plan} />
         </div>

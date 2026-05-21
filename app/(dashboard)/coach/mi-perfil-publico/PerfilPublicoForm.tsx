@@ -148,7 +148,7 @@ export function PerfilPublicoForm({ inicial, baseUrl }: Props) {
             onClick={() => set("perfil_publico_activo", !form.perfil_publico_activo)}
             className="flex items-center gap-2 px-3 py-2 rounded-xl font-semibold text-sm transition-all"
             style={{
-              background: form.perfil_publico_activo ? "var(--green-bg)" : "var(--gray-100)",
+              background: form.perfil_publico_activo ? "var(--green-bg)" : "var(--background-hover)",
               color:      form.perfil_publico_activo ? "var(--green)"    : "var(--foreground-muted)",
             }}
           >
@@ -330,7 +330,7 @@ export function PerfilPublicoForm({ inicial, baseUrl }: Props) {
                 onClick={() => toggleEspecialidad(esp)}
                 className="px-3 py-1.5 rounded-full text-xs font-semibold transition-all"
                 style={{
-                  background: sel ? "var(--blue)"    : "var(--gray-100)",
+                  background: sel ? "var(--blue)"    : "var(--background-hover)",
                   color:      sel ? "white"           : "var(--foreground-muted)",
                   border:     sel ? "none"            : "1px solid var(--border)",
                 }}

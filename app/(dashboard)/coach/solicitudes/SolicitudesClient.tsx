@@ -117,7 +117,7 @@ export function SolicitudesClient({ solicitudes, cuposDisponibles }: Props) {
   return (
     <>
       {/* ── Tabs ──────────────────────────────────────────── */}
-      <div className="flex gap-1 p-1 rounded-xl" style={{ background: "var(--gray-100)" }}>
+      <div className="flex gap-1 p-1 rounded-xl" style={{ background: "var(--background-hover)" }}>
         {TABS.map((t) => {
           const count = t.id === "todas" ? solicitudes.length : t.id === "pendiente" ? pendientes : t.id === "aprobada" ? aprobadas : rechazadas
           return (
@@ -136,7 +136,7 @@ export function SolicitudesClient({ solicitudes, cuposDisponibles }: Props) {
                 <span
                   className="px-1.5 py-0.5 rounded-full text-[10px] font-bold"
                   style={{
-                    background: t.id === "pendiente" && tab !== "pendiente" ? "var(--orange)" : "var(--gray-200)",
+                    background: t.id === "pendiente" && tab !== "pendiente" ? "var(--orange)" : "var(--border)",
                     color:      t.id === "pendiente" && tab !== "pendiente" ? "white" : "var(--foreground-muted)",
                   }}
                 >
@@ -349,7 +349,7 @@ function SolicitudCard({
   const badgeConfig = {
     pendiente:  { bg: "var(--orange-bg)",  color: "var(--orange)", icono: Clock,         texto: "Pendiente" },
     aprobada:   { bg: "var(--green-bg)",   color: "var(--green)",  icono: CheckCircle2,  texto: "Aprobada" },
-    rechazada:  { bg: "var(--gray-100)",   color: "var(--gray-500)", icono: XCircle,     texto: "Rechazada" },
+    rechazada:  { bg: "var(--background-hover)",   color: "var(--foreground-muted)", icono: XCircle,     texto: "Rechazada" },
   }
   const badge = badgeConfig[solicitud.estado]
   const BadgeIcon = badge.icono
@@ -408,7 +408,7 @@ function SolicitudCard({
       {solicitud.nota_interna && (
         <div
           className="rounded-xl p-2.5"
-          style={{ background: "var(--gray-50)", border: "1px solid var(--border)" }}
+          style={{ background: "var(--background)", border: "1px solid var(--border)" }}
         >
           <p className="text-[10px] font-bold uppercase tracking-wide mb-0.5" style={{ color: "var(--foreground-muted)" }}>Nota interna</p>
           <p className="text-xs" style={{ color: "var(--foreground-muted)" }}>{solicitud.nota_interna}</p>
@@ -430,7 +430,7 @@ function SolicitudCard({
             disabled={cuposDisponibles === 0}
             className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl text-xs font-bold transition-all disabled:opacity-50 disabled:cursor-not-allowed"
             style={{
-              background: cuposDisponibles === 0 ? "var(--gray-200)" : "#dcfce7",
+              background: cuposDisponibles === 0 ? "var(--border)" : "#dcfce7",
               color:      cuposDisponibles === 0 ? "var(--foreground-muted)" : "#16a34a",
             }}
             title={cuposDisponibles === 0 ? "No tienes cupos disponibles" : undefined}

@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
-import { Loader2, X, ArrowUpCircle, ArrowDownCircle, Calendar } from "lucide-react"
+import { Loader2, X, ArrowUpCircle, ArrowDownCircle, Calendar, AlertTriangle } from "lucide-react"
 import { toast } from "sonner"
 
 interface Props {
@@ -10,9 +10,12 @@ interface Props {
   planActual:       string
   estadoActual:     string
   fechaVencimiento: string | null  // ISO string
+  alumnosActivos:   number
 }
 
-export function CambiarPlanModal({ coachId, planActual, estadoActual, fechaVencimiento }: Props) {
+const LIMITE_ALUMNOS_GRATIS = 3
+
+export function CambiarPlanModal({ coachId, planActual, estadoActual, fechaVencimiento, alumnosActivos }: Props) {
   const [abierto, setAbierto]           = useState(false)
   const [cargando, setCargando]         = useState(false)
   const [nuevoPlan, setNuevoPlan]       = useState<"gratis" | "inicial">(planActual as "gratis" | "inicial")
@@ -28,6 +31,14 @@ export function CambiarPlanModal({ coachId, planActual, estadoActual, fechaVenci
     return d.toISOString().split("T")[0]
   })
   const [motivo, setMotivo]             = useState("")
+  const [confirmando, setConfirmando]   = useState(false)
+  const [textoConfirm, setTextoConfirm] = useState("")
+
+  const esDowngradeDestructivo =
+    nuevoPlan === "gratis" &&
+    planActual === "inicial" &&
+    alumnosActivos > LIMITE_ALUMNOS_GRATIS
+  const alumnosAArchivar = Math.max(0, alumnosActivos - LIMITE_ALUMNOS_GRATIS)
 
   const router = useRouter()
 
@@ -70,12 +81,29 @@ export function CambiarPlanModal({ coachId, planActual, estadoActual, fechaVenci
 
       toast.success("Plan actualizado correctamente")
       setAbierto(false)
+      setConfirmando(false)
+      setTextoConfirm("")
       router.refresh()
     } catch {
       toast.error("Error de conexión")
     } finally {
       setCargando(false)
     }
+  }
+
+  function intentarGuardar() {
+    if (esDowngradeDestructivo && !confirmando) {
+      setConfirmando(true)
+      return
+    }
+    guardar()
+  }
+
+  function cerrar() {
+    if (cargando) return
+    setAbierto(false)
+    setConfirmando(false)
+    setTextoConfirm("")
   }
 
   return (
@@ -92,7 +120,7 @@ export function CambiarPlanModal({ coachId, planActual, estadoActual, fechaVenci
         <div
           className="fixed inset-0 z-50 flex items-center justify-center p-4"
           style={{ background: "rgba(0,0,0,0.5)" }}
-          onClick={(e) => { if (e.target === e.currentTarget) setAbierto(false) }}
+          onClick={(e) => { if (e.target === e.currentTarget) cerrar() }}
         >
           <div
             className="w-full max-w-md rounded-2xl flex flex-col max-h-[90vh]"
@@ -105,18 +133,77 @@ export function CambiarPlanModal({ coachId, planActual, estadoActual, fechaVenci
             {/* Header fijo */}
             <div className="flex items-center justify-between px-6 pt-6 pb-4 flex-shrink-0 border-b" style={{ borderColor: "var(--border)" }}>
               <h2 className="text-base font-bold" style={{ color: "var(--foreground)" }}>
-                Cambiar plan del coach
+                {confirmando ? "Confirmar downgrade" : "Cambiar plan del coach"}
               </h2>
               <button
-                onClick={() => setAbierto(false)}
+                onClick={cerrar}
+                aria-label="Cerrar"
                 className="p-1.5 rounded-lg transition-colors"
-                style={{ color: "var(--foreground-muted)", background: "var(--gray-100)" }}
+                style={{ color: "var(--foreground-muted)", background: "var(--background-hover)" }}
               >
                 <X size={16} />
               </button>
             </div>
 
-            {/* Cuerpo desplazable */}
+            {/* Pantalla de confirmación destructiva */}
+            {confirmando ? (
+              <div className="overflow-y-auto px-6 py-5 space-y-5 flex-1">
+                <div
+                  className="rounded-xl p-4 flex gap-3"
+                  style={{ background: "var(--red-bg)", border: "1px solid var(--red)" }}
+                >
+                  <AlertTriangle size={20} style={{ color: "var(--red)", flexShrink: 0 }} />
+                  <div className="space-y-1">
+                    <p className="text-sm font-bold" style={{ color: "var(--red)" }}>
+                      Acción destructiva
+                    </p>
+                    <p className="text-xs" style={{ color: "var(--foreground)" }}>
+                      Este coach tiene <strong>{alumnosActivos} alumnos activos</strong>. El Plan Gratis solo permite {LIMITE_ALUMNOS_GRATIS}.
+                      Al confirmar, los <strong>{alumnosAArchivar} alumnos más antiguos serán archivados automáticamente</strong> (no eliminados, pero el coach perderá acceso de edición sobre ellos).
+                    </p>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold mb-1.5" style={{ color: "var(--foreground)" }}>
+                    Escribe <code className="px-1.5 py-0.5 rounded" style={{ background: "var(--background-hover)", color: "var(--red)" }}>CONFIRMAR</code> para continuar
+                  </label>
+                  <input
+                    type="text"
+                    value={textoConfirm}
+                    onChange={(e) => setTextoConfirm(e.target.value)}
+                    placeholder="CONFIRMAR"
+                    autoFocus
+                    className="input-base"
+                    style={{ borderColor: textoConfirm === "CONFIRMAR" ? "var(--red)" : "var(--border)" }}
+                  />
+                </div>
+
+                <div className="flex gap-3">
+                  <button
+                    onClick={() => { setConfirmando(false); setTextoConfirm("") }}
+                    className="btn-secondary flex-1 justify-center"
+                    disabled={cargando}
+                  >
+                    Volver
+                  </button>
+                  <button
+                    onClick={guardar}
+                    disabled={cargando || textoConfirm !== "CONFIRMAR"}
+                    className="flex-1 justify-center flex items-center gap-1.5 rounded-xl px-4 py-2 text-sm font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    style={{
+                      background: textoConfirm === "CONFIRMAR" ? "var(--red)" : "var(--background-hover)",
+                      color:      textoConfirm === "CONFIRMAR" ? "white"      : "var(--foreground-muted)",
+                    }}
+                  >
+                    {cargando
+                      ? <><Loader2 size={14} className="animate-spin" /> Procesando...</>
+                      : `Archivar ${alumnosAArchivar} y bajar a Gratis`
+                    }
+                  </button>
+                </div>
+              </div>
+            ) : (
             <div className="overflow-y-auto px-6 py-5 space-y-5 flex-1">
 
             {/* Selector de plan */}
@@ -214,10 +301,18 @@ export function CambiarPlanModal({ coachId, planActual, estadoActual, fechaVenci
             {/* Advertencia de downgrade */}
             {nuevoPlan === "gratis" && planActual === "inicial" && (
               <div
-                className="rounded-xl p-3 text-xs"
-                style={{ background: "var(--orange-bg)", color: "var(--orange)" }}
+                className="rounded-xl p-3 text-xs flex gap-2"
+                style={{
+                  background: esDowngradeDestructivo ? "var(--red-bg)" : "var(--orange-bg)",
+                  color:      esDowngradeDestructivo ? "var(--red)"    : "var(--orange)",
+                }}
               >
-                ⚠️ Al pasar a plan Gratis, si el coach tiene más de 3 alumnos activos, los más antiguos serán archivados automáticamente (no eliminados).
+                <AlertTriangle size={14} style={{ flexShrink: 0, marginTop: 1 }} />
+                <span>
+                  {esDowngradeDestructivo
+                    ? <>Coach tiene <strong>{alumnosActivos} alumnos activos</strong>. Bajar a Gratis <strong>archivará {alumnosAArchivar} alumnos</strong>. Tendrás que confirmar al guardar.</>
+                    : "Al pasar a plan Gratis, si el coach tiene más de 3 alumnos activos, los más antiguos serán archivados automáticamente (no eliminados)."}
+                </span>
               </div>
             )}
 
@@ -238,24 +333,25 @@ export function CambiarPlanModal({ coachId, planActual, estadoActual, fechaVenci
             {/* Acciones */}
             <div className="flex gap-3">
               <button
-                onClick={() => setAbierto(false)}
+                onClick={cerrar}
                 className="btn-secondary flex-1 justify-center"
                 disabled={cargando}
               >
                 Cancelar
               </button>
               <button
-                onClick={guardar}
+                onClick={intentarGuardar}
                 disabled={cargando}
                 className="btn-primary flex-1 justify-center disabled:opacity-60"
               >
                 {cargando
                   ? <><Loader2 size={14} className="animate-spin" /> Guardando...</>
-                  : "Guardar cambios"
+                  : esDowngradeDestructivo ? "Continuar..." : "Guardar cambios"
                 }
               </button>
             </div>
             </div>
+            )}
           </div>
         </div>
       )}

@@ -7,9 +7,15 @@ import { RutinaForm } from "@/components/domain/RutinaForm"
 
 export const metadata = { title: "Nueva rutina" }
 
-export default async function NuevaRutinaPage() {
+export default async function NuevaRutinaPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ alumno_id?: string }>
+}) {
   const session = await auth()
   if (!session?.user.coachId) redirect("/login")
+
+  const { alumno_id: alumnoIdParam } = await searchParams
 
   const coach = await prisma.coach.findUnique({
     where: { id: session.user.coachId },
@@ -23,6 +29,11 @@ export default async function NuevaRutinaPage() {
     orderBy: { created_at: "desc" },
   })
 
+  // Pre-selecciona el alumno solo si pertenece al coach y está activo
+  const alumnoPreseleccionado = alumnoIdParam && alumnos.some((a) => a.id === alumnoIdParam)
+    ? alumnoIdParam
+    : null
+
   return (
     <div className="animate-fade-in">
       <div className="mb-6">
@@ -34,6 +45,7 @@ export default async function NuevaRutinaPage() {
         <p className="section-subtitle">Crea una rutina y asígnala a un alumno</p>
       </div>
       <RutinaForm
+        valorInicial={alumnoPreseleccionado ? { alumno_id: alumnoPreseleccionado } : undefined}
         alumnos={alumnos.map((a) => ({
           id: a.id, nombre: a.user.nombre, apellido: a.user.apellido,
         }))}

@@ -2,18 +2,19 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { type LucideIcon } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 interface NavItemProps {
   href: string
-  icono: LucideIcon
+  // Recibe el ícono ya renderizado como JSX (serializable a través del límite server→client).
+  // Pasar el componente (LucideIcon) crashea en Next.js 16: forwardRef no es serializable.
+  icon: React.ReactNode
   label: string
   badge?: number
   onClick?: () => void
 }
 
-export function NavItem({ href, icono: Icono, label, badge, onClick }: NavItemProps) {
+export function NavItem({ href, icon, label, badge, onClick }: NavItemProps) {
   const pathname = usePathname()
   const rutasRaiz = ["/admin", "/coach", "/alumno"]
   const activo =
@@ -50,7 +51,7 @@ export function NavItem({ href, icono: Icono, label, badge, onClick }: NavItemPr
         }
       }}
     >
-      <Icono size={18} strokeWidth={activo ? 2.5 : 2} />
+      {icon}
       <span className="flex-1">{label}</span>
       {badge !== undefined && badge > 0 && (
         <span
