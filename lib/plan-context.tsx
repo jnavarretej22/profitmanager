@@ -48,3 +48,9 @@ export function usePlan(): PlanContextValue {
   if (!ctx) throw new Error("usePlan debe usarse dentro de <PlanProvider>")
   return ctx
 }
+
+// Versión segura para componentes que pueden renderizarse fuera del PlanProvider
+// (ej. el RutinaForm reutilizado en el panel admin).
+export function usePlanOpcional(): PlanContextValue | null {
+  return useContext(PlanContext)
+}

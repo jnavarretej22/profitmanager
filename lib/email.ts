@@ -11,7 +11,7 @@ function getResend(): Resend {
 const FROM = process.env.EMAIL_FROM ?? "ProFit Manager <noreply@profitmanager.app>"
 
 export type EmailTemplate =
-  | { tipo: "bienvenida-coach";         data: { nombre: string; email: string } }
+  | { tipo: "bienvenida-coach";         data: { nombre: string; email: string; linkLogin?: string } }
   | { tipo: "verificacion-email";       data: { nombre: string; linkVerificacion: string } }
   | { tipo: "reset-contrasena";         data: { nombre: string; linkReset: string } }
   | { tipo: "bienvenida-alumno";        data: { nombreAlumno: string; nombreCoach: string; email: string; linkLogin: string } }

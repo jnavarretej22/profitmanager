@@ -4,7 +4,7 @@ import Link from "next/link"
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { Plus, Trash2, ChevronUp, ChevronDown, Loader2, Save, BookOpen, X, UtensilsCrossed } from "lucide-react"
-import { usePlan } from "@/lib/plan-context"
+import { usePlanOpcional } from "@/lib/plan-context"
 import { VigenciaSelector } from "./VigenciaSelector"
 
 const DIAS_SEMANA = ["lunes","martes","miercoles","jueves","viernes","sabado","domingo"] as const
@@ -87,6 +87,7 @@ interface PlanAlimenticioFormProps {
     es_template?:       boolean
     alumno_id?:         string | null
     fecha_fin?:         string | null
+    plan_requerido?:    string | null
     dias?: Array<{
       dia_semana:  string
       nombre_foco: string | null
@@ -103,6 +104,10 @@ interface PlanAlimenticioFormProps {
     }>
   }
   alumnos: AlumnoOption[]
+  // Cuando es true, el form crea/edita un template del sistema desde el panel admin.
+  // Oculta selector de alumno, vigencia, toggle template y el botón "Usar template";
+  // agrega selector de plan_requerido y usa endpoints /api/admin/planes-alimenticios.
+  modoAdmin?: boolean
 }
 
 function nuevaComida(): Comida {
@@ -159,20 +164,21 @@ function diasDesdeValorInicial(diasInit: PlanAlimenticioFormProps["valorInicial"
   })
 }
 
-export function PlanAlimenticioForm({ planId, valorInicial = {}, alumnos }: PlanAlimenticioFormProps) {
+export function PlanAlimenticioForm({ planId, valorInicial = {}, alumnos, modoAdmin = false }: PlanAlimenticioFormProps) {
   const router = useRouter()
-  const { tieneFeature } = usePlan()
+  const planCtx = usePlanOpcional()
   const esEdicion          = !!planId
-  const tieneTemplatesDietas = tieneFeature("templates_dietas_objetivo")
+  const tieneTemplatesDietas = modoAdmin ? false : (planCtx?.tieneFeature("templates_dietas_objetivo") ?? false)
 
-  const [nombre,     setNombre]     = useState(valorInicial.nombre ?? "")
-  const [objetivo,   setObjetivo]   = useState(valorInicial.objetivo ?? "")
-  const [calObjetivo,setCalObjetivo]= useState(valorInicial.calorias_objetivo?.toString() ?? "")
-  const [esTemplate, setEsTemplate] = useState(valorInicial.es_template ?? false)
-  const [alumnoId,   setAlumnoId]   = useState(valorInicial.alumno_id ?? "")
-  const [fechaFin,   setFechaFin]   = useState<string | null>(valorInicial.fecha_fin ?? null)
-  const [dias,       setDias]       = useState<DiaForm[]>(() => diasDesdeValorInicial(valorInicial.dias))
-  const [diaActivo,  setDiaActivo]  = useState<DiaSemana>("lunes")
+  const [nombre,        setNombre]        = useState(valorInicial.nombre ?? "")
+  const [objetivo,      setObjetivo]      = useState(valorInicial.objetivo ?? "")
+  const [calObjetivo,   setCalObjetivo]   = useState(valorInicial.calorias_objetivo?.toString() ?? "")
+  const [esTemplate,    setEsTemplate]    = useState(valorInicial.es_template ?? false)
+  const [alumnoId,      setAlumnoId]      = useState(valorInicial.alumno_id ?? "")
+  const [fechaFin,      setFechaFin]      = useState<string | null>(valorInicial.fecha_fin ?? null)
+  const [planRequerido, setPlanRequerido] = useState(valorInicial.plan_requerido ?? "inicial")
+  const [dias,          setDias]          = useState<DiaForm[]>(() => diasDesdeValorInicial(valorInicial.dias))
+  const [diaActivo,     setDiaActivo]     = useState<DiaSemana>("lunes")
 
   const [cargando,           setCargando]           = useState(false)
   const [error,              setError]              = useState("")
@@ -280,9 +286,10 @@ export function PlanAlimenticioForm({ planId, valorInicial = {}, alumnos }: Plan
         nombre,
         objetivo:          objetivo || undefined,
         calorias_objetivo: calObjetivo ? parseInt(calObjetivo) : undefined,
-        es_template:       esTemplate,
-        alumno_id:         alumnoId || null,
-        fecha_fin:         alumnoId ? fechaFin : null,
+        es_template:       modoAdmin ? true : esTemplate,
+        alumno_id:         modoAdmin ? null : (alumnoId || null),
+        fecha_fin:         modoAdmin ? null : (alumnoId ? fechaFin : null),
+        ...(modoAdmin && { plan_requerido: planRequerido || null }),
         dias: dias.map((d) => ({
           dia_semana:  d.dia_semana,
           nombre_foco: d.nombre_foco || undefined,
@@ -299,15 +306,16 @@ export function PlanAlimenticioForm({ planId, valorInicial = {}, alumnos }: Plan
         })),
       }
 
-      const url    = esEdicion ? `/api/planes-alimenticios/${planId}` : "/api/planes-alimenticios"
-      const method = esEdicion ? "PATCH" : "POST"
+      const baseUrl = modoAdmin ? "/api/admin/planes-alimenticios" : "/api/planes-alimenticios"
+      const url     = esEdicion ? `${baseUrl}/${planId}` : baseUrl
+      const method  = esEdicion ? "PATCH" : "POST"
 
       const res  = await fetch(url, { method, headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) })
       const data = await res.json()
 
       if (!res.ok) { setError(data.mensaje ?? "Error al guardar"); return }
 
-      router.push("/coach/planes-alimenticios")
+      router.push(modoAdmin ? "/admin/planes-alimenticios" : "/coach/planes-alimenticios")
       router.refresh()
     } catch {
       setError("Error de conexión")
@@ -416,56 +424,75 @@ export function PlanAlimenticioForm({ planId, valorInicial = {}, alumnos }: Plan
             </div>
           </div>
 
-          {/* Asignar a alumno */}
-          <div>
-            <label className="block text-sm font-semibold mb-1.5" style={{ color: "var(--foreground)" }}>
-              Asignar a alumno
-            </label>
-            <select
-              value={alumnoId}
-              onChange={(e) => { setAlumnoId(e.target.value); setFechaFin(null) }}
-              className="input-base"
-            >
-              <option value="">Sin asignar (guardar como borrador)</option>
-              {alumnos.map((a) => (
-                <option key={a.id} value={a.id}>{a.nombre} {a.apellido}</option>
-              ))}
-            </select>
-          </div>
+          {!modoAdmin && (
+            <>
+              {/* Asignar a alumno */}
+              <div>
+                <label className="block text-sm font-semibold mb-1.5" style={{ color: "var(--foreground)" }}>
+                  Asignar a alumno
+                </label>
+                <select
+                  value={alumnoId}
+                  onChange={(e) => { setAlumnoId(e.target.value); setFechaFin(null) }}
+                  className="input-base"
+                >
+                  <option value="">Sin asignar (guardar como borrador)</option>
+                  {alumnos.map((a) => (
+                    <option key={a.id} value={a.id}>{a.nombre} {a.apellido}</option>
+                  ))}
+                </select>
+              </div>
 
-          {/* Vigencia — solo cuando hay alumno seleccionado */}
-          {alumnoId && (
-            <div className="rounded-xl p-4" style={{ background: "var(--background)", border: "1px solid var(--border)" }}>
-              <VigenciaSelector value={fechaFin} onChange={setFechaFin} />
-            </div>
+              {/* Vigencia — solo cuando hay alumno seleccionado */}
+              {alumnoId && (
+                <div className="rounded-xl p-4" style={{ background: "var(--background)", border: "1px solid var(--border)" }}>
+                  <VigenciaSelector value={fechaFin} onChange={setFechaFin} />
+                </div>
+              )}
+
+              {/* Toggle template */}
+              <label className="flex items-center gap-3 cursor-pointer">
+                <div
+                  className="relative h-6 w-11 rounded-full transition-colors"
+                  style={{ background: esTemplate ? "var(--blue)" : "var(--border)" }}
+                  onClick={() => setEsTemplate((v) => !v)}
+                >
+                  <span
+                    className="absolute top-1 h-4 w-4 rounded-full bg-white transition-transform shadow"
+                    style={{ transform: esTemplate ? "translateX(21px)" : "translateX(4px)" }}
+                  />
+                </div>
+                <span className="text-sm font-semibold" style={{ color: "var(--foreground)" }}>
+                  Guardar como template reutilizable
+                </span>
+              </label>
+
+              {!tieneTemplatesDietas && (
+                <div
+                  className="flex items-center gap-3 rounded-xl px-4 py-3"
+                  style={{ background: "var(--blue-bg)", border: "1px solid var(--blue)22" }}
+                >
+                  <BookOpen size={16} style={{ color: "var(--blue)", flexShrink: 0 }} />
+                  <p className="text-xs font-medium" style={{ color: "var(--blue)" }}>
+                    Los templates de dietas por objetivo están disponibles en el
+                    <Link href="/coach/mi-plan" className="font-bold ml-1">Plan Inicial →</Link>
+                  </p>
+                </div>
+              )}
+            </>
           )}
 
-          {/* Toggle template */}
-          <label className="flex items-center gap-3 cursor-pointer">
-            <div
-              className="relative h-6 w-11 rounded-full transition-colors"
-              style={{ background: esTemplate ? "var(--blue)" : "var(--border)" }}
-              onClick={() => setEsTemplate((v) => !v)}
-            >
-              <span
-                className="absolute top-1 h-4 w-4 rounded-full bg-white transition-transform shadow"
-                style={{ transform: esTemplate ? "translateX(21px)" : "translateX(4px)" }}
-              />
-            </div>
-            <span className="text-sm font-semibold" style={{ color: "var(--foreground)" }}>
-              Guardar como template reutilizable
-            </span>
-          </label>
-
-          {!tieneTemplatesDietas && (
-            <div
-              className="flex items-center gap-3 rounded-xl px-4 py-3"
-              style={{ background: "var(--blue-bg)", border: "1px solid var(--blue)22" }}
-            >
-              <BookOpen size={16} style={{ color: "var(--blue)", flexShrink: 0 }} />
-              <p className="text-xs font-medium" style={{ color: "var(--blue)" }}>
-                Los templates de dietas por objetivo están disponibles en el
-                <Link href="/coach/mi-plan" className="font-bold ml-1">Plan Inicial →</Link>
+          {modoAdmin && (
+            <div>
+              <label className="block text-sm font-semibold mb-1.5" style={{ color: "var(--foreground)" }}>
+                Plan requerido
+              </label>
+              <select value={planRequerido} onChange={(e) => setPlanRequerido(e.target.value)} className="input-base">
+                <option value="gratis">Gratis (todos los coaches pueden usarlo)</option>
+                <option value="inicial">Inicial (solo coaches con plan Inicial)</option>
+              </select>
+              <p className="mt-1 text-xs" style={{ color: "var(--foreground-subtle)" }}>
+                Define qué coaches verán este template al crear un plan alimenticio nuevo.
               </p>
             </div>
           )}

@@ -3,7 +3,7 @@
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { Plus, Trash2, ChevronUp, ChevronDown, Loader2, Save, BookOpen, X, Coffee } from "lucide-react"
-import { usePlan } from "@/lib/plan-context"
+import { usePlanOpcional } from "@/lib/plan-context"
 import { VigenciaSelector } from "./VigenciaSelector"
 
 const DIAS_SEMANA = ["lunes","martes","miercoles","jueves","viernes","sabado","domingo"] as const
@@ -56,6 +56,7 @@ interface RutinaFormProps {
     es_template?:     boolean
     alumno_id?:       string | null
     fecha_fin?:       string | null
+    plan_requerido?:  string | null
     dias?: Array<{
       dia_semana:  string
       nombre_foco?: string | null
@@ -73,6 +74,10 @@ interface RutinaFormProps {
     }>
   }
   alumnos: AlumnoOption[]
+  // Cuando es true, el form crea/edita un template del sistema desde el panel admin:
+  // oculta selector de alumno, toggle es_template y vigencia; añade selector de plan_requerido;
+  // usa endpoints /api/admin/rutinas y redirige a /admin/rutinas.
+  modoAdmin?: boolean
 }
 
 function nuevoEjercicio(): Ejercicio {
@@ -110,21 +115,23 @@ function diasDesdeValorInicial(diasInit: RutinaFormProps["valorInicial"] extends
   })
 }
 
-export function RutinaForm({ rutinaId, valorInicial = {}, alumnos }: RutinaFormProps) {
+export function RutinaForm({ rutinaId, valorInicial = {}, alumnos, modoAdmin = false }: RutinaFormProps) {
   const router = useRouter()
-  const { tieneFeature } = usePlan()
+  const planCtx = usePlanOpcional()
   const esEdicion      = !!rutinaId
-  const tieneTemplates = tieneFeature("templates_rutinas")
+  // En modo admin, los templates siempre están disponibles. En modo coach, depende del plan.
+  const tieneTemplates = modoAdmin ? false : (planCtx?.tieneFeature("templates_rutinas") ?? false)
 
-  const [nombre,      setNombre]      = useState(valorInicial.nombre ?? "")
-  const [descripcion, setDescripcion] = useState(valorInicial.descripcion ?? "")
-  const [objetivo,    setObjetivo]    = useState(valorInicial.objetivo ?? "")
-  const [duracion,    setDuracion]    = useState(valorInicial.duracion_minutos?.toString() ?? "")
-  const [esTemplate,  setEsTemplate]  = useState(valorInicial.es_template ?? false)
-  const [alumnoId,    setAlumnoId]    = useState(valorInicial.alumno_id ?? "")
-  const [fechaFin,    setFechaFin]    = useState<string | null>(valorInicial.fecha_fin ?? null)
-  const [dias,        setDias]        = useState<DiaForm[]>(() => diasDesdeValorInicial(valorInicial.dias))
-  const [diaActivo,   setDiaActivo]   = useState<DiaSemana>("lunes")
+  const [nombre,         setNombre]         = useState(valorInicial.nombre ?? "")
+  const [descripcion,    setDescripcion]    = useState(valorInicial.descripcion ?? "")
+  const [objetivo,       setObjetivo]       = useState(valorInicial.objetivo ?? "")
+  const [duracion,       setDuracion]       = useState(valorInicial.duracion_minutos?.toString() ?? "")
+  const [esTemplate,     setEsTemplate]     = useState(valorInicial.es_template ?? false)
+  const [alumnoId,       setAlumnoId]       = useState(valorInicial.alumno_id ?? "")
+  const [fechaFin,       setFechaFin]       = useState<string | null>(valorInicial.fecha_fin ?? null)
+  const [planRequerido,  setPlanRequerido]  = useState(valorInicial.plan_requerido ?? "inicial")
+  const [dias,           setDias]           = useState<DiaForm[]>(() => diasDesdeValorInicial(valorInicial.dias))
+  const [diaActivo,      setDiaActivo]      = useState<DiaSemana>("lunes")
 
   const [cargando,          setCargando]          = useState(false)
   const [error,             setError]             = useState("")
@@ -233,9 +240,10 @@ export function RutinaForm({ rutinaId, valorInicial = {}, alumnos }: RutinaFormP
         descripcion,
         objetivo:         objetivo || undefined,
         duracion_minutos: duracion ? parseInt(duracion) : undefined,
-        es_template:      esTemplate,
-        alumno_id:        alumnoId || null,
-        fecha_fin:        alumnoId ? fechaFin : null,
+        es_template:      modoAdmin ? true : esTemplate,
+        alumno_id:        modoAdmin ? null : (alumnoId || null),
+        fecha_fin:        modoAdmin ? null : (alumnoId ? fechaFin : null),
+        ...(modoAdmin && { plan_requerido: planRequerido || null }),
         dias: dias.map((d) => ({
           dia_semana:  d.dia_semana,
           nombre_foco: d.nombre_foco || undefined,
@@ -253,15 +261,16 @@ export function RutinaForm({ rutinaId, valorInicial = {}, alumnos }: RutinaFormP
         })),
       }
 
-      const url    = esEdicion ? `/api/rutinas/${rutinaId}` : "/api/rutinas"
-      const method = esEdicion ? "PATCH" : "POST"
+      const baseUrl = modoAdmin ? "/api/admin/rutinas" : "/api/rutinas"
+      const url     = esEdicion ? `${baseUrl}/${rutinaId}` : baseUrl
+      const method  = esEdicion ? "PATCH" : "POST"
 
       const res  = await fetch(url, { method, headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) })
       const data = await res.json()
 
       if (!res.ok) { setError(data.mensaje ?? "Error al guardar"); return }
 
-      router.push("/coach/rutinas")
+      router.push(modoAdmin ? "/admin/rutinas" : "/coach/rutinas")
       router.refresh()
     } catch {
       setError("Error de conexión")
@@ -372,45 +381,64 @@ export function RutinaForm({ rutinaId, valorInicial = {}, alumnos }: RutinaFormP
             </div>
           </div>
 
-          {/* Asignar a alumno */}
-          <div>
-            <label className="block text-sm font-semibold mb-1.5" style={{ color: "var(--foreground)" }}>
-              Asignar a alumno
-            </label>
-            <select value={alumnoId} onChange={(e) => { setAlumnoId(e.target.value); setFechaFin(null) }} className="input-base">
-              <option value="">Sin asignar (guardar como borrador)</option>
-              {alumnos.map((a) => (
-                <option key={a.id} value={a.id}>{a.nombre} {a.apellido}</option>
-              ))}
-            </select>
-          </div>
+          {!modoAdmin && (
+            <>
+              {/* Asignar a alumno */}
+              <div>
+                <label className="block text-sm font-semibold mb-1.5" style={{ color: "var(--foreground)" }}>
+                  Asignar a alumno
+                </label>
+                <select value={alumnoId} onChange={(e) => { setAlumnoId(e.target.value); setFechaFin(null) }} className="input-base">
+                  <option value="">Sin asignar (guardar como borrador)</option>
+                  {alumnos.map((a) => (
+                    <option key={a.id} value={a.id}>{a.nombre} {a.apellido}</option>
+                  ))}
+                </select>
+              </div>
 
-          {/* Vigencia — solo cuando hay alumno seleccionado */}
-          {alumnoId && (
-            <div
-              className="rounded-xl p-4"
-              style={{ background: "var(--background)", border: "1px solid var(--border)" }}
-            >
-              <VigenciaSelector value={fechaFin} onChange={setFechaFin} />
-            </div>
+              {/* Vigencia — solo cuando hay alumno seleccionado */}
+              {alumnoId && (
+                <div
+                  className="rounded-xl p-4"
+                  style={{ background: "var(--background)", border: "1px solid var(--border)" }}
+                >
+                  <VigenciaSelector value={fechaFin} onChange={setFechaFin} />
+                </div>
+              )}
+
+              {/* Toggle template */}
+              <label className="flex items-center gap-3 cursor-pointer">
+                <div
+                  className="relative h-6 w-11 rounded-full transition-colors"
+                  style={{ background: esTemplate ? "var(--blue)" : "var(--border)" }}
+                  onClick={() => setEsTemplate((v) => !v)}
+                >
+                  <span
+                    className="absolute top-1 h-4 w-4 rounded-full bg-white transition-transform shadow"
+                    style={{ transform: esTemplate ? "translateX(21px)" : "translateX(4px)" }}
+                  />
+                </div>
+                <span className="text-sm font-semibold" style={{ color: "var(--foreground)" }}>
+                  Guardar como template reutilizable
+                </span>
+              </label>
+            </>
           )}
 
-          {/* Toggle template */}
-          <label className="flex items-center gap-3 cursor-pointer">
-            <div
-              className="relative h-6 w-11 rounded-full transition-colors"
-              style={{ background: esTemplate ? "var(--blue)" : "var(--border)" }}
-              onClick={() => setEsTemplate((v) => !v)}
-            >
-              <span
-                className="absolute top-1 h-4 w-4 rounded-full bg-white transition-transform shadow"
-                style={{ transform: esTemplate ? "translateX(21px)" : "translateX(4px)" }}
-              />
+          {modoAdmin && (
+            <div>
+              <label className="block text-sm font-semibold mb-1.5" style={{ color: "var(--foreground)" }}>
+                Plan requerido
+              </label>
+              <select value={planRequerido} onChange={(e) => setPlanRequerido(e.target.value)} className="input-base">
+                <option value="gratis">Gratis (todos los coaches pueden usarlo)</option>
+                <option value="inicial">Inicial (solo coaches con plan Inicial)</option>
+              </select>
+              <p className="mt-1 text-xs" style={{ color: "var(--foreground-subtle)" }}>
+                Define qué coaches verán este template al crear una rutina nueva.
+              </p>
             </div>
-            <span className="text-sm font-semibold" style={{ color: "var(--foreground)" }}>
-              Guardar como template reutilizable
-            </span>
-          </label>
+          )}
         </fieldset>
 
         {/* ── Días y ejercicios ────────────────────────────────────────── */}

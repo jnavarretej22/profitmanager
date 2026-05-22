@@ -3,11 +3,13 @@ import {
 } from "@react-email/components"
 
 interface Props {
-  nombre: string
-  email: string
+  nombre:     string
+  email:      string
+  linkLogin?: string  // Si está presente, el coach fue creado por un admin y debe activar su cuenta
 }
 
-export default function BienvenidaCoach({ nombre, email }: Props) {
+export default function BienvenidaCoach({ nombre, email, linkLogin }: Props) {
+  const esActivacion = !!linkLogin
   return (
     <Html lang="es">
       <Head />
@@ -21,18 +23,21 @@ export default function BienvenidaCoach({ nombre, email }: Props) {
           <Section style={content}>
             <Heading style={h1}>¡Bienvenido, {nombre}! 🎉</Heading>
             <Text style={p}>
-              Tu cuenta de coach ha sido creada exitosamente. Ya puedes empezar a gestionar
-              a tus alumnos, asignar rutinas y planes alimenticios, y agendar citas.
+              {esActivacion
+                ? "Tu cuenta de coach fue creada por el equipo de ProFit Manager. Antes de empezar, activa tu cuenta creando tu propia contraseña."
+                : "Tu cuenta de coach ha sido creada exitosamente. Ya puedes empezar a gestionar a tus alumnos, asignar rutinas y planes alimenticios, y agendar citas."}
             </Text>
 
             <Section style={infoBox}>
               <Text style={infoText}>Tu correo registrado: <strong>{email}</strong></Text>
             </Section>
 
-            <Text style={p}>Para comenzar, ingresa a tu dashboard:</Text>
+            <Text style={p}>
+              {esActivacion ? "Para activar tu cuenta y crear tu contraseña:" : "Para comenzar, ingresa a tu dashboard:"}
+            </Text>
 
-            <Button style={button} href={`${process.env.NEXTAUTH_URL}/coach`}>
-              Ir a mi dashboard
+            <Button style={button} href={linkLogin ?? `${process.env.NEXTAUTH_URL}/coach`}>
+              {esActivacion ? "Activar mi cuenta" : "Ir a mi dashboard"}
             </Button>
 
             <Hr style={hr} />

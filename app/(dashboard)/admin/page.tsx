@@ -4,11 +4,12 @@ import { redirect } from "next/navigation"
 import Link from "next/link"
 import {
   Users, DollarSign, AlertTriangle, XCircle,
-  ChevronRight, Plus, Bell, FileText,
+  ChevronRight, Plus, Bell, FileText, Dumbbell, UtensilsCrossed,
 } from "lucide-react"
 import { StatCard, Badge, Avatar } from "@/components/ui"
 import { PlanFeatureService } from "@/lib/plan-features"
 import { RegistrarPagoModal } from "./RegistrarPagoModal"
+import { CrearCoachModal } from "./CrearCoachModal"
 import { AdminCoachesTable } from "./AdminCoachesTable"
 
 export default async function AdminDashboardPage({
@@ -78,13 +79,51 @@ export default async function AdminDashboardPage({
           <h1 className="section-title">Panel de administración</h1>
           <p className="section-subtitle">Gestión completa de coaches y cobros</p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex gap-2 flex-wrap">
+          <CrearCoachModal />
           <RegistrarPagoModal coaches={allCoaches.map((c) => ({ id: c.id, nombre: `${c.user.nombre} ${c.user.apellido}`, email: c.user.email }))} />
           {/* eslint-disable-next-line @next/next/no-html-link-for-pages */}
           <a href="/api/admin/reportes/csv" download className="btn-secondary text-sm">
             <FileText size={15} /> Exportar CSV
           </a>
         </div>
+      </div>
+
+      {/* Accesos rápidos a contenido */}
+      <div className="grid gap-3 sm:grid-cols-2">
+        <Link
+          href="/admin/rutinas"
+          className="flex items-center justify-between rounded-2xl px-5 py-4 transition-colors"
+          style={{ background: "var(--background-card)", border: "1px solid var(--border)", boxShadow: "var(--shadow-sm)" }}
+        >
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl" style={{ background: "var(--blue-bg)" }}>
+              <Dumbbell size={20} style={{ color: "var(--blue)" }} />
+            </div>
+            <div>
+              <p className="text-sm font-bold" style={{ color: "var(--foreground)" }}>Templates de rutinas</p>
+              <p className="text-xs" style={{ color: "var(--foreground-muted)" }}>Plantillas globales para coaches</p>
+            </div>
+          </div>
+          <ChevronRight size={18} style={{ color: "var(--foreground-subtle)" }} />
+        </Link>
+
+        <Link
+          href="/admin/planes-alimenticios"
+          className="flex items-center justify-between rounded-2xl px-5 py-4 transition-colors"
+          style={{ background: "var(--background-card)", border: "1px solid var(--border)", boxShadow: "var(--shadow-sm)" }}
+        >
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl" style={{ background: "var(--green-bg)" }}>
+              <UtensilsCrossed size={20} style={{ color: "var(--green)" }} />
+            </div>
+            <div>
+              <p className="text-sm font-bold" style={{ color: "var(--foreground)" }}>Templates de planes alimenticios</p>
+              <p className="text-xs" style={{ color: "var(--foreground-muted)" }}>Plantillas globales para coaches</p>
+            </div>
+          </div>
+          <ChevronRight size={18} style={{ color: "var(--foreground-subtle)" }} />
+        </Link>
       </div>
 
       {/* Stats */}
