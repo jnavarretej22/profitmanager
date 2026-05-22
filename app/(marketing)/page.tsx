@@ -72,7 +72,7 @@ function Nav() {
         borderBottom: "1px solid var(--border)",
       }}
     >
-      <Brand />
+      <Brand href="/" />
 
       <div className="hidden md:flex items-center gap-6">
         <a href="#funcionalidades" className="text-sm font-medium transition-colors" style={{ color: "var(--foreground-muted)" }}>
@@ -475,7 +475,7 @@ function Footer() {
       style={{ borderColor: "var(--border)", background: "var(--background-card)" }}
     >
       <div className="mx-auto max-w-5xl flex flex-col sm:flex-row items-center justify-between gap-4">
-        <Brand size="sm" />
+        <Brand size="sm" href="/" />
         <div className="flex items-center gap-5 text-xs" style={{ color: "var(--foreground-muted)" }}>
           <Link href="/terminos" className="hover:underline">Términos</Link>
           <Link href="/privacidad" className="hover:underline">Privacidad</Link>

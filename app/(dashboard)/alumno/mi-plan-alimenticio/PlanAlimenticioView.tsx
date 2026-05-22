@@ -90,7 +90,10 @@ export function PlanAlimenticioView({ plan, hoyFecha, logsHoy }: Props) {
 
   const diaInfo = plan.dias.find((d) => d.dia_semana === diaActivo)
 
-  const comidasOrd = diaInfo && !diaInfo.es_libre
+  // Día sin comidas se trata como libre (fallback para datos creados antes del fix).
+  const esLibreDiaActivo = !diaInfo || diaInfo.es_libre || diaInfo.comidas.length === 0
+
+  const comidasOrd = !esLibreDiaActivo && diaInfo
     ? [...diaInfo.comidas].sort((a, b) => MOMENTOS_ORDEN.indexOf(a.momento) - MOMENTOS_ORDEN.indexOf(b.momento))
     : []
 
@@ -172,7 +175,7 @@ export function PlanAlimenticioView({ plan, hoyFecha, logsHoy }: Props) {
                 >
                   {DIA_CORTO[d]}
                 </span>
-                {dInfo?.es_libre ? (
+                {dInfo?.es_libre || (dInfo && numCom === 0) ? (
                   <span style={{ color: "var(--foreground-subtle)", fontSize: "9px" }}>LIBRE</span>
                 ) : dInfo ? (
                   <span style={{ fontSize: "9px" }}>{numCom} com.</span>
@@ -189,7 +192,7 @@ export function PlanAlimenticioView({ plan, hoyFecha, logsHoy }: Props) {
           <div className="px-5 py-8 text-center">
             <p className="text-sm" style={{ color: "var(--foreground-muted)" }}>No hay datos para {DIA_NOMBRE[diaActivo]}.</p>
           </div>
-        ) : diaInfo.es_libre ? (
+        ) : esLibreDiaActivo ? (
           <div className="flex flex-col items-center justify-center py-12 px-5">
             <UtensilsCrossed size={32} className="mb-3" style={{ color: "var(--orange)" }} />
             <p className="text-base font-bold mb-1" style={{ color: "var(--orange)" }}>Día libre — {DIA_NOMBRE[diaActivo]}</p>

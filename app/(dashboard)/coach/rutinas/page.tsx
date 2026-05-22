@@ -114,7 +114,9 @@ export default async function RutinasPage({
       ) : (
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {rutinas.map((r) => {
-            const diasEntrenamiento = r.dias.filter((d) => !d.es_descanso)
+            // Tratar como descanso cualquier día sin ejercicios (cubre datos creados antes
+            // del fix donde días vacíos se persistían con es_descanso=false).
+            const diasEntrenamiento = r.dias.filter((d) => !d.es_descanso && d.ejercicios.length > 0)
             const totalEjercicios = r.dias.reduce((acc, d) => acc + d.ejercicios.length, 0)
             return (
               <Link
@@ -160,7 +162,7 @@ export default async function RutinasPage({
                   <div className="flex flex-wrap gap-1 mb-3">
                     {["lunes","martes","miercoles","jueves","viernes","sabado","domingo"].map((d) => {
                       const diaData = r.dias.find((x) => x.dia_semana === d)
-                      const activo = !!diaData && !diaData.es_descanso
+                      const activo = !!diaData && !diaData.es_descanso && diaData.ejercicios.length > 0
                       return (
                         <span
                           key={d}

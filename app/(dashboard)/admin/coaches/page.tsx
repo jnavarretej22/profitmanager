@@ -3,6 +3,7 @@ import { prisma } from "@/lib/db"
 import { redirect } from "next/navigation"
 import { AdminCoachesTable } from "../AdminCoachesTable"
 import { RegistrarPagoModal } from "../RegistrarPagoModal"
+import { CrearCoachModal } from "../CrearCoachModal"
 
 export const metadata = { title: "Coaches" }
 
@@ -57,20 +58,23 @@ export default async function AdminCoachesPage({
 
   return (
     <div className="space-y-5 animate-fade-in">
-      <div className="flex items-start justify-between gap-4">
+      <div className="flex items-start justify-between gap-4 flex-wrap">
         <div>
           <h1 className="section-title">Coaches</h1>
           <p className="section-subtitle">
             {coaches.length} coach{coaches.length !== 1 ? "es" : ""} encontrado{coaches.length !== 1 ? "s" : ""}
           </p>
         </div>
-        <RegistrarPagoModal
-          coaches={allCoaches.map((c) => ({
-            id: c.id,
-            nombre: `${c.user.nombre} ${c.user.apellido}`,
-            email: c.user.email,
-          }))}
-        />
+        <div className="flex gap-2 flex-wrap">
+          <CrearCoachModal />
+          <RegistrarPagoModal
+            coaches={allCoaches.map((c) => ({
+              id: c.id,
+              nombre: `${c.user.nombre} ${c.user.apellido}`,
+              email: c.user.email,
+            }))}
+          />
+        </div>
       </div>
 
       <AdminCoachesTable

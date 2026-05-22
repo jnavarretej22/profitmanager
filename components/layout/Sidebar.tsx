@@ -5,7 +5,7 @@ import { signOut } from "next-auth/react"
 import {
   LayoutDashboard, Users, Dumbbell, UtensilsCrossed, Calendar,
   CreditCard, LogOut, Settings,
-  BarChart2, ClipboardList, X, Globe, UserPlus,
+  BarChart2, X, Globe, UserPlus,
 } from "lucide-react"
 import { Brand } from "@/components/ui/Brand"
 import { Avatar } from "@/components/ui/Avatar"
@@ -52,7 +52,8 @@ const NAV_ADMIN = [
   { href: "/admin", icono: LayoutDashboard, label: "Dashboard" },
   { href: "/admin/coaches", icono: Users, label: "Coaches" },
   { href: "/admin/pagos", icono: CreditCard, label: "Pagos" },
-  { href: "/admin/planes", icono: ClipboardList, label: "Planes" },
+  { href: "/admin/rutinas", icono: Dumbbell, label: "Templates rutinas" },
+  { href: "/admin/planes-alimenticios", icono: UtensilsCrossed, label: "Templates planes" },
   { href: "/admin/reportes", icono: BarChart2, label: "Reportes" },
 ]
 
@@ -72,7 +73,7 @@ export function Sidebar({
     >
       {/* Brand */}
       <div className="flex items-center justify-between px-5 py-5">
-        <Brand size="sm" />
+        <Brand size="sm" href={`/${rol}`} />
         {/* Botón cerrar en mobile */}
         <button
           onClick={onCerrar}

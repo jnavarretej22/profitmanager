@@ -70,7 +70,7 @@ export default async function AlumnoLayout({ children }: { children: React.React
     >
       {/* ── Sidebar ─────────────────────────────────────── */}
       <aside
-        className="hidden lg:flex flex-col w-60 flex-shrink-0 fixed top-0 left-0 h-full z-30"
+        className="hidden md:flex flex-col w-60 flex-shrink-0 fixed top-0 left-0 h-full z-30"
         style={{
           background: "var(--background-card)",
           borderRight: "1px solid var(--border)",
@@ -78,7 +78,7 @@ export default async function AlumnoLayout({ children }: { children: React.React
       >
         {/* Logo */}
         <div className="flex items-center justify-between px-5 py-5 border-b" style={{ borderColor: "var(--border)" }}>
-          <Brand size="sm" />
+          <Brand size="sm" href="/alumno" />
           <ThemeToggle />
         </div>
 
@@ -141,7 +141,7 @@ export default async function AlumnoLayout({ children }: { children: React.React
 
       {/* ── Topbar mobile ──────────────────────────────── */}
       <div
-        className="lg:hidden fixed top-0 left-0 right-0 z-30 flex items-center justify-between px-4 py-3"
+        className="md:hidden fixed top-0 left-0 right-0 z-30 flex items-center justify-between px-4 py-3"
         style={{ background: "var(--background-card)", borderBottom: "1px solid var(--border)" }}
       >
         <div className="flex items-center gap-2">
@@ -152,7 +152,7 @@ export default async function AlumnoLayout({ children }: { children: React.React
             whatsappLink={whatsappLink}
             mailtoLink={mailtoLink}
           />
-          <Brand size="sm" />
+          <Brand size="sm" href="/alumno" />
         </div>
         <div className="flex items-center gap-2">
           <NotificacionesPanel notificacionesSinLeer={notifSinLeer} notificaciones={notificaciones} />
@@ -163,7 +163,7 @@ export default async function AlumnoLayout({ children }: { children: React.React
 
       {/* ── Topbar desktop ─────────────────────────────── */}
       <header
-        className="hidden lg:flex fixed top-0 left-60 right-0 z-20 items-center justify-between px-6 py-3.5"
+        className="hidden md:flex fixed top-0 left-60 right-0 z-20 items-center justify-between px-6 py-3.5"
         style={{ background: "var(--background-card)", borderBottom: "1px solid var(--border)", height: "56px" }}
       >
         <p className="text-xs capitalize" style={{ color: "var(--foreground-muted)" }}>
@@ -186,7 +186,7 @@ export default async function AlumnoLayout({ children }: { children: React.React
 
       {/* ── Contenido principal ─────────────────────────── */}
       <main
-        className="flex-1 lg:ml-60 pt-16 lg:pt-[56px] px-4 lg:px-8 pb-8"
+        className="flex-1 md:ml-60 pt-16 md:pt-[56px] px-4 md:px-8 pb-8"
         style={{ paddingBottom: marcaAgua ? "3.5rem" : "2rem" }}
       >
         <div className="max-w-4xl mx-auto">

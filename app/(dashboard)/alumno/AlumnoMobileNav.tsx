@@ -57,7 +57,7 @@ export function AlumnoMobileNav({
               className="flex items-center justify-between px-5 py-5 border-b"
               style={{ borderColor: "var(--border)" }}
             >
-              <Brand size="sm" />
+              <Brand size="sm" href="/alumno" />
               <button onClick={() => setAbierto(false)} className="btn-ghost p-1.5">
                 <X size={18} />
               </button>

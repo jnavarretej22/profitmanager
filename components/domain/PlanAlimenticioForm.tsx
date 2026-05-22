@@ -290,20 +290,25 @@ export function PlanAlimenticioForm({ planId, valorInicial = {}, alumnos, modoAd
         alumno_id:         modoAdmin ? null : (alumnoId || null),
         fecha_fin:         modoAdmin ? null : (alumnoId ? fechaFin : null),
         ...(modoAdmin && { plan_requerido: planRequerido || null }),
-        dias: dias.map((d) => ({
-          dia_semana:  d.dia_semana,
-          nombre_foco: d.nombre_foco || undefined,
-          es_libre:    d.es_libre,
-          comidas: d.es_libre ? [] : d.comidas.map((c) => ({
-            momento:         c.momento,
-            hora_sugerida:   c.hora_sugerida || undefined,
-            descripcion:     c.descripcion,
-            calorias:        c.calorias        ? parseInt(c.calorias)        : undefined,
-            proteinas_g:     c.proteinas_g     ? parseInt(c.proteinas_g)     : undefined,
-            carbohidratos_g: c.carbohidratos_g ? parseInt(c.carbohidratos_g) : undefined,
-            grasas_g:        c.grasas_g        ? parseInt(c.grasas_g)        : undefined,
-          })),
-        })),
+        // Un día sin comidas y sin marcar como libre se trata como libre al guardar
+        // para que la vista de detalle no lo muestre como un día activo vacío.
+        dias: dias.map((d) => {
+          const esLibreEfectivo = d.es_libre || d.comidas.length === 0
+          return {
+            dia_semana:  d.dia_semana,
+            nombre_foco: d.nombre_foco || undefined,
+            es_libre:    esLibreEfectivo,
+            comidas: esLibreEfectivo ? [] : d.comidas.map((c) => ({
+              momento:         c.momento,
+              hora_sugerida:   c.hora_sugerida || undefined,
+              descripcion:     c.descripcion,
+              calorias:        c.calorias        ? parseInt(c.calorias)        : undefined,
+              proteinas_g:     c.proteinas_g     ? parseInt(c.proteinas_g)     : undefined,
+              carbohidratos_g: c.carbohidratos_g ? parseInt(c.carbohidratos_g) : undefined,
+              grasas_g:        c.grasas_g        ? parseInt(c.grasas_g)        : undefined,
+            })),
+          }
+        }),
       }
 
       const baseUrl = modoAdmin ? "/api/admin/planes-alimenticios" : "/api/planes-alimenticios"
@@ -326,10 +331,10 @@ export function PlanAlimenticioForm({ planId, valorInicial = {}, alumnos, modoAd
 
   const diaData = dias.find((d) => d.dia_semana === diaActivo)!
   const totales = sumarMacrosDia(diaData.comidas)
-  // Comidas del día activo ordenadas por momento
-  const comidasOrdenadas = [...diaData.comidas].sort(
-    (a, b) => MOMENTOS_ORDEN.indexOf(a.momento) - MOMENTOS_ORDEN.indexOf(b.momento)
-  )
+  // Respetar el orden de inserción del usuario — usar los botones up/down para reordenar.
+  // (Antes ordenábamos por MOMENTOS_ORDEN pero eso reorganizaba la lista al cambiar el
+  // momento de una comida, lo que se percibía como "el orden se invierte".)
+  const comidasOrdenadas = diaData.comidas
 
   return (
     <>
@@ -609,8 +614,6 @@ export function PlanAlimenticioForm({ planId, valorInicial = {}, alumnos, modoAd
                 <div className="space-y-3">
                   {comidasOrdenadas.map((comida, idx) => {
                     const color = momentoColor(comida.momento)
-                    // índice real en el array sin ordenar
-                    const idxReal = diaData.comidas.findIndex((c) => c.tempId === comida.tempId)
                     return (
                       <div
                         key={comida.tempId}
@@ -646,7 +649,7 @@ export function PlanAlimenticioForm({ planId, valorInicial = {}, alumnos, modoAd
                             <button
                               type="button"
                               onClick={() => moverComida(diaActivo, comida.tempId, "up")}
-                              disabled={idxReal === 0}
+                              disabled={idx === 0}
                               className="btn-ghost p-1 disabled:opacity-30"
                             >
                               <ChevronUp size={13} />
@@ -654,7 +657,7 @@ export function PlanAlimenticioForm({ planId, valorInicial = {}, alumnos, modoAd
                             <button
                               type="button"
                               onClick={() => moverComida(diaActivo, comida.tempId, "down")}
-                              disabled={idxReal === diaData.comidas.length - 1}
+                              disabled={idx === diaData.comidas.length - 1}
                               className="btn-ghost p-1 disabled:opacity-30"
                             >
                               <ChevronDown size={13} />

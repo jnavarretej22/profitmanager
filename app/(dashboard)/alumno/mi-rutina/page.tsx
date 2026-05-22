@@ -97,7 +97,9 @@ export default async function MiRutinaPage() {
           (a, b) => ORDEN_DIAS.indexOf(a.dia_semana) - ORDEN_DIAS.indexOf(b.dia_semana)
         )
         const totalEjercicios = rutina.dias.reduce((acc, d) => acc + d.ejercicios.length, 0)
-        const diasEntreno     = diasOrdenados.filter((d) => !d.es_descanso).length
+        // Tratar como descanso cualquier día sin ejercicios (cubre datos creados antes
+        // del fix donde días vacíos se persistían con es_descanso=false).
+        const diasEntreno     = diasOrdenados.filter((d) => !d.es_descanso && d.ejercicios.length > 0).length
 
         return (
           <section key={rutina.id} className="space-y-4">
@@ -168,7 +170,7 @@ export default async function MiRutinaPage() {
                 <div className="flex flex-wrap gap-2">
                   {ORDEN_DIAS.map((d) => {
                     const diaData = rutina.dias.find((x) => x.dia_semana === d)
-                    const activo  = !!diaData && !diaData.es_descanso
+                    const activo  = !!diaData && !diaData.es_descanso && diaData.ejercicios.length > 0
                     const esHoy   = d === diaHoyKey
                     return (
                       <div key={d} className="flex flex-col items-center gap-1">
@@ -201,6 +203,8 @@ export default async function MiRutinaPage() {
 
               {diasOrdenados.map((dia) => {
                 const esHoy = dia.dia_semana === diaHoyKey
+                // Normalizar: día sin ejercicios = descanso (fallback para datos viejos)
+                const esDescanso = dia.es_descanso || dia.ejercicios.length === 0
                 return (
                   <div
                     key={dia.id}
@@ -219,7 +223,7 @@ export default async function MiRutinaPage() {
                       }}
                     >
                       <div className="flex items-center gap-2">
-                        {dia.es_descanso ? (
+                        {esDescanso ? (
                           <Coffee size={16} style={{ color: "var(--foreground-subtle)" }} />
                         ) : (
                           <Dumbbell size={16} style={{ color: esHoy ? "var(--blue)" : "var(--foreground-muted)" }} />
@@ -231,18 +235,18 @@ export default async function MiRutinaPage() {
                           {DIA_NOMBRE[dia.dia_semana]}
                           {esHoy && <span className="ml-2 text-xs font-semibold" style={{ color: "var(--orange)" }}>Hoy</span>}
                         </span>
-                        {dia.nombre_foco && !dia.es_descanso && (
+                        {dia.nombre_foco && !esDescanso && (
                           <span className="text-xs" style={{ color: "var(--foreground-subtle)" }}>· {dia.nombre_foco}</span>
                         )}
                       </div>
-                      {!dia.es_descanso && (
+                      {!esDescanso && (
                         <span className="text-xs" style={{ color: "var(--foreground-subtle)" }}>
                           {dia.ejercicios.length} ejercicio{dia.ejercicios.length !== 1 ? "s" : ""}
                         </span>
                       )}
                     </div>
 
-                    {dia.es_descanso ? (
+                    {esDescanso ? (
                       <div className="flex items-center gap-3 px-5 py-4">
                         <Coffee size={20} style={{ color: "var(--foreground-subtle)" }} />
                         <p className="text-sm" style={{ color: "var(--foreground-muted)" }}>

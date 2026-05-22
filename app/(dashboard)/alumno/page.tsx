@@ -58,6 +58,12 @@ export default async function AlumnoDashboardPage() {
       },
       planes_alimenticios: {
         where: { activo: true, deleted_at: null },
+        include: {
+          dias: {
+            orderBy: { orden: "asc" },
+            include: { comidas: { orderBy: { orden: "asc" } } },
+          },
+        },
         take: 1,
       },
       citas: {
@@ -214,7 +220,7 @@ export default async function AlumnoDashboardPage() {
         />
       </div>
 
-      {/* ── Calendario de entrenamiento ─────────────────── */}
+      {/* ── Calendario de entrenamiento + comidas ─────────── */}
       <CalendarioRutina
         rutina={rutina ? {
           id:               rutina.id,
@@ -234,6 +240,23 @@ export default async function AlumnoDashboardPage() {
               rpe:               e.rpe,
               notas:             e.notas,
               orden:             e.orden,
+            })),
+          })),
+        } : null}
+        plan={plan ? {
+          id:        plan.id,
+          nombre:    plan.nombre,
+          fecha_fin: plan.fecha_fin?.toISOString().split("T")[0] ?? null,
+          dias:      plan.dias.map((d) => ({
+            dia_semana: d.dia_semana,
+            es_libre:   d.es_libre,
+            comidas:    d.comidas.map((c) => ({
+              momento:       c.momento,
+              hora_sugerida: c.hora_sugerida
+                ? new Date(c.hora_sugerida).toTimeString().slice(0, 5)
+                : null,
+              descripcion:   c.descripcion,
+              calorias:      c.calorias,
             })),
           })),
         } : null}

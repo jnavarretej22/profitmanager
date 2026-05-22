@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { ChevronLeft, ChevronRight, X, Dumbbell, Clock, RotateCcw, Timer, Coffee } from "lucide-react"
+import { ChevronLeft, ChevronRight, X, Dumbbell, Clock, RotateCcw, Timer, Coffee, UtensilsCrossed } from "lucide-react"
 
 interface Ejercicio {
   nombre:            string
@@ -29,8 +29,37 @@ interface Rutina {
   fecha_fin?:       string | null
 }
 
+interface ComidaPlan {
+  momento:       string
+  hora_sugerida: string | null
+  descripcion:   string
+  calorias:      number | null
+}
+
+interface DiaPlan {
+  dia_semana: string
+  es_libre:   boolean
+  comidas:    ComidaPlan[]
+}
+
+interface Plan {
+  id:        string
+  nombre:    string
+  dias:      DiaPlan[]
+  fecha_fin?: string | null
+}
+
 interface Props {
   rutina: Rutina | null
+  plan?:  Plan | null
+}
+
+const MOMENTO_LABEL: Record<string, string> = {
+  desayuno:     "Desayuno",
+  media_manana: "Media mañana",
+  almuerzo:     "Almuerzo",
+  merienda:     "Merienda",
+  cena:         "Cena",
 }
 
 const JS_DIA: Record<number, string> = {
@@ -82,12 +111,16 @@ function ModalDia({
   fecha,
   rutina,
   dia,
+  comidas,
+  planNombre,
   onCerrar,
 }: {
-  fecha:    Date
-  rutina:   Rutina
-  dia:      DiaRutina
-  onCerrar: () => void
+  fecha:      Date
+  rutina:     Rutina | null
+  dia:        DiaRutina | null
+  comidas:    ComidaPlan[]
+  planNombre: string | null
+  onCerrar:   () => void
 }) {
   const fechaLabel = fecha.toLocaleDateString("es-EC", {
     weekday: "long", day: "numeric", month: "long",
@@ -121,16 +154,22 @@ function ModalDia({
           <div className="flex items-center gap-2.5">
             <div
               className="h-9 w-9 rounded-xl flex items-center justify-center flex-shrink-0"
-              style={{ background: "var(--blue-bg)" }}
+              style={{ background: rutina && dia ? "var(--blue-bg)" : "var(--green-bg)" }}
             >
-              <Dumbbell size={17} style={{ color: "var(--blue)" }} />
+              {rutina && dia ? (
+                <Dumbbell size={17} style={{ color: "var(--blue)" }} />
+              ) : (
+                <UtensilsCrossed size={17} style={{ color: "var(--green)" }} />
+              )}
             </div>
             <div>
               <p className="text-sm font-bold capitalize" style={{ color: "var(--foreground)" }}>
                 {fechaLabel}
               </p>
               <p className="text-xs" style={{ color: "var(--foreground-muted)" }}>
-                {rutina.nombre}{dia.nombre_foco ? ` · ${dia.nombre_foco}` : ""}
+                {rutina && dia
+                  ? `${rutina.nombre}${dia.nombre_foco ? ` · ${dia.nombre_foco}` : ""}`
+                  : planNombre ?? ""}
               </p>
             </div>
           </div>
@@ -144,29 +183,44 @@ function ModalDia({
         </div>
 
         {/* Meta */}
-        <div
-          className="flex items-center gap-4 px-5 py-3 border-b flex-wrap flex-shrink-0"
-          style={{ borderColor: "var(--border)", background: "var(--background)" }}
-        >
-          <span className="flex items-center gap-1.5 text-xs font-medium" style={{ color: "var(--foreground-muted)" }}>
-            <RotateCcw size={12} />
-            {OBJETIVO_LABEL[rutina.objetivo] ?? rutina.objetivo}
-          </span>
-          {rutina.duracion_minutos && (
+        {rutina && dia && (
+          <div
+            className="flex items-center gap-4 px-5 py-3 border-b flex-wrap flex-shrink-0"
+            style={{ borderColor: "var(--border)", background: "var(--background)" }}
+          >
             <span className="flex items-center gap-1.5 text-xs font-medium" style={{ color: "var(--foreground-muted)" }}>
-              <Clock size={12} />
-              {rutina.duracion_minutos} min
+              <RotateCcw size={12} />
+              {OBJETIVO_LABEL[rutina.objetivo] ?? rutina.objetivo}
             </span>
-          )}
-          <span className="flex items-center gap-1.5 text-xs font-medium" style={{ color: "var(--foreground-muted)" }}>
-            <Dumbbell size={12} />
-            {dia.ejercicios.length} ejercicios
-          </span>
-        </div>
+            {rutina.duracion_minutos && (
+              <span className="flex items-center gap-1.5 text-xs font-medium" style={{ color: "var(--foreground-muted)" }}>
+                <Clock size={12} />
+                {rutina.duracion_minutos} min
+              </span>
+            )}
+            <span className="flex items-center gap-1.5 text-xs font-medium" style={{ color: "var(--foreground-muted)" }}>
+              <Dumbbell size={12} />
+              {dia.ejercicios.length} ejercicios
+            </span>
+            {comidas.length > 0 && (
+              <span className="flex items-center gap-1.5 text-xs font-medium" style={{ color: "var(--foreground-muted)" }}>
+                <UtensilsCrossed size={12} />
+                {comidas.length} comidas
+              </span>
+            )}
+          </div>
+        )}
 
-        {/* Lista ejercicios — scrollable */}
-        <div className="overflow-y-auto flex-1 px-4 py-3 space-y-2">
-          {dia.ejercicios.map((ej) => (
+        {/* Lista ejercicios + comidas — scrollable */}
+        <div className="overflow-y-auto flex-1 px-4 py-3 space-y-3">
+          {rutina && dia && dia.ejercicios.length > 0 && (
+            <div className="space-y-2">
+              {comidas.length > 0 && (
+                <p className="text-[10px] font-bold uppercase tracking-wider" style={{ color: "var(--blue)" }}>
+                  Entrenamiento
+                </p>
+              )}
+              {dia.ejercicios.map((ej) => (
             <div
               key={ej.orden}
               className="flex gap-3 rounded-xl p-3"
@@ -225,6 +279,50 @@ function ModalDia({
               </div>
             </div>
           ))}
+            </div>
+          )}
+
+          {comidas.length > 0 && (
+            <div className="space-y-2">
+              {rutina && dia && dia.ejercicios.length > 0 && (
+                <p className="text-[10px] font-bold uppercase tracking-wider mt-2" style={{ color: "var(--green)" }}>
+                  Comidas
+                </p>
+              )}
+              {comidas.map((c, idx) => (
+                <div
+                  key={idx}
+                  className="flex gap-3 rounded-xl p-3"
+                  style={{ background: "var(--background)", border: "1px solid var(--border)", borderLeftWidth: "3px", borderLeftColor: "var(--green)" }}
+                >
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span
+                        className="px-2 py-0.5 rounded-full text-[11px] font-semibold"
+                        style={{ background: "var(--green-bg)", color: "var(--green)" }}
+                      >
+                        {MOMENTO_LABEL[c.momento] ?? c.momento}
+                      </span>
+                      {c.hora_sugerida && (
+                        <span className="text-[11px] font-semibold flex items-center gap-1" style={{ color: "var(--foreground-muted)" }}>
+                          <Clock size={10} />
+                          {c.hora_sugerida}
+                        </span>
+                      )}
+                      {c.calorias && (
+                        <span className="text-[11px] font-semibold" style={{ color: "var(--foreground-muted)" }}>
+                          {c.calorias} kcal
+                        </span>
+                      )}
+                    </div>
+                    <p className="text-sm mt-1.5" style={{ color: "var(--foreground)" }}>
+                      {c.descripcion}
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
 
         {/* Footer */}
@@ -242,13 +340,13 @@ function ModalDia({
   )
 }
 
-export function CalendarioRutina({ rutina }: Props) {
+export function CalendarioRutina({ rutina, plan = null }: Props) {
   const hoy  = new Date()
   const [anio, setAnio] = useState(hoy.getFullYear())
   const [mes,  setMes]  = useState(hoy.getMonth())
-  const [diaModal, setDiaModal] = useState<{ fecha: Date; dia: DiaRutina } | null>(null)
+  const [diaModal, setDiaModal] = useState<{ fecha: Date; dia: DiaRutina | null; comidas: ComidaPlan[] } | null>(null)
 
-  const diasEntrenamiento = rutina?.dias.filter((d) => !d.es_descanso) ?? []
+  const diasEntrenamiento = rutina?.dias.filter((d) => !d.es_descanso && d.ejercicios.length > 0) ?? []
   const cuadricula = buildCuadricula(anio, mes)
 
   function navAnterior() {
@@ -264,14 +362,28 @@ export function CalendarioRutina({ rutina }: Props) {
       if (d > fin) return undefined
     }
     const diaNombre = JS_DIA[d.getDay()]
-    return rutina?.dias.find((x) => x.dia_semana === diaNombre && !x.es_descanso)
+    // Tratar como descanso días sin ejercicios (datos viejos)
+    return rutina?.dias.find((x) => x.dia_semana === diaNombre && !x.es_descanso && x.ejercicios.length > 0)
+  }
+
+  function getComidasDelDia(d: Date): ComidaPlan[] {
+    if (!plan) return []
+    if (plan.fecha_fin) {
+      const fin = new Date(plan.fecha_fin + "T12:00:00")
+      if (d > fin) return []
+    }
+    const diaNombre = JS_DIA[d.getDay()]
+    const diaPlan = plan.dias.find((x) => x.dia_semana === diaNombre)
+    if (!diaPlan || diaPlan.es_libre || diaPlan.comidas.length === 0) return []
+    return diaPlan.comidas
   }
 
   function handleClick(celda: { date: Date; esDelMes: boolean }) {
-    if (!celda.esDelMes || !rutina) return
-    const dia = getDiaRutina(celda.date)
-    if (!dia) return
-    setDiaModal({ fecha: celda.date, dia })
+    if (!celda.esDelMes) return
+    const dia     = getDiaRutina(celda.date) ?? null
+    const comidas = getComidasDelDia(celda.date)
+    if (!dia && comidas.length === 0) return
+    setDiaModal({ fecha: celda.date, dia, comidas })
   }
 
   return (
@@ -358,7 +470,7 @@ export function CalendarioRutina({ rutina }: Props) {
           ))}
         </div>
 
-        {!rutina ? (
+        {!rutina && !plan ? (
           <div className="py-12 text-center px-4">
             <Dumbbell size={26} className="mx-auto mb-2.5" style={{ color: "var(--foreground-subtle)" }} />
             <p className="text-sm font-semibold" style={{ color: "var(--foreground)" }}>
@@ -372,9 +484,11 @@ export function CalendarioRutina({ rutina }: Props) {
           <div className="grid grid-cols-7 gap-px p-2 sm:p-3">
             {cuadricula.map((celda, i) => {
               const diaRutina = celda.esDelMes ? getDiaRutina(celda.date) : undefined
+              const comidasDia = celda.esDelMes ? getComidasDelDia(celda.date) : []
               const conRutina = !!diaRutina
+              const conComidas = comidasDia.length > 0
               const hoyFlag   = esHoy(celda.date, hoy)
-              const clickable = conRutina
+              const clickable = conRutina || conComidas
 
               return (
                 <button
@@ -423,10 +537,17 @@ export function CalendarioRutina({ rutina }: Props) {
                         whiteSpace:   "nowrap",
                         textOverflow: "ellipsis",
                       }}
-                      title={diaRutina?.nombre_foco ?? rutina.nombre}
+                      title={diaRutina?.nombre_foco ?? (rutina ? rutina.nombre : "")}
                     >
-                      {(diaRutina?.nombre_foco ?? rutina.nombre).slice(0, 6).toUpperCase()}
+                      {(diaRutina?.nombre_foco ?? (rutina?.nombre ?? "")).slice(0, 6).toUpperCase()}
                     </span>
+                  )}
+                  {conComidas && (
+                    <span
+                      className="mt-0.5 h-1.5 w-1.5 rounded-full"
+                      style={{ background: hoyFlag && conRutina ? "white" : "var(--green)" }}
+                      title={`${comidasDia.length} comidas`}
+                    />
                   )}
                 </button>
               )
@@ -435,7 +556,7 @@ export function CalendarioRutina({ rutina }: Props) {
         )}
 
         {/* Leyenda */}
-        {rutina && (
+        {(rutina || plan) && (
           <div
             className="flex items-center gap-3 sm:gap-5 px-4 sm:px-5 py-2.5 border-t flex-wrap"
             style={{ borderColor: "var(--border)" }}
@@ -444,23 +565,29 @@ export function CalendarioRutina({ rutina }: Props) {
               <span className="h-2.5 w-2.5 rounded-full" style={{ background: "var(--blue-bg)", border: "1.5px solid var(--blue)" }} />
               Hoy
             </span>
-            <span className="flex items-center gap-1.5 text-[11px]" style={{ color: "var(--foreground-muted)" }}>
-              <span className="h-2.5 w-2.5 rounded-full" style={{ background: "var(--blue)" }} />
-              Entrenamiento · clic para ver ejercicios
-            </span>
-            <span className="flex items-center gap-1.5 text-[11px]" style={{ color: "var(--foreground-muted)" }}>
-              <Coffee size={10} />
-              Descanso
-            </span>
+            {rutina && (
+              <span className="flex items-center gap-1.5 text-[11px]" style={{ color: "var(--foreground-muted)" }}>
+                <span className="h-2.5 w-2.5 rounded-full" style={{ background: "var(--blue)" }} />
+                Entrenamiento
+              </span>
+            )}
+            {plan && (
+              <span className="flex items-center gap-1.5 text-[11px]" style={{ color: "var(--foreground-muted)" }}>
+                <span className="h-1.5 w-1.5 rounded-full" style={{ background: "var(--green)" }} />
+                Comidas planificadas
+              </span>
+            )}
           </div>
         )}
       </div>
 
-      {diaModal && rutina && (
+      {diaModal && (
         <ModalDia
           fecha={diaModal.fecha}
           rutina={rutina}
           dia={diaModal.dia}
+          comidas={diaModal.comidas}
+          planNombre={plan?.nombre ?? null}
           onCerrar={() => setDiaModal(null)}
         />
       )}

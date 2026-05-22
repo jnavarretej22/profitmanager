@@ -9,7 +9,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
     >
       {/* Header con brand y toggle */}
       <div className="absolute top-0 left-0 right-0 flex items-center justify-between px-6 py-4">
-        <Brand size="sm" />
+        <Brand size="sm" href="/" />
         <ThemeToggle size="sm" />
       </div>
 

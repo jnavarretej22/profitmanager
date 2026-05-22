@@ -76,8 +76,15 @@ export async function POST(req: NextRequest) {
   const body   = await req.json()
   const parsed = crearSchema.safeParse(body)
   if (!parsed.success) {
+    const flat = parsed.error.flatten()
+    const primerError =
+      Object.entries(flat.fieldErrors).find(([, errs]) => errs && errs.length > 0)
+    const mensaje = primerError
+      ? `${primerError[0]}: ${primerError[1]?.[0]}`
+      : flat.formErrors[0] ?? "Datos inválidos"
+    console.error("[admin/rutinas] Validación falló:", JSON.stringify(flat))
     return NextResponse.json(
-      { error: "DATOS_INVALIDOS", detalles: parsed.error.flatten().fieldErrors },
+      { error: "DATOS_INVALIDOS", mensaje, detalles: flat.fieldErrors },
       { status: 400 }
     )
   }

@@ -12,6 +12,12 @@ const loginSchema = z.object({
 export const { handlers, auth, signIn, signOut } = NextAuth({
   // Sin adapter: Credentials requiere estrategia JWT, no database sessions
   session: { strategy: "jwt" },
+  // Confía en el host del request para construir URLs (callbacks, redirects).
+  // Sin esto, NextAuth usa NEXTAUTH_URL para todo — y si esa variable apunta a un
+  // dominio distinto al actual (ej. branch preview de Vercel con auth SSO), el
+  // logout/login redirige al dominio "equivocado" y a su SSO. Con trustHost,
+  // usa el `Host` del request actual.
+  trustHost: true,
   pages: {
     signIn: "/login",
     error: "/login",

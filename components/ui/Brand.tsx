@@ -9,7 +9,7 @@ interface BrandProps {
   className?: string
 }
 
-export function Brand({ variant = "full", size = "md", href = "/", className }: BrandProps) {
+export function Brand({ variant = "full", size = "md", href, className }: BrandProps) {
   const iconSize = { sm: 14, md: 18, lg: 22 }[size]
   const containerSize = { sm: "h-7 w-7", md: "h-9 w-9", lg: "h-11 w-11" }[size]
   const textSize = { sm: "text-sm", md: "text-base", lg: "text-xl" }[size]
@@ -48,7 +48,7 @@ export function Brand({ variant = "full", size = "md", href = "/", className }: 
     </span>
   )
 
-  if (href) {
+  if (href !== undefined) {
     return <Link href={href}>{content}</Link>
   }
 

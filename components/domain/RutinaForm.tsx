@@ -244,21 +244,27 @@ export function RutinaForm({ rutinaId, valorInicial = {}, alumnos, modoAdmin = f
         alumno_id:        modoAdmin ? null : (alumnoId || null),
         fecha_fin:        modoAdmin ? null : (alumnoId ? fechaFin : null),
         ...(modoAdmin && { plan_requerido: planRequerido || null }),
-        dias: dias.map((d) => ({
-          dia_semana:  d.dia_semana,
-          nombre_foco: d.nombre_foco || undefined,
-          es_descanso: d.es_descanso,
-          ejercicios:  d.es_descanso ? [] : d.ejercicios.map((ej) => ({
-            nombre:            ej.nombre,
-            series:            ej.series,
-            repeticiones:      ej.repeticiones,
-            peso_kg:           ej.peso_kg.trim() ? parseFloat(ej.peso_kg) : undefined,
-            descanso_segundos: ej.descanso_segundos || undefined,
-            rpe:               ej.rpe || undefined,
-            progresion:        ej.progresion || undefined,
-            notas:             ej.notas || undefined,
-          })),
-        })),
+        // Un día sin ejercicios y sin marcar como descanso es ambiguo. Lo tratamos
+        // como descanso al guardar para que la vista de detalle no lo muestre como
+        // un día activo vacío.
+        dias: dias.map((d) => {
+          const esDescansoEfectivo = d.es_descanso || d.ejercicios.length === 0
+          return {
+            dia_semana:  d.dia_semana,
+            nombre_foco: d.nombre_foco || undefined,
+            es_descanso: esDescansoEfectivo,
+            ejercicios:  esDescansoEfectivo ? [] : d.ejercicios.map((ej) => ({
+              nombre:            ej.nombre,
+              series:            ej.series,
+              repeticiones:      ej.repeticiones,
+              peso_kg:           ej.peso_kg.trim() ? parseFloat(ej.peso_kg) : undefined,
+              descanso_segundos: ej.descanso_segundos || undefined,
+              rpe:               ej.rpe || undefined,
+              progresion:        ej.progresion || undefined,
+              notas:             ej.notas || undefined,
+            })),
+          }
+        }),
       }
 
       const baseUrl = modoAdmin ? "/api/admin/rutinas" : "/api/rutinas"
