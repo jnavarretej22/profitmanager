@@ -116,7 +116,40 @@ export default async function MiProgresoPage() {
                 Historial de mediciones ({mediciones.length})
               </h3>
             </div>
-            <div className="overflow-x-auto">
+            {/* Vista mobile (<md): cards verticales */}
+            <ul className="md:hidden divide-y" style={{ borderColor: "var(--border)" }}>
+              {mediciones.map((m) => {
+                const campos = [
+                  { label: "Peso",     valor: m.peso_kg,           suf: "kg" },
+                  { label: "% Grasa",  valor: m.porcentaje_grasa,  suf: "%"  },
+                  { label: "Cintura",  valor: m.cintura_cm,        suf: "cm" },
+                  { label: "Cadera",   valor: m.cadera_cm,         suf: "cm" },
+                  { label: "Pecho",    valor: m.pecho_cm,          suf: "cm" },
+                  { label: "Brazo",    valor: m.brazo_cm,          suf: "cm" },
+                  { label: "Pierna",   valor: m.pierna_cm,         suf: "cm" },
+                ]
+                return (
+                  <li key={m.id} className="p-4">
+                    <p className="text-xs font-bold mb-2" style={{ color: "var(--foreground)" }}>
+                      {formatFechaCorta(m.fecha)}
+                    </p>
+                    <div className="grid grid-cols-2 gap-x-3 gap-y-1.5">
+                      {campos.filter((c) => c.valor != null).map((c) => (
+                        <div key={c.label} className="flex justify-between text-xs">
+                          <span style={{ color: "var(--foreground-muted)" }}>{c.label}</span>
+                          <span className="font-semibold" style={{ color: "var(--foreground)" }}>
+                            {Number(c.valor).toFixed(1)} {c.suf}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </li>
+                )
+              })}
+            </ul>
+
+            {/* Vista desktop (≥md): tabla */}
+            <div className="hidden md:block overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
                   <tr style={{ borderBottom: "1px solid var(--border)" }}>

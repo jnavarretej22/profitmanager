@@ -3,19 +3,6 @@ import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/db"
 import { AlumnoChrome } from "./AlumnoChrome"
 import { AlumnoLogoutForm } from "./AlumnoLogoutForm"
-import {
-  LayoutDashboard, Dumbbell, UtensilsCrossed,
-  TrendingUp, Calendar, User,
-} from "lucide-react"
-
-const NAV_ITEMS = [
-  { href: "/alumno",                     label: "Inicio",          icono: LayoutDashboard },
-  { href: "/alumno/mi-rutina",           label: "Mi rutina",       icono: Dumbbell },
-  { href: "/alumno/mi-plan-alimenticio", label: "Mi alimentación", icono: UtensilsCrossed },
-  { href: "/alumno/mi-progreso",         label: "Mi progreso",     icono: TrendingUp },
-  { href: "/alumno/mi-agenda",           label: "Mi agenda",       icono: Calendar },
-  { href: "/alumno/perfil",              label: "Mi perfil",       icono: User },
-]
 
 export default async function AlumnoLayout({ children }: { children: React.ReactNode }) {
   const session = await auth()
@@ -61,7 +48,6 @@ export default async function AlumnoLayout({ children }: { children: React.React
 
   return (
     <AlumnoChrome
-      navItems={NAV_ITEMS}
       user={{ nombre: user.nombre, apellido: user.apellido }}
       coach={{
         nombre:       coach.user.nombre,

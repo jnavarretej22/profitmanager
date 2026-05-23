@@ -54,7 +54,58 @@ export default async function AdminPagosPage() {
             </p>
           </div>
         ) : (
-          <div className="overflow-x-auto">
+        <>
+          {/* Vista mobile (<md): cards verticales */}
+          <ul className="md:hidden divide-y" style={{ borderColor: "var(--border)" }}>
+            {pagos.map((p) => (
+              <li key={p.id} className="p-4">
+                <div className="flex items-center justify-between gap-2 mb-1">
+                  <Link
+                    href={`/admin/coaches/${p.coach_id}`}
+                    className="font-semibold text-sm truncate hover:underline"
+                    style={{ color: "var(--blue)" }}
+                  >
+                    {p.coach.user.nombre} {p.coach.user.apellido}
+                  </Link>
+                  <span className="font-bold text-sm flex-shrink-0" style={{ color: "var(--green)" }}>
+                    ${Number(p.monto).toFixed(2)}
+                  </span>
+                </div>
+                <p className="text-[11px] truncate mb-2" style={{ color: "var(--foreground-subtle)" }}>
+                  {p.coach.user.email}
+                </p>
+                <div className="flex items-center gap-2 flex-wrap text-[11px]" style={{ color: "var(--foreground-muted)" }}>
+                  <Badge variant="neutral">{p.metodo}</Badge>
+                  <span>{new Date(p.fecha_pago).toLocaleDateString("es-EC", { day: "numeric", month: "short", year: "numeric" })}</span>
+                  <span>·</span>
+                  <span>
+                    {new Date(p.periodo_desde).toLocaleDateString("es-EC", { day: "numeric", month: "short" })}
+                    {" → "}
+                    {new Date(p.periodo_hasta).toLocaleDateString("es-EC", { day: "numeric", month: "short" })}
+                  </span>
+                  {p.comprobante_url && (
+                    <a
+                      href={p.comprobante_url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-1 font-semibold"
+                      style={{ color: "var(--blue)" }}
+                    >
+                      <ExternalLink size={11} /> Comprobante
+                    </a>
+                  )}
+                </div>
+                {p.registrador && (
+                  <p className="text-[10px] mt-1.5" style={{ color: "var(--foreground-subtle)" }}>
+                    Registrado por {p.registrador.nombre} {p.registrador.apellido}
+                  </p>
+                )}
+              </li>
+            ))}
+          </ul>
+
+          {/* Vista desktop (≥md): tabla */}
+          <div className="hidden md:block overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
                 <tr style={{ borderBottom: "1px solid var(--border)" }}>
@@ -115,6 +166,7 @@ export default async function AdminPagosPage() {
               </tbody>
             </table>
           </div>
+        </>
         )}
       </div>
     </div>

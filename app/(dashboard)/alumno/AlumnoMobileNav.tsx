@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { signOut } from "next-auth/react"
+import { cerrarSesion } from "@/lib/cerrar-sesion"
 import {
   Menu, X, LogOut, MessageCircle,
   LayoutDashboard, Dumbbell, UtensilsCrossed, TrendingUp, Calendar, User,
@@ -107,7 +107,7 @@ export function AlumnoMobileNav({
 
             <div className="px-3 pb-4 border-t pt-3" style={{ borderColor: "var(--border)" }}>
               <button
-                onClick={() => signOut({ callbackUrl: "/login" })}
+                onClick={() => cerrarSesion()}
                 className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold transition-colors"
                 style={{ color: "var(--foreground-muted)" }}
               >

@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import { Loader2, Save, Eye, EyeOff, Lock, Info, AlertCircle } from "lucide-react"
-import { signOut } from "next-auth/react"
+import { cerrarSesion } from "@/lib/cerrar-sesion"
 import type { Objetivo, Genero } from "@prisma/client"
 
 const OBJETIVO_LABEL: Record<Objetivo, string> = {
@@ -234,7 +234,7 @@ export function PerfilAlumnoForm(props: PerfilAlumnoFormProps) {
       >
         <p className="text-sm font-semibold" style={{ color: "var(--foreground)" }}>Cerrar sesión</p>
         <button
-          onClick={() => signOut({ callbackUrl: "/login" })}
+          onClick={() => cerrarSesion()}
           className="btn-secondary text-sm"
           style={{ color: "var(--red)", borderColor: "var(--red)44" }}
         >

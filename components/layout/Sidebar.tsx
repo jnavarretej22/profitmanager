@@ -1,7 +1,7 @@
 "use client"
 
 import Link from "next/link"
-import { signOut } from "next-auth/react"
+import { cerrarSesion } from "@/lib/cerrar-sesion"
 import {
   LayoutDashboard, Users, Dumbbell, UtensilsCrossed, Calendar,
   CreditCard, LogOut, Settings,
@@ -162,7 +162,7 @@ export function Sidebar({
             </p>
           </div>
           <button
-            onClick={() => signOut({ callbackUrl: "/login" })}
+            onClick={() => cerrarSesion()}
             className="btn-ghost p-1.5 flex-shrink-0"
             title="Cerrar sesión"
           >

@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import { Loader2, Save, Eye, EyeOff, Lock } from "lucide-react"
-import { signOut } from "next-auth/react"
+import { cerrarSesion } from "@/lib/cerrar-sesion"
 
 const ZONAS_HORARIAS = [
   "America/Guayaquil","America/Bogota","America/Lima",
@@ -177,7 +177,7 @@ export function CoachPerfilForm(props: Props) {
       {/* Logout */}
       <div className="rounded-2xl px-5 py-4 flex items-center justify-between" style={{ background: "var(--background-card)", border: "1px solid var(--border)" }}>
         <p className="text-sm font-semibold" style={{ color: "var(--foreground)" }}>Cerrar sesión</p>
-        <button onClick={() => signOut({ callbackUrl: "/login" })} className="btn-secondary text-sm" style={{ color: "var(--red)", borderColor: "var(--red)44" }}>
+        <button onClick={() => cerrarSesion()} className="btn-secondary text-sm" style={{ color: "var(--red)", borderColor: "var(--red)44" }}>
           Cerrar sesión
         </button>
       </div>

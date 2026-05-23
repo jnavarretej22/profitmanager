@@ -1,21 +1,29 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { Menu, MessageCircle } from "lucide-react"
+import {
+  Menu, MessageCircle,
+  LayoutDashboard, Dumbbell, UtensilsCrossed, TrendingUp, Calendar, User,
+} from "lucide-react"
 import { Avatar, Brand } from "@/components/ui"
 import { ThemeToggle } from "@/components/ui/ThemeToggle"
 import { NotificacionesPanel, WatermarkFooter } from "@/components/layout"
 import { NavItem } from "@/components/layout/NavItem"
 import { AlumnoMobileNav } from "./AlumnoMobileNav"
-import type { LucideIcon } from "lucide-react"
 
 const SIDEBAR_OCULTO_KEY = "profitmanager:sidebarOcultoDesktop"
 
-interface NavItemDef {
-  href:  string
-  label: string
-  icono: LucideIcon
-}
+// Los iconos son componentes (funciones) y NO se pueden pasar como props desde un
+// server component a un client component (Next.js no los puede serializar).
+// Por eso NAV_ITEMS vive aquí, en el cliente.
+const NAV_ITEMS = [
+  { href: "/alumno",                     label: "Inicio",          icono: LayoutDashboard },
+  { href: "/alumno/mi-rutina",           label: "Mi rutina",       icono: Dumbbell },
+  { href: "/alumno/mi-plan-alimenticio", label: "Mi alimentación", icono: UtensilsCrossed },
+  { href: "/alumno/mi-progreso",         label: "Mi progreso",     icono: TrendingUp },
+  { href: "/alumno/mi-agenda",           label: "Mi agenda",       icono: Calendar },
+  { href: "/alumno/perfil",              label: "Mi perfil",       icono: User },
+] as const
 
 interface Notificacion {
   id: string
@@ -29,7 +37,6 @@ interface Notificacion {
 
 interface AlumnoChromeProps {
   children: React.ReactNode
-  navItems: NavItemDef[]
   user: { nombre: string; apellido: string }
   coach: {
     nombre:       string
@@ -45,7 +52,7 @@ interface AlumnoChromeProps {
 }
 
 export function AlumnoChrome({
-  children, navItems, user, coach, whatsappLink, mailtoLink,
+  children, user, coach, whatsappLink, mailtoLink,
   notifSinLeer, notificaciones, marcaAgua, logoutForm,
 }: AlumnoChromeProps) {
   const [ocultoDesktop, setOcultoDesktop] = useState(false)
@@ -101,7 +108,7 @@ export function AlumnoChrome({
           </div>
 
           <nav className="flex-1 overflow-y-auto py-4 px-3 space-y-0.5">
-            {navItems.map(({ href, label, icono: Icono }) => (
+            {NAV_ITEMS.map(({ href, label, icono: Icono }) => (
               <NavItem
                 key={href}
                 href={href}

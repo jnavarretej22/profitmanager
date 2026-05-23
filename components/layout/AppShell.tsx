@@ -67,11 +67,13 @@ export function AppShell({
   }
 
   function handleToggle() {
-    // Si la viewport es mobile, abre el drawer. Si es desktop, oculta/muestra el sidebar fijo.
-    if (typeof window !== "undefined" && window.matchMedia("(min-width: 768px)").matches) {
+    // En desktop oculta/muestra el sidebar fijo. En mobile abre/cierra el drawer.
+    // Tailwind md = 768px.
+    if (typeof window === "undefined") return
+    if (window.innerWidth >= 768) {
       toggleDesktop()
     } else {
-      setSidebarAbierto(true)
+      setSidebarAbierto((v) => !v)
     }
   }
 

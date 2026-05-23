@@ -89,11 +89,68 @@ export function AdminCoachesTable({ coaches, busqueda, filtro, basePath = "/admi
         </div>
       </div>
 
-      {/* Tabla */}
+      {/* Tabla / cards */}
       {coaches.length === 0 ? (
         <p className="py-10 text-center text-sm" style={{ color: "var(--foreground-muted)" }}>No se encontraron coaches</p>
       ) : (
-        <div className="overflow-x-auto">
+      <>
+        {/* Vista mobile (<md): cards verticales */}
+        <ul className="md:hidden divide-y" style={{ borderColor: "var(--border)" }}>
+          {coaches.map((c) => {
+            const dias = diasParaVencer(c.fecha_vencimiento)
+            const limite = PlanFeatureService.limiteAlumnos(c.plan_actual)
+            const pct = Math.min((c.alumnos.length / limite) * 100, 100)
+            const urgente = dias !== null && dias <= 3
+            const proximo = dias !== null && dias <= 7 && dias > 3
+
+            return (
+              <li key={c.id}>
+                <Link
+                  href={`/admin/coaches/${c.id}`}
+                  className="flex items-center gap-3 p-4 transition-colors hover:bg-[var(--background-hover)]"
+                >
+                  <Avatar nombre={c.user.nombre} apellido={c.user.apellido} size="sm" />
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center justify-between gap-2 mb-1">
+                      <p className="font-semibold text-sm truncate" style={{ color: "var(--foreground)" }}>
+                        {c.user.nombre} {c.user.apellido}
+                      </p>
+                      <Badge variant={c.plan_actual === "inicial" ? "plan-inicial" : "plan-gratis"}>
+                        {PlanFeatureService.getNombrePlan(c.plan_actual)}
+                      </Badge>
+                    </div>
+                    <p className="text-[11px] truncate mb-2" style={{ color: "var(--foreground-subtle)" }}>{c.user.email}</p>
+
+                    <div className="flex items-center gap-3 flex-wrap text-[11px]">
+                      <Badge variant={c.estado_plan === "activo" ? "success" : c.estado_plan === "solo_lectura" ? "danger" : "neutral"} dot>
+                        {c.estado_plan === "activo" ? "Activo" : c.estado_plan === "solo_lectura" ? "Vencido" : "—"}
+                      </Badge>
+                      <span style={{ color: "var(--foreground-muted)" }}>
+                        {c.alumnos.length}/{limite} alumnos
+                      </span>
+                      {c.fecha_vencimiento && (
+                        <span
+                          className="font-semibold"
+                          style={{ color: urgente ? "var(--red)" : proximo ? "var(--orange)" : "var(--foreground-muted)" }}
+                        >
+                          Vence {new Date(c.fecha_vencimiento).toLocaleDateString("es-EC", { day: "numeric", month: "short" })}
+                          {urgente && " ⚠️"}
+                        </span>
+                      )}
+                    </div>
+
+                    <div className="mt-2 h-1 rounded-full overflow-hidden" style={{ background: "var(--border)" }}>
+                      <div className="h-full rounded-full" style={{ width: `${pct}%`, background: pct >= 100 ? "var(--red)" : "var(--blue)" }} />
+                    </div>
+                  </div>
+                </Link>
+              </li>
+            )
+          })}
+        </ul>
+
+        {/* Vista desktop (≥md): tabla */}
+        <div className="hidden md:block overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
               <tr style={{ borderBottom: "1px solid var(--border)" }}>
@@ -178,6 +235,7 @@ export function AdminCoachesTable({ coaches, busqueda, filtro, basePath = "/admi
             </tbody>
           </table>
         </div>
+      </>
       )}
     </div>
   )
