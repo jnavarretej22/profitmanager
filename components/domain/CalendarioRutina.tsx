@@ -481,7 +481,7 @@ export function CalendarioRutina({ rutina, plan = null }: Props) {
             </p>
           </div>
         ) : (
-          <div className="grid grid-cols-7 gap-px p-2 sm:p-3">
+          <div className="grid grid-cols-7 gap-px p-1 sm:p-3">
             {cuadricula.map((celda, i) => {
               const diaRutina = celda.esDelMes ? getDiaRutina(celda.date) : undefined
               const comidasDia = celda.esDelMes ? getComidasDelDia(celda.date) : []

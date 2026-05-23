@@ -1,10 +1,12 @@
 "use client"
 
 import Link from "next/link"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { Sidebar } from "./Sidebar"
 import { Topbar } from "./Topbar"
 import type { PlanActual, EstadoPlan } from "@prisma/client"
+
+const SIDEBAR_OCULTO_KEY = "profitmanager:sidebarOcultoDesktop"
 
 interface Notificacion {
   id: string
@@ -34,7 +36,44 @@ export function AppShell({
   children, rol, nombre, apellido, email,
   plan, estadoPlan, notificacionesSinLeer = 0, solicitudesPendientes = 0, notificaciones = [], zonaHoraria,
 }: AppShellProps) {
+  // drawer mobile (<md) — siempre vuelve a false al montar
   const [sidebarAbierto, setSidebarAbierto] = useState(false)
+  // oculto desktop (>=md) — persistido en localStorage
+  const [sidebarOcultoDesktop, setSidebarOcultoDesktop] = useState(false)
+
+  useEffect(() => {
+    if (typeof window === "undefined") return
+    setSidebarOcultoDesktop(window.localStorage.getItem(SIDEBAR_OCULTO_KEY) === "true")
+
+    // Sincronizar entre pestañas: si el usuario cambia el toggle en otra pestaña,
+    // esta se entera y refleja el cambio sin necesidad de refresh.
+    function onStorage(e: StorageEvent) {
+      if (e.key === SIDEBAR_OCULTO_KEY) {
+        setSidebarOcultoDesktop(e.newValue === "true")
+      }
+    }
+    window.addEventListener("storage", onStorage)
+    return () => window.removeEventListener("storage", onStorage)
+  }, [])
+
+  function toggleDesktop() {
+    setSidebarOcultoDesktop((v) => {
+      const next = !v
+      if (typeof window !== "undefined") {
+        window.localStorage.setItem(SIDEBAR_OCULTO_KEY, String(next))
+      }
+      return next
+    })
+  }
+
+  function handleToggle() {
+    // Si la viewport es mobile, abre el drawer. Si es desktop, oculta/muestra el sidebar fijo.
+    if (typeof window !== "undefined" && window.matchMedia("(min-width: 768px)").matches) {
+      toggleDesktop()
+    } else {
+      setSidebarAbierto(true)
+    }
+  }
 
   return (
     <div
@@ -51,6 +90,7 @@ export function AppShell({
         notificacionesSinLeer={notificacionesSinLeer}
         solicitudesPendientes={solicitudesPendientes}
         abierto={sidebarAbierto}
+        ocultoDesktop={sidebarOcultoDesktop}
         onCerrar={() => setSidebarAbierto(false)}
       />
 
@@ -62,7 +102,7 @@ export function AppShell({
           notificacionesSinLeer={notificacionesSinLeer}
           notificaciones={notificaciones}
           zonaHoraria={zonaHoraria}
-          onAbrirSidebar={() => setSidebarAbierto(true)}
+          onAbrirSidebar={handleToggle}
         />
 
         {/* Banner modo solo lectura */}
@@ -82,7 +122,7 @@ export function AppShell({
           className="flex-1 overflow-y-auto"
           style={{ background: "var(--background)" }}
         >
-          <div className="mx-auto max-w-6xl px-5 py-6">
+          <div className="mx-auto max-w-6xl px-3 sm:px-5 py-4 sm:py-6">
             {children}
           </div>
         </main>

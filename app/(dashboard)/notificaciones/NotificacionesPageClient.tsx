@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { Bell, CheckCheck, Calendar, Dumbbell, UtensilsCrossed, CreditCard, Clock, AlertCircle } from "lucide-react"
+import { Bell, CheckCheck, Calendar, Dumbbell, UtensilsCrossed, CreditCard, Clock, AlertCircle, Loader2 } from "lucide-react"
 import { useRouter } from "next/navigation"
 
 interface Notificacion {
@@ -63,9 +63,9 @@ function MarcarTodasBtn() {
     <button
       onClick={marcarTodas}
       disabled={cargando}
-      className="btn-secondary text-sm flex items-center gap-2"
+      className="btn-secondary text-sm flex items-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed"
     >
-      <CheckCheck size={15} />
+      {cargando ? <Loader2 size={15} className="animate-spin" /> : <CheckCheck size={15} />}
       Marcar todas
     </button>
   )

@@ -1,15 +1,11 @@
 import { redirect } from "next/navigation"
-import { auth, signOut } from "@/lib/auth"
+import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/db"
-import { ThemeToggle } from "@/components/ui/ThemeToggle"
-import { Avatar, Brand } from "@/components/ui"
-import { WatermarkFooter, NotificacionesPanel } from "@/components/layout"
-import { NavItem } from "@/components/layout/NavItem"
-import { AlumnoMobileNav } from "./AlumnoMobileNav"
+import { AlumnoChrome } from "./AlumnoChrome"
+import { AlumnoLogoutForm } from "./AlumnoLogoutForm"
 import {
   LayoutDashboard, Dumbbell, UtensilsCrossed,
-  TrendingUp, Calendar, User, LogOut,
-  MessageCircle,
+  TrendingUp, Calendar, User,
 } from "lucide-react"
 
 const NAV_ITEMS = [
@@ -64,138 +60,22 @@ export default async function AlumnoLayout({ children }: { children: React.React
   const mailtoLink = `mailto:${coach.user.email}`
 
   return (
-    <div
-      className="flex min-h-screen"
-      style={{ background: "var(--background)" }}
+    <AlumnoChrome
+      navItems={NAV_ITEMS}
+      user={{ nombre: user.nombre, apellido: user.apellido }}
+      coach={{
+        nombre:       coach.user.nombre,
+        apellido:     coach.user.apellido,
+        especialidad: coach.especialidad ?? null,
+      }}
+      whatsappLink={whatsappLink}
+      mailtoLink={mailtoLink}
+      notifSinLeer={notifSinLeer}
+      notificaciones={notificaciones}
+      marcaAgua={marcaAgua}
+      logoutForm={<AlumnoLogoutForm />}
     >
-      {/* ── Sidebar ─────────────────────────────────────── */}
-      <aside
-        className="hidden md:flex flex-col w-60 flex-shrink-0 fixed top-0 left-0 h-full z-30"
-        style={{
-          background: "var(--background-card)",
-          borderRight: "1px solid var(--border)",
-        }}
-      >
-        {/* Logo */}
-        <div className="flex items-center justify-between px-5 py-5 border-b" style={{ borderColor: "var(--border)" }}>
-          <Brand size="sm" href="/alumno" />
-          <ThemeToggle />
-        </div>
-
-        {/* Nav */}
-        <nav className="flex-1 overflow-y-auto py-4 px-3 space-y-0.5">
-          {NAV_ITEMS.map(({ href, label, icono: Icono }) => (
-            <NavItem key={href} href={href} icon={<Icono size={18} strokeWidth={2} />} label={label} />
-          ))}
-        </nav>
-
-        {/* Card del coach */}
-        <div className="mx-3 mb-3 rounded-2xl overflow-hidden">
-          <div
-            className="p-4"
-            style={{
-              background: "linear-gradient(135deg, #F97316, #EA580C)",
-            }}
-          >
-            <p className="text-xs font-semibold text-white/70 mb-1">Tu coach</p>
-            <p className="text-sm font-bold text-white mb-0.5">
-              {coach.user.nombre} {coach.user.apellido}
-            </p>
-            {coach.especialidad && (
-              <p className="text-xs text-white/70 mb-3">{coach.especialidad}</p>
-            )}
-            <div className="flex gap-2">
-              <a
-                href={whatsappLink ?? mailtoLink}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-bold transition-all hover:opacity-90"
-                style={{ background: "rgba(255,255,255,0.2)", color: "white" }}
-              >
-                <MessageCircle size={13} />
-                Contactar
-              </a>
-            </div>
-          </div>
-        </div>
-
-        {/* Logout */}
-        <div className="px-3 pb-4 border-t pt-3" style={{ borderColor: "var(--border)" }}>
-          <form
-            action={async () => {
-              "use server"
-              await signOut({ redirectTo: "/login" })
-            }}
-          >
-            <button
-              type="submit"
-              className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold transition-colors"
-              style={{ color: "var(--foreground-muted)" }}
-            >
-              <LogOut size={18} />
-              Cerrar sesión
-            </button>
-          </form>
-        </div>
-      </aside>
-
-      {/* ── Topbar mobile ──────────────────────────────── */}
-      <div
-        className="md:hidden fixed top-0 left-0 right-0 z-30 flex items-center justify-between px-4 py-3"
-        style={{ background: "var(--background-card)", borderBottom: "1px solid var(--border)" }}
-      >
-        <div className="flex items-center gap-2">
-          <AlumnoMobileNav
-            coachNombre={coach.user.nombre}
-            coachApellido={coach.user.apellido}
-            coachEspecialidad={coach.especialidad ?? null}
-            whatsappLink={whatsappLink}
-            mailtoLink={mailtoLink}
-          />
-          <Brand size="sm" href="/alumno" />
-        </div>
-        <div className="flex items-center gap-2">
-          <NotificacionesPanel notificacionesSinLeer={notifSinLeer} notificaciones={notificaciones} />
-          <ThemeToggle />
-          <Avatar nombre={user.nombre} apellido={user.apellido} size="sm" />
-        </div>
-      </div>
-
-      {/* ── Topbar desktop ─────────────────────────────── */}
-      <header
-        className="hidden md:flex fixed top-0 left-60 right-0 z-20 items-center justify-between px-6 py-3.5"
-        style={{ background: "var(--background-card)", borderBottom: "1px solid var(--border)", height: "56px" }}
-      >
-        <p className="text-xs capitalize" style={{ color: "var(--foreground-muted)" }}>
-          {new Date().toLocaleDateString("es-EC", { weekday: "long", day: "numeric", month: "long" })}
-        </p>
-        <div className="flex items-center gap-3">
-          <a
-            href={whatsappLink ?? mailtoLink}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="btn-secondary text-xs py-1.5 px-3"
-          >
-            <MessageCircle size={14} />
-            Contactar a mi coach
-          </a>
-          <NotificacionesPanel notificacionesSinLeer={notifSinLeer} notificaciones={notificaciones} />
-          <Avatar nombre={user.nombre} apellido={user.apellido} size="sm" />
-        </div>
-      </header>
-
-      {/* ── Contenido principal ─────────────────────────── */}
-      <main
-        className="flex-1 md:ml-60 pt-16 md:pt-[56px] px-4 md:px-8 pb-8"
-        style={{ paddingBottom: marcaAgua ? "3.5rem" : "2rem" }}
-      >
-        <div className="max-w-4xl mx-auto">
-          {children}
-        </div>
-      </main>
-
-      {/* ── Marca de agua (plan Gratis del coach) ──────── */}
-      {marcaAgua && <WatermarkFooter />}
-    </div>
+      {children}
+    </AlumnoChrome>
   )
 }

@@ -24,6 +24,7 @@ interface SidebarProps {
   notificacionesSinLeer?: number
   solicitudesPendientes?: number
   abierto: boolean
+  ocultoDesktop?: boolean
   onCerrar: () => void
 }
 
@@ -59,7 +60,7 @@ const NAV_ADMIN = [
 
 export function Sidebar({
   rol, nombre, apellido, email, plan, estadoPlan,
-  notificacionesSinLeer = 0, solicitudesPendientes = 0, abierto, onCerrar,
+  notificacionesSinLeer = 0, solicitudesPendientes = 0, abierto, ocultoDesktop = false, onCerrar,
 }: SidebarProps) {
   const navItems = rol === "coach" ? NAV_COACH : rol === "alumno" ? NAV_ALUMNO : NAV_ADMIN
 
@@ -174,10 +175,12 @@ export function Sidebar({
 
   return (
     <>
-      {/* Desktop: siempre visible */}
-      <div className="hidden md:flex md:flex-shrink-0">
-        {SidebarContent}
-      </div>
+      {/* Desktop: visible salvo que el usuario lo haya ocultado */}
+      {!ocultoDesktop && (
+        <div className="hidden md:flex md:flex-shrink-0">
+          {SidebarContent}
+        </div>
+      )}
 
       {/* Mobile: drawer */}
       {abierto && (

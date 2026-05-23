@@ -4,6 +4,7 @@ import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { Plus, Trash2, ChevronUp, ChevronDown, Loader2, Save, BookOpen, X, Coffee } from "lucide-react"
 import { usePlanOpcional } from "@/lib/plan-context"
+import { useWarnCambiosSinGuardar } from "@/lib/use-warn-cambios-sin-guardar"
 import { VigenciaSelector } from "./VigenciaSelector"
 
 const DIAS_SEMANA = ["lunes","martes","miercoles","jueves","viernes","sabado","domingo"] as const
@@ -138,6 +139,11 @@ export function RutinaForm({ rutinaId, valorInicial = {}, alumnos, modoAdmin = f
   const [mostrarTemplates,  setMostrarTemplates]  = useState(false)
   const [templates,         setTemplates]         = useState<TemplateRutina[]>([])
   const [cargandoTemplates, setCargandoTemplates] = useState(false)
+
+  useWarnCambiosSinGuardar(
+    { nombre, descripcion, objetivo, duracion, esTemplate, alumnoId, fechaFin, planRequerido, dias },
+    !cargando,
+  )
 
   const hoy = DIAS_SEMANA[new Date().getDay() === 0 ? 6 : new Date().getDay() - 1]
 

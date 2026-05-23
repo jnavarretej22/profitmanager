@@ -43,7 +43,7 @@ export function AdminCoachAcciones({ coachId, userActivo, estadoPlan }: Props) {
       <button
         onClick={() => accion("toggle_user", { activo_user: !userActivo })}
         disabled={cargando !== null}
-        className="btn-secondary text-xs flex items-center gap-1.5 disabled:opacity-60"
+        className="btn-secondary text-xs flex items-center gap-1.5 disabled:opacity-60 disabled:cursor-not-allowed"
         style={{ color: userActivo ? "var(--red)" : "var(--green)", borderColor: userActivo ? "var(--red)44" : "var(--green)44" }}
       >
         {cargando === "toggle_user" ? <Loader2 size={13} className="animate-spin" /> : (userActivo ? <UserX size={13} /> : <UserCheck size={13} />)}
@@ -55,7 +55,7 @@ export function AdminCoachAcciones({ coachId, userActivo, estadoPlan }: Props) {
         <button
           onClick={() => accion("activar_plan", { estado_plan: "activo" })}
           disabled={cargando !== null}
-          className="btn-secondary text-xs flex items-center gap-1.5 disabled:opacity-60"
+          className="btn-secondary text-xs flex items-center gap-1.5 disabled:opacity-60 disabled:cursor-not-allowed"
           style={{ color: "var(--green)", borderColor: "var(--green)44" }}
         >
           {cargando === "activar_plan" ? <Loader2 size={13} className="animate-spin" /> : <Shield size={13} />}
@@ -65,7 +65,7 @@ export function AdminCoachAcciones({ coachId, userActivo, estadoPlan }: Props) {
         <button
           onClick={() => accion("solo_lectura", { estado_plan: "solo_lectura" })}
           disabled={cargando !== null}
-          className="btn-secondary text-xs flex items-center gap-1.5 disabled:opacity-60"
+          className="btn-secondary text-xs flex items-center gap-1.5 disabled:opacity-60 disabled:cursor-not-allowed"
           style={{ color: "var(--orange)", borderColor: "var(--orange)44" }}
         >
           {cargando === "solo_lectura" ? <Loader2 size={13} className="animate-spin" /> : <ShieldOff size={13} />}

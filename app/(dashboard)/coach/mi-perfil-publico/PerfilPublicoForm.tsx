@@ -8,6 +8,7 @@ import {
   CheckCircle2, XCircle, Phone,
   ExternalLink, ToggleLeft, ToggleRight,
 } from "lucide-react"
+import { useWarnCambiosSinGuardar } from "@/lib/use-warn-cambios-sin-guardar"
 import { toast } from "sonner"
 
 const ESPECIALIDADES = [
@@ -42,6 +43,8 @@ export function PerfilPublicoForm({ inicial, baseUrl }: Props) {
   const [copiado, setCopiado]         = useState(false)
   const [slugStatus, setSlugStatus]   = useState<"idle" | "checking" | "ok" | "error">("idle")
   const [slugError, setSlugError]     = useState("")
+
+  useWarnCambiosSinGuardar(form, !cargando)
   const slugTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const router = useRouter()
 

@@ -1,6 +1,6 @@
 "use client"
 
-import { Calendar, CheckCircle2, AlertTriangle, Unlink } from "lucide-react"
+import { Calendar, CheckCircle2, AlertTriangle, Unlink, Loader2 } from "lucide-react"
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 
@@ -76,10 +76,10 @@ export function GoogleCalendarSection({ conectado, googleStatus }: Props) {
           <button
             onClick={desconectar}
             disabled={desconectando}
-            className="btn-secondary text-xs"
+            className="btn-secondary text-xs disabled:opacity-60 disabled:cursor-not-allowed"
             style={{ color: "var(--red)", borderColor: "var(--red)44" }}
           >
-            <Unlink size={13} />
+            {desconectando ? <Loader2 size={13} className="animate-spin" /> : <Unlink size={13} />}
             {desconectando ? "Desconectando..." : "Desconectar Google Calendar"}
           </button>
         </div>

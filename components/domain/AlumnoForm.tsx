@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation"
 import { z } from "zod"
 import { Loader2, Save } from "lucide-react"
 import { toast } from "sonner"
+import { useWarnCambiosSinGuardar } from "@/lib/use-warn-cambios-sin-guardar"
 
 const alumnoSchema = z.object({
   nombre: z.string().min(2, "Mínimo 2 caracteres"),
@@ -117,6 +118,8 @@ export function AlumnoForm({ alumnoId, valorInicial = {}, onExito }: AlumnoFormP
   const [errores, setErrores] = useState<Record<string, string>>({})
   const [errorGeneral, setErrorGeneral] = useState("")
   const [cargando, setCargando] = useState(false)
+
+  useWarnCambiosSinGuardar(form, !cargando)
 
   function setField(key: keyof FormData, value: string) {
     setForm((f) => ({ ...f, [key]: value }))

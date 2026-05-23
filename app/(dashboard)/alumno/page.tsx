@@ -127,7 +127,7 @@ export default async function AlumnoDashboardPage() {
 
       {/* ── Profile Banner ──────────────────────────────── */}
       <div
-        className="relative overflow-hidden rounded-2xl px-6 py-6"
+        className="relative overflow-hidden rounded-2xl px-4 sm:px-6 py-5 sm:py-6"
         style={{ background: "linear-gradient(135deg, #111827, #1e293b)" }}
       >
         <div
@@ -137,10 +137,10 @@ export default async function AlumnoDashboardPage() {
         <div className="relative z-10 flex flex-col gap-4 sm:flex-row sm:items-center">
           <Avatar nombre={alumno.user.nombre} apellido={alumno.user.apellido} size="lg" />
 
-          <div className="flex-1">
+          <div className="flex-1 min-w-0">
             <div className="flex flex-wrap items-center gap-2 mb-1">
               <h1
-                className="text-xl font-extrabold text-white"
+                className="text-lg sm:text-xl font-extrabold text-white break-words"
                 style={{ letterSpacing: "-0.02em" }}
               >
                 {alumno.user.nombre} {alumno.user.apellido}
@@ -156,7 +156,7 @@ export default async function AlumnoDashboardPage() {
               Coach: {alumno.coach.user.nombre} {alumno.coach.user.apellido}
             </p>
 
-            <div className="flex flex-wrap gap-5 items-center">
+            <div className="flex flex-wrap gap-3 sm:gap-5 items-center">
               {streak > 0 && (
                 <div
                   className="flex items-center gap-2 rounded-xl px-3 py-2"

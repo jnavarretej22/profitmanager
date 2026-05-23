@@ -47,11 +47,11 @@ export function Topbar({
       }}
     >
       <div className="flex items-center gap-3">
-        {/* Hamburguesa mobile */}
+        {/* Hamburguesa: en mobile abre el drawer, en desktop oculta/muestra el sidebar fijo */}
         <button
           onClick={onAbrirSidebar}
-          className="btn-ghost md:hidden"
-          aria-label="Abrir menú"
+          className="btn-ghost"
+          aria-label="Alternar menú lateral"
         >
           <Menu size={20} />
         </button>
