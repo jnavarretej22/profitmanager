@@ -115,13 +115,13 @@ export function PlanAlimenticioView({ plan, hoyFecha, logsHoy }: Props) {
   return (
     <>
       {/* Header del plan */}
-      <div className="rounded-2xl p-5" style={{ background: "var(--background-card)", border: "1px solid var(--border)", boxShadow: "var(--shadow-sm)" }}>
+      <div className="rounded-2xl p-4 sm:p-5" style={{ background: "var(--background-card)", border: "1px solid var(--border)", boxShadow: "var(--shadow-sm)" }}>
         <div className="flex items-start gap-3 mb-2">
-          <span className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl" style={{ background: "var(--green-bg)" }}>
+          <span className="flex h-10 w-10 sm:h-11 sm:w-11 flex-shrink-0 items-center justify-center rounded-xl" style={{ background: "var(--green-bg)" }}>
             <UtensilsCrossed size={20} style={{ color: "var(--green)" }} />
           </span>
-          <div>
-            <h2 className="font-bold" style={{ color: "var(--foreground)" }}>{plan.nombre}</h2>
+          <div className="flex-1 min-w-0">
+            <h2 className="font-bold break-words" style={{ color: "var(--foreground)" }}>{plan.nombre}</h2>
             {plan.calorias_objetivo && (
               <p className="text-xs" style={{ color: "var(--foreground-muted)" }}>
                 Objetivo: {plan.calorias_objetivo} kcal/día
@@ -159,7 +159,7 @@ export function PlanAlimenticioView({ plan, hoyFecha, logsHoy }: Props) {
                 key={d}
                 type="button"
                 onClick={() => setDiaActivo(d)}
-                className="flex-shrink-0 flex flex-col items-center px-4 py-3 text-xs font-bold transition-colors"
+                className="flex-1 sm:flex-initial flex-shrink-0 flex flex-col items-center px-2 sm:px-4 py-3 text-xs font-bold transition-colors min-w-0"
                 style={{
                   color:        esActivo ? "var(--green)" : "var(--foreground-muted)",
                   borderBottom: esActivo ? "2px solid var(--green)" : "2px solid transparent",
@@ -204,7 +204,7 @@ export function PlanAlimenticioView({ plan, hoyFecha, logsHoy }: Props) {
           <div>
             {/* Foco del día + macros totales */}
             {(diaInfo.nombre_foco || totCal > 0) && (
-              <div className="px-5 py-4 border-b" style={{ borderColor: "var(--border)", background: "var(--background)" }}>
+              <div className="px-3 sm:px-5 py-4 border-b" style={{ borderColor: "var(--border)", background: "var(--background)" }}>
                 {diaInfo.nombre_foco && (
                   <div className="mb-3">
                     <p className="text-[10px] font-bold uppercase tracking-wider mb-0.5" style={{ color: "var(--foreground-subtle)" }}>
@@ -215,12 +215,12 @@ export function PlanAlimenticioView({ plan, hoyFecha, logsHoy }: Props) {
                 )}
                 {totCal > 0 && (
                   <>
-                    <div className="grid grid-cols-4 gap-2 mb-2">
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-2">
                       {[
-                        { label: "kcal",    valor: totCal,          color: "var(--orange)", bg: "var(--orange-bg)" },
-                        { label: "Proteínas",valor: `${totProt}g`,  color: "var(--blue)",   bg: "var(--blue-bg)"   },
-                        { label: "Carbos",  valor: `${totCarbs}g`,  color: "var(--green)",  bg: "var(--green-bg)"  },
-                        { label: "Grasas",  valor: `${totGrasas}g`, color: "var(--purple)", bg: "var(--purple-bg)" },
+                        { label: "kcal",      valor: totCal,          color: "var(--orange)", bg: "var(--orange-bg)" },
+                        { label: "Proteínas", valor: `${totProt}g`,   color: "var(--blue)",   bg: "var(--blue-bg)"   },
+                        { label: "Carbos",    valor: `${totCarbs}g`,  color: "var(--green)",  bg: "var(--green-bg)"  },
+                        { label: "Grasas",    valor: `${totGrasas}g`, color: "var(--purple)", bg: "var(--purple-bg)" },
                       ].map(({ label, valor, color, bg }) => (
                         <div key={label} className="rounded-xl py-2 text-center" style={{ background: bg }}>
                           <p className="text-sm font-extrabold" style={{ color }}>{valor}</p>
@@ -263,7 +263,7 @@ export function PlanAlimenticioView({ plan, hoyFecha, logsHoy }: Props) {
 
             {/* Resumen "cumplidas hoy" */}
             {esHoy && comidasOrd.length > 0 && (
-              <div className="px-5 py-2.5 flex items-center justify-between" style={{ background: "var(--green-bg)", borderBottom: "1px solid var(--border)" }}>
+              <div className="px-3 sm:px-5 py-2.5 flex items-center justify-between gap-2 flex-wrap" style={{ background: "var(--green-bg)", borderBottom: "1px solid var(--border)" }}>
                 <span className="text-xs font-bold" style={{ color: "var(--green)" }}>
                   {cumplidasHoy} de {comidasOrd.length} comidas cumplidas hoy
                 </span>
@@ -285,7 +285,7 @@ export function PlanAlimenticioView({ plan, hoyFecha, logsHoy }: Props) {
                   const cumplida = !!logsLocal[c.id]
                   const cargando = enviando === c.id
                   return (
-                    <li key={c.id} className="px-5 py-4 flex items-start gap-3" style={{ borderLeft: "3px solid " + color, opacity: esHoy && cumplida ? 0.7 : 1 }}>
+                    <li key={c.id} className="px-3 sm:px-5 py-4 flex items-start gap-3" style={{ borderLeft: "3px solid " + color, opacity: esHoy && cumplida ? 0.7 : 1 }}>
                       {esHoy && (
                         <button
                           type="button"

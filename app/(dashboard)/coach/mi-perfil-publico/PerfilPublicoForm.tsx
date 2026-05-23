@@ -168,10 +168,19 @@ export function PerfilPublicoForm({ inicial, baseUrl }: Props) {
             Tu URL pública
           </label>
           <div className="flex gap-2">
-            <div className="flex-1 relative">
+            {/* Container con flex en lugar de absolute para que el prefijo
+                nunca se monte sobre el texto del input, sin importar su largo */}
+            <div
+              className="flex-1 flex items-stretch rounded-xl overflow-hidden"
+              style={{ border: "1px solid var(--border)", background: "var(--background-card)" }}
+            >
               <span
-                className="absolute left-3 top-1/2 -translate-y-1/2 text-xs font-medium select-none"
-                style={{ color: "var(--foreground-muted)" }}
+                className="flex items-center px-3 text-xs font-medium whitespace-nowrap select-none border-r"
+                style={{
+                  color: "var(--foreground-muted)",
+                  background: "var(--background)",
+                  borderColor: "var(--border)",
+                }}
               >
                 {baseUrl.replace(/https?:\/\//, "")}/
               </span>
@@ -184,12 +193,12 @@ export function PerfilPublicoForm({ inicial, baseUrl }: Props) {
                   if (val.length >= 3) verificarSlug(val)
                   else setSlugStatus("idle")
                 }}
-                className="input-base pl-[90px] pr-8"
+                className="flex-1 min-w-0 bg-transparent border-none outline-none px-3 text-sm"
                 placeholder="tu-nombre"
-                style={{ fontFamily: "monospace" }}
+                style={{ fontFamily: "monospace", color: "var(--foreground)" }}
               />
               {/* Indicador de disponibilidad */}
-              <div className="absolute right-3 top-1/2 -translate-y-1/2">
+              <div className="flex items-center pr-3">
                 {slugStatus === "checking" && <Loader2 size={14} className="animate-spin" style={{ color: "var(--foreground-muted)" }} />}
                 {slugStatus === "ok"       && <CheckCircle2 size={14} style={{ color: "var(--green)" }} />}
                 {slugStatus === "error"    && <XCircle      size={14} style={{ color: "var(--red)"   }} />}

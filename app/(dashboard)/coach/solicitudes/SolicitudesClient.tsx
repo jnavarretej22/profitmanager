@@ -117,9 +117,9 @@ export function SolicitudesClient({ solicitudes, cuposDisponibles }: Props) {
               onClick={() => setTab(t.id)}
               className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg text-xs font-semibold transition-all"
               style={{
-                background: tab === t.id ? "white" : "transparent",
-                color:      tab === t.id ? "var(--foreground)" : "var(--foreground-muted)",
-                boxShadow:  tab === t.id ? "0 1px 3px rgba(0,0,0,0.08)" : "none",
+                background: tab === t.id ? "var(--background-card)" : "transparent",
+                color:      tab === t.id ? "var(--foreground)"      : "var(--foreground-muted)",
+                boxShadow:  tab === t.id ? "var(--shadow-sm)"       : "none",
               }}
             >
               {t.label}
@@ -168,13 +168,13 @@ export function SolicitudesClient({ solicitudes, cuposDisponibles }: Props) {
       {/* ── Modal de confirmación ──────────────────────────── */}
       {modal && (
         <div
-          className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4"
-          style={{ background: "rgba(0,0,0,0.5)", backdropFilter: "blur(4px)" }}
+          className="fixed inset-0 z-[60] flex items-center justify-center p-3 sm:p-4 overflow-y-auto"
+          style={{ background: "rgba(0,0,0,0.5)" }}
           onClick={(e) => { if (e.target === e.currentTarget && !exito) cerrarModal() }}
         >
           <div
-            className="w-full sm:max-w-md rounded-t-3xl sm:rounded-2xl overflow-hidden"
-            style={{ background: "var(--background-card)" }}
+            className="w-full max-w-md rounded-2xl overflow-hidden my-auto"
+            style={{ background: "var(--background-card)", maxHeight: "calc(100dvh - 24px)" }}
           >
             <div className="p-5 border-b" style={{ borderColor: "var(--border)" }}>
               <p className="font-extrabold text-base" style={{ color: "var(--foreground)" }}>

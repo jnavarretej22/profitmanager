@@ -128,23 +128,20 @@ function ModalDia({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4"
-      style={{ background: "rgba(0,0,0,0.55)", backdropFilter: "blur(4px)" }}
+      className="fixed inset-0 z-[60] flex items-center justify-center p-3 sm:p-4 overflow-y-auto"
+      style={{ background: "rgba(0,0,0,0.55)" }}
       onClick={(e) => { if (e.target === e.currentTarget) onCerrar() }}
     >
       <div
-        className="w-full sm:max-w-md flex flex-col max-h-[90dvh] sm:max-h-[80vh]"
+        className="w-full max-w-md flex flex-col my-auto"
         style={{
           background:   "var(--background-card)",
           border:       "1px solid var(--border)",
           boxShadow:    "var(--shadow-lg)",
-          borderRadius: "20px 20px 0 0",
+          borderRadius: "20px",
+          maxHeight:    "calc(100dvh - 24px)",
         }}
       >
-        {/* Handle móvil */}
-        <div className="flex justify-center pt-3 pb-1 sm:hidden">
-          <div className="h-1 w-10 rounded-full" style={{ background: "var(--border-strong)" }} />
-        </div>
 
         {/* Header */}
         <div
@@ -544,10 +541,16 @@ export function CalendarioRutina({ rutina, plan = null }: Props) {
                   )}
                   {conComidas && (
                     <span
-                      className="mt-0.5 h-1.5 w-1.5 rounded-full"
+                      className="mt-1 flex h-4 w-4 items-center justify-center rounded-full"
                       style={{ background: hoyFlag && conRutina ? "white" : "var(--green)" }}
-                      title={`${comidasDia.length} comidas`}
-                    />
+                      title={`${comidasDia.length} comidas planificadas`}
+                    >
+                      <UtensilsCrossed
+                        size={9}
+                        strokeWidth={2.5}
+                        color={hoyFlag && conRutina ? "var(--green)" : "white"}
+                      />
+                    </span>
                   )}
                 </button>
               )
@@ -573,7 +576,12 @@ export function CalendarioRutina({ rutina, plan = null }: Props) {
             )}
             {plan && (
               <span className="flex items-center gap-1.5 text-[11px]" style={{ color: "var(--foreground-muted)" }}>
-                <span className="h-1.5 w-1.5 rounded-full" style={{ background: "var(--green)" }} />
+                <span
+                  className="flex h-4 w-4 items-center justify-center rounded-full"
+                  style={{ background: "var(--green)" }}
+                >
+                  <UtensilsCrossed size={9} strokeWidth={2.5} color="white" />
+                </span>
                 Comidas planificadas
               </span>
             )}

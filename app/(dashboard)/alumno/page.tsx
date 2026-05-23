@@ -127,8 +127,8 @@ export default async function AlumnoDashboardPage() {
 
       {/* ── Profile Banner ──────────────────────────────── */}
       <div
-        className="relative overflow-hidden rounded-2xl px-4 sm:px-6 py-5 sm:py-6"
-        style={{ background: "linear-gradient(135deg, #111827, #1e293b)" }}
+        className="banner-hero relative overflow-hidden rounded-2xl px-4 sm:px-6 py-5 sm:py-6"
+        style={{ background: "linear-gradient(135deg, #2D7DF6 0%, #1F66D9 50%, #1E40AF 100%)" }}
       >
         <div
           className="pointer-events-none absolute -right-12 -top-12 h-48 w-48 rounded-full opacity-20"
@@ -140,8 +140,8 @@ export default async function AlumnoDashboardPage() {
           <div className="flex-1 min-w-0">
             <div className="flex flex-wrap items-center gap-2 mb-1">
               <h1
-                className="text-lg sm:text-xl font-extrabold text-white break-words"
-                style={{ letterSpacing: "-0.02em" }}
+                className="text-lg sm:text-xl font-extrabold break-words"
+                style={{ color: "var(--banner-text)", letterSpacing: "-0.02em" }}
               >
                 {alumno.user.nombre} {alumno.user.apellido}
               </h1>
@@ -152,7 +152,7 @@ export default async function AlumnoDashboardPage() {
                 <Badge variant="orange">{OBJETIVO_LABEL[alumno.objetivo]}</Badge>
               )}
             </div>
-            <p className="text-sm mb-4" style={{ color: "rgba(255,255,255,0.55)" }}>
+            <p className="text-sm mb-4" style={{ color: "var(--banner-text-subtle)" }}>
               Coach: {alumno.coach.user.nombre} {alumno.coach.user.apellido}
             </p>
 
@@ -165,10 +165,10 @@ export default async function AlumnoDashboardPage() {
                 >
                   <Flame size={18} style={{ color: "#FB923C" }} />
                   <div>
-                    <p className="text-xl font-extrabold text-white leading-none" style={{ letterSpacing: "-0.02em" }}>
+                    <p className="text-xl font-extrabold leading-none" style={{ color: "var(--banner-text)", letterSpacing: "-0.02em" }}>
                       {streak}
                     </p>
-                    <p className="text-[10px] uppercase tracking-wider font-semibold" style={{ color: "rgba(255,255,255,0.6)" }}>
+                    <p className="text-[10px] uppercase tracking-wider font-semibold" style={{ color: "var(--banner-text-muted)" }}>
                       {streak === 1 ? "día seguido" : "días seguidos"}
                     </p>
                   </div>
@@ -183,11 +183,11 @@ export default async function AlumnoDashboardPage() {
               ].map(({ label, valor }) => (
                 <div key={label}>
                   {valor && (
-                    <p className="text-2xl font-extrabold text-white" style={{ letterSpacing: "-0.03em" }}>
+                    <p className="text-2xl font-extrabold" style={{ color: "var(--banner-text)", letterSpacing: "-0.03em" }}>
                       {valor}
                     </p>
                   )}
-                  <p className="text-xs" style={{ color: "rgba(255,255,255,0.55)" }}>{label}</p>
+                  <p className="text-xs" style={{ color: "var(--banner-text-subtle)" }}>{label}</p>
                 </div>
               ))}
             </div>

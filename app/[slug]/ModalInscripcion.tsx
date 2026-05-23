@@ -86,13 +86,13 @@ export function ModalInscripcion({ slug, nombreCoach, cuposDisponibles }: Props)
       {/* Modal */}
       {abierto && (
         <div
-          className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4"
-          style={{ background: "rgba(0,0,0,0.5)", backdropFilter: "blur(4px)" }}
+          className="fixed inset-0 z-[60] flex items-center justify-center p-3 sm:p-4 overflow-y-auto"
+          style={{ background: "rgba(0,0,0,0.5)" }}
           onClick={(e) => { if (e.target === e.currentTarget) cerrar() }}
         >
           <div
-            className="w-full sm:max-w-md rounded-t-3xl sm:rounded-2xl flex flex-col"
-            style={{ background: "white", maxHeight: "95vh" }}
+            className="w-full max-w-md rounded-2xl flex flex-col my-auto"
+            style={{ background: "white", maxHeight: "calc(100dvh - 24px)" }}
           >
             {/* Header fijo */}
             <div className="flex items-center justify-between p-5 pb-3 border-b flex-shrink-0" style={{ borderColor: "#f3f4f6" }}>

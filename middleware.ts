@@ -6,10 +6,14 @@ import type { NextRequest } from "next/server"
 import { checkRateLimit, RATE_LIMITS } from "@/lib/rate-limit"
 
 // APIs donde el alumno SÍ puede escribir
+// Regla de negocio (§6.4 CLAUDE.md): el alumno no muta datos del progreso,
+// pero SÍ registra: su propia cuenta, sus logs de cumplimiento, notificaciones.
 const ALUMNO_API_MUTACION_PERMITIDA = [
   "/api/alumno/perfil",
   "/api/alumno/cambiar-password",
-  "/api/notificaciones",  // marcar como leídas
+  "/api/alumno/sesiones-rutina",  // check-in de entrenamientos (estado, energía, notas)
+  "/api/alumno/comidas-log",      // marcar comidas como cumplidas
+  "/api/notificaciones",          // marcar como leídas
 ]
 
 // Rutas de API que no requieren sesión (tienen su propia autenticación)

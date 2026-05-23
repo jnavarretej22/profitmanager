@@ -77,6 +77,16 @@ export function AppShell({
     }
   }
 
+  function handleCerrar() {
+    // El botón X dentro del sidebar cierra el sidebar correcto según el viewport.
+    if (typeof window !== "undefined" && window.innerWidth >= 768) {
+      setSidebarOcultoDesktop(true)
+      window.localStorage.setItem(SIDEBAR_OCULTO_KEY, "true")
+    } else {
+      setSidebarAbierto(false)
+    }
+  }
+
   return (
     <div
       className="flex h-dvh overflow-hidden"
@@ -93,10 +103,14 @@ export function AppShell({
         solicitudesPendientes={solicitudesPendientes}
         abierto={sidebarAbierto}
         ocultoDesktop={sidebarOcultoDesktop}
-        onCerrar={() => setSidebarAbierto(false)}
+        onCerrarMobile={() => setSidebarAbierto(false)}
+        onCerrar={handleCerrar}
       />
 
-      <div className="flex flex-1 flex-col overflow-hidden">
+      <main
+        className="flex-1 overflow-y-auto"
+        style={{ background: "var(--background)" }}
+      >
         <Topbar
           nombre={nombre}
           apellido={apellido}
@@ -110,7 +124,7 @@ export function AppShell({
         {/* Banner modo solo lectura */}
         {estadoPlan === "solo_lectura" && (
           <div
-            className="flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-semibold"
+            className="mx-3 sm:mx-4 mt-2 rounded-full px-4 py-2 text-sm font-semibold flex items-center justify-center gap-2"
             style={{ background: "var(--red-bg)", color: "var(--red)" }}
           >
             Tu plan venció. Acceso en modo solo lectura.{" "}
@@ -120,15 +134,10 @@ export function AppShell({
           </div>
         )}
 
-        <main
-          className="flex-1 overflow-y-auto"
-          style={{ background: "var(--background)" }}
-        >
-          <div className="mx-auto max-w-6xl px-3 sm:px-5 py-4 sm:py-6">
-            {children}
-          </div>
-        </main>
-      </div>
+        <div className="mx-auto max-w-6xl px-3 sm:px-5 py-4 sm:py-6">
+          {children}
+        </div>
+      </main>
     </div>
   )
 }

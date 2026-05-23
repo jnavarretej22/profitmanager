@@ -84,7 +84,7 @@ export function RegistrarPagoModal({ coaches }: { coaches: Coach[] }) {
       </button>
 
       {abierto && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: "rgba(0,0,0,0.6)", backdropFilter: "blur(4px)" }}>
+        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4" style={{ background: "rgba(0,0,0,0.6)", backdropFilter: "blur(4px)" }}>
           <div
             className="w-full max-w-lg max-h-[90vh] rounded-2xl flex flex-col"
             style={{ background: "var(--background-card)", border: "1px solid var(--border)", boxShadow: "var(--shadow-xl)" }}

@@ -493,7 +493,7 @@ export function AlumnoDetailTabs({
 
       {/* Modal asignar rutina */}
       {modalAsignar && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: "rgba(0,0,0,0.5)", backdropFilter: "blur(6px)" }}>
+        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4" style={{ background: "rgba(0,0,0,0.5)", backdropFilter: "blur(6px)" }}>
           <div className="w-full max-w-md rounded-2xl flex flex-col max-h-[85vh]" style={{ background: "var(--background-card)", border: "1px solid var(--border)", boxShadow: "var(--shadow-xl)" }}>
             <div className="flex items-center justify-between px-5 py-4 border-b flex-shrink-0" style={{ borderColor: "var(--border)" }}>
               <div>
@@ -730,7 +730,7 @@ export function AlumnoDetailTabs({
 
       {/* Modal asignar plan */}
       {modalAsignarPlan && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: "rgba(0,0,0,0.5)", backdropFilter: "blur(6px)" }}>
+        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4" style={{ background: "rgba(0,0,0,0.5)", backdropFilter: "blur(6px)" }}>
           <div className="w-full max-w-md rounded-2xl flex flex-col max-h-[85vh]" style={{ background: "var(--background-card)", border: "1px solid var(--border)", boxShadow: "var(--shadow-xl)" }}>
             <div className="flex items-center justify-between px-5 py-4 border-b flex-shrink-0" style={{ borderColor: "var(--border)" }}>
               <div>
@@ -805,7 +805,7 @@ export function AlumnoDetailTabs({
 
       {/* Modal archivar */}
       {modalArchivar && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: "rgba(0,0,0,0.5)", backdropFilter: "blur(6px)" }}>
+        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4" style={{ background: "rgba(0,0,0,0.5)", backdropFilter: "blur(6px)" }}>
           <div className="w-full max-w-sm rounded-2xl p-7 animate-scale-in" style={{ background: "var(--background-card)", border: "1px solid var(--border)", boxShadow: "var(--shadow-lg)" }}>
             <h2 className="text-lg font-bold mb-2" style={{ color: "var(--foreground)" }}>¿Archivar a {alumno.nombre}?</h2>
             <p className="text-sm mb-6" style={{ color: "var(--foreground-muted)" }}>

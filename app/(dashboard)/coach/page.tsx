@@ -141,8 +141,8 @@ export default async function CoachDashboardPage() {
 
       {/* ── Welcome Banner ──────────────────────────────────────────────────── */}
       <div
-        className="relative overflow-hidden rounded-2xl px-7 py-6"
-        style={{ background: "linear-gradient(135deg, #0F172A 0%, #1E293B 50%, #0F2240 100%)" }}
+        className="banner-hero relative overflow-hidden rounded-2xl px-7 py-6"
+        style={{ background: "linear-gradient(135deg, #2D7DF6 0%, #1F66D9 50%, #1E40AF 100%)" }}
       >
         {/* Orbes decorativos gym */}
         <div
@@ -159,12 +159,12 @@ export default async function CoachDashboardPage() {
         />
 
         <div className="relative z-10">
-          <p className="text-sm font-medium mb-1" style={{ color: "rgba(255,255,255,0.6)" }}>
+          <p className="text-sm font-medium mb-1" style={{ color: "var(--banner-text-muted)" }}>
             Panel del coach
           </p>
           <h1
-            className="text-2xl font-extrabold text-white mb-5"
-            style={{ letterSpacing: "-0.02em" }}
+            className="text-2xl font-extrabold mb-5"
+            style={{ color: "var(--banner-text)", letterSpacing: "-0.02em" }}
           >
             ¡Hola, {nombreCoach}! 👋
           </h1>
@@ -177,10 +177,10 @@ export default async function CoachDashboardPage() {
               ...(semanas !== null ? [{ label: "Semanas usando ProFit", valor: `${semanas}` }] : []),
             ].map(({ label, valor }) => (
               <div key={label}>
-                <p className="text-2xl font-extrabold text-white" style={{ letterSpacing: "-0.03em" }}>
+                <p className="text-2xl font-extrabold" style={{ color: "var(--banner-text)", letterSpacing: "-0.03em" }}>
                   {valor}
                 </p>
-                <p className="text-xs" style={{ color: "rgba(255,255,255,0.55)" }}>
+                <p className="text-xs" style={{ color: "var(--banner-text-subtle)" }}>
                   {label}
                 </p>
               </div>

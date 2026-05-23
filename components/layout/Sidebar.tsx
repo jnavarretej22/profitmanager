@@ -25,6 +25,11 @@ interface SidebarProps {
   solicitudesPendientes?: number
   abierto: boolean
   ocultoDesktop?: boolean
+  // Cierra solo el drawer mobile (para auto-cerrar al navegar a otra ruta).
+  // NO toca el sidebar fijo de desktop.
+  onCerrarMobile: () => void
+  // Cierra "todo": en mobile cierra drawer, en desktop oculta el sidebar fijo.
+  // Solo para el botón X explícito.
   onCerrar: () => void
 }
 
@@ -60,25 +65,27 @@ const NAV_ADMIN = [
 
 export function Sidebar({
   rol, nombre, apellido, email, plan, estadoPlan,
-  notificacionesSinLeer = 0, solicitudesPendientes = 0, abierto, ocultoDesktop = false, onCerrar,
+  notificacionesSinLeer = 0, solicitudesPendientes = 0, abierto, ocultoDesktop = false,
+  onCerrarMobile, onCerrar,
 }: SidebarProps) {
   const navItems = rol === "coach" ? NAV_COACH : rol === "alumno" ? NAV_ALUMNO : NAV_ADMIN
 
   const SidebarContent = (
     <aside
-      className="flex h-full w-[260px] flex-col"
+      className="flex h-full w-[260px] flex-col bg-white dark:bg-[#1A1D27]"
       style={{
-        background: "var(--sidebar-bg)",
         borderRight: "1px solid var(--sidebar-border)",
+        isolation: "isolate",
       }}
     >
       {/* Brand */}
       <div className="flex items-center justify-between px-5 py-5">
         <Brand size="sm" href={`/${rol}`} />
-        {/* Botón cerrar en mobile */}
+        {/* Botón cerrar — en mobile cierra el drawer, en desktop oculta el sidebar fijo */}
         <button
           onClick={onCerrar}
-          className="md:hidden btn-ghost p-1.5"
+          className="btn-ghost p-1.5"
+          aria-label="Cerrar menú lateral"
         >
           <X size={18} />
         </button>
@@ -95,7 +102,7 @@ export function Sidebar({
                 href={item.href}
                 icon={<Icono size={18} strokeWidth={2} />}
                 label={item.label}
-                onClick={onCerrar}
+                onClick={onCerrarMobile}
                 badge={
                   item.href === "/coach/solicitudes" && solicitudesPendientes > 0
                     ? solicitudesPendientes
@@ -128,7 +135,7 @@ export function Sidebar({
               href="/coach/mi-plan"
               className="block text-xs font-semibold mt-1"
               style={{ color: "var(--blue)" }}
-              onClick={onCerrar}
+              onClick={onCerrarMobile}
             >
               Subir a Plan Inicial →
             </Link>
@@ -138,7 +145,7 @@ export function Sidebar({
               href="/coach/mi-plan"
               className="block text-xs font-semibold mt-1"
               style={{ color: "var(--red)" }}
-              onClick={onCerrar}
+              onClick={onCerrarMobile}
             >
               Renovar plan →
             </Link>
@@ -185,15 +192,16 @@ export function Sidebar({
       {/* Mobile: drawer */}
       {abierto && (
         <>
-          {/* Backdrop */}
+          {/* Backdrop sólido (sin blur — evita conflictos con el topbar pill que también lo usa) */}
           <div
-            className="fixed inset-0 z-30 md:hidden"
-            style={{ background: "rgba(0,0,0,0.5)", backdropFilter: "blur(4px)" }}
-            onClick={onCerrar}
+            className="fixed inset-0 z-[55] md:hidden"
+            style={{ background: "rgba(0,0,0,0.55)" }}
+            onClick={onCerrarMobile}
           />
           {/* Drawer */}
           <div
-            className="fixed inset-y-0 left-0 z-40 md:hidden animate-slide-in"
+            className="fixed inset-y-0 left-0 z-[56] md:hidden animate-slide-in"
+            style={{ boxShadow: "var(--shadow-lg)" }}
           >
             {SidebarContent}
           </div>

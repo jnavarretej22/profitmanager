@@ -1,8 +1,9 @@
 import Link from "next/link"
 import { Check, Users, Dumbbell, UtensilsCrossed, Calendar, BarChart2, FileDown, ChevronRight } from "lucide-react"
 import { Brand } from "@/components/ui/Brand"
-import { ThemeToggle } from "@/components/ui/ThemeToggle"
 import { Badge } from "@/components/ui/Badge"
+import { CarruselHero } from "./CarruselHero"
+import { LandingNav } from "./LandingNav"
 
 // ─── Datos de features ──────────────────────────────────────────────────────
 
@@ -58,50 +59,6 @@ const PLAN_INICIAL = [
   "Exportar PDFs sin marca de agua",
   "Soporte prioritario",
 ]
-
-// ─── Componente Nav ─────────────────────────────────────────────────────────
-
-function Nav() {
-  return (
-    <nav
-      className="sticky top-0 z-50 flex items-center justify-between px-6 py-3.5"
-      style={{
-        background: "rgba(var(--nav-bg, 249,250,251), 0.88)",
-        backdropFilter: "blur(12px)",
-        WebkitBackdropFilter: "blur(12px)",
-        borderBottom: "1px solid var(--border)",
-      }}
-    >
-      <Brand href="/" />
-
-      <div className="hidden md:flex items-center gap-6">
-        <a href="#funcionalidades" className="text-sm font-medium transition-colors" style={{ color: "var(--foreground-muted)" }}>
-          Funcionalidades
-        </a>
-        <a href="#precios" className="text-sm font-medium transition-colors" style={{ color: "var(--foreground-muted)" }}>
-          Precios
-        </a>
-      </div>
-
-      <div className="flex items-center gap-2">
-        <ThemeToggle size="sm" />
-        <Link
-          href="/login"
-          className="hidden sm:block text-sm font-semibold px-4 py-2 rounded-xl transition-colors"
-          style={{ color: "var(--foreground)" }}
-        >
-          Iniciar sesión
-        </Link>
-        <Link
-          href="/registro"
-          className="btn-primary text-sm py-2 px-4"
-        >
-          Empezar gratis
-        </Link>
-      </div>
-    </nav>
-  )
-}
 
 // ─── Componente Hero ─────────────────────────────────────────────────────────
 
@@ -491,7 +448,8 @@ function Footer() {
 export default function LandingPage() {
   return (
     <div style={{ background: "var(--background)" }}>
-      <Nav />
+      <LandingNav />
+      <CarruselHero />
       <Hero />
       <Features />
       <Pricing />

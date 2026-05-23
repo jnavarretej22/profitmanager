@@ -1,9 +1,8 @@
 "use client"
 
-import { useState } from "react"
 import { cerrarSesion } from "@/lib/cerrar-sesion"
 import {
-  Menu, X, LogOut, MessageCircle,
+  X, LogOut, MessageCircle,
   LayoutDashboard, Dumbbell, UtensilsCrossed, TrendingUp, Calendar, User,
 } from "lucide-react"
 import { NavItem } from "@/components/layout/NavItem"
@@ -24,34 +23,39 @@ interface Props {
   coachEspecialidad: string | null
   whatsappLink: string | null
   mailtoLink: string
+  abierto: boolean
+  onCerrar: () => void
 }
 
 export function AlumnoMobileNav({
   coachNombre, coachApellido, coachEspecialidad, whatsappLink, mailtoLink,
+  abierto, onCerrar,
 }: Props) {
-  const [abierto, setAbierto] = useState(false)
+  const setAbierto = (v: boolean) => { if (!v) onCerrar() }
 
   return (
     <>
-      <button
-        onClick={() => setAbierto(true)}
-        className="btn-ghost p-1.5"
-        aria-label="Abrir menú"
-      >
-        <Menu size={20} />
-      </button>
 
       {abierto && (
         <>
+          {/* Backdrop oscuro sin blur — el blur+transparency mezclado con el topbar pill
+              (que también tiene backdrop-filter) producía el efecto "transparente y bugeado" */}
           <div
-            className="fixed inset-0 z-30"
-            style={{ background: "rgba(0,0,0,0.5)", backdropFilter: "blur(4px)" }}
+            className="fixed inset-0 z-[55]"
+            style={{ background: "rgba(0,0,0,0.55)" }}
             onClick={() => setAbierto(false)}
           />
 
+          {/* bg explícito con Tailwind dark: variant evita problemas de var CSS
+              no aplicada por GPU layers durante animaciones / backdrop-filter ancestros.
+              isolation: isolate crea stacking context propio del drawer. */}
           <div
-            className="fixed inset-y-0 left-0 z-40 flex w-64 flex-col"
-            style={{ background: "var(--background-card)", borderRight: "1px solid var(--border)" }}
+            className="fixed inset-y-0 left-0 z-[56] flex w-64 flex-col bg-white dark:bg-[#1A1D27]"
+            style={{
+              borderRight: "1px solid var(--border)",
+              boxShadow: "var(--shadow-lg)",
+              isolation: "isolate",
+            }}
           >
             <div
               className="flex items-center justify-between px-5 py-5 border-b"

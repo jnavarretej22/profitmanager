@@ -44,6 +44,12 @@
   --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.07), 0 2px 4px -1px rgba(0,0,0,0.04);
   --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.08), 0 4px 6px -2px rgba(0,0,0,0.03);
 
+  /* Banner hero (dashboards) — claro en light mode, oscuro en dark mode */
+  --banner-bg:           linear-gradient(135deg, #2D7DF6 0%, #1F66D9 50%, #1E40AF 100%);
+  --banner-text:         #FFFFFF;
+  --banner-text-muted:   rgba(255,255,255,0.65);
+  --banner-text-subtle:  rgba(255,255,255,0.5);
+
   /* Radios */
   --radius-sm: 8px;
   --radius-md: 12px;
@@ -92,6 +98,9 @@
   --shadow-sm: 0 1px 3px rgba(0,0,0,0.4), 0 1px 2px rgba(0,0,0,0.3);
   --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.4), 0 2px 4px -1px rgba(0,0,0,0.3);
   --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.5), 0 4px 6px -2px rgba(0,0,0,0.4);
+
+  /* Banner hero en dark mode — vuelve al gradient oscuro original */
+  --banner-bg: linear-gradient(135deg, #0F172A 0%, #1E293B 50%, #0F2240 100%);
 }
 
 /* ─── Tema Tailwind v4 ───────────────────────────────────────────────────────── */
@@ -106,6 +115,13 @@
   --color-orange: var(--orange);
   --color-red: var(--red);
   --font-sans: var(--font-sans);
+}
+
+/* ─── Banner hero (dashboards) ─────────────────────────────────────────────── */
+/* El light mode se aplica por style inline en el componente (garantiza painting).
+   El dark mode usa esta regla con !important para sobreescribir el style inline. */
+.dark .banner-hero {
+  background: linear-gradient(135deg, #0F172A 0%, #1E293B 50%, #0F2240 100%) !important;
 }
 
 /* ─── Reset y estilos base ──────────────────────────────────────────────────── */
@@ -131,7 +147,9 @@ body {
 }
 
 /* ─── Tipografía ─────────────────────────────────────────────────────────────── */
-h1, h2, h3, h4, h5, h6 {
+/* :where() baja specificity a 0 → las utility classes (text-white, text-blue, etc.)
+   ganan sin necesidad de !important o style inline. */
+:where(h1, h2, h3, h4, h5, h6) {
   font-family: var(--font-sans);
   font-weight: 700;
   letter-spacing: -0.02em;
