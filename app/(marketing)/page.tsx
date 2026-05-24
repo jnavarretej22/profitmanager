@@ -379,6 +379,84 @@ function Pricing() {
   )
 }
 
+// ─── Guías de usuario ────────────────────────────────────────────────────────
+
+function Guias() {
+  return (
+    <section className="px-6 py-16" style={{ background: "var(--background-hover)" }}>
+      <div className="mx-auto max-w-5xl">
+        <div className="text-center mb-10">
+          <h2
+            className="text-2xl sm:text-3xl font-extrabold mb-3"
+            style={{ color: "var(--foreground)", letterSpacing: "-0.02em" }}
+          >
+            ¿Cómo funciona ProFit Manager?
+          </h2>
+          <p className="text-base" style={{ color: "var(--foreground-muted)" }}>
+            Guías paso a paso para que sepas exactamente qué hace cada sección.
+          </p>
+        </div>
+
+        <div className="grid sm:grid-cols-2 gap-5 max-w-3xl mx-auto">
+          <Link
+            href="/guia/coach"
+            className="group rounded-2xl p-6 transition-all hover:-translate-y-1"
+            style={{
+              background: "var(--background-card)",
+              border:     "1px solid var(--border)",
+              boxShadow:  "var(--shadow-sm)",
+            }}
+          >
+            <div
+              className="inline-flex items-center justify-center h-12 w-12 rounded-xl mb-4"
+              style={{ background: "var(--blue-bg)", color: "var(--blue)" }}
+            >
+              <Users size={22} />
+            </div>
+            <h3 className="text-lg font-extrabold mb-2" style={{ color: "var(--foreground)" }}>
+              Guía del coach
+            </h3>
+            <p className="text-sm mb-4" style={{ color: "var(--foreground-muted)", lineHeight: "1.55" }}>
+              Cómo gestionar alumnos, crear rutinas y planes alimenticios, agendar citas y seguir el progreso.
+            </p>
+            <span className="inline-flex items-center gap-1 text-sm font-semibold" style={{ color: "var(--blue)" }}>
+              Leer guía
+              <ChevronRight size={16} className="transition-transform group-hover:translate-x-1" />
+            </span>
+          </Link>
+
+          <Link
+            href="/guia/alumno"
+            className="group rounded-2xl p-6 transition-all hover:-translate-y-1"
+            style={{
+              background: "var(--background-card)",
+              border:     "1px solid var(--border)",
+              boxShadow:  "var(--shadow-sm)",
+            }}
+          >
+            <div
+              className="inline-flex items-center justify-center h-12 w-12 rounded-xl mb-4"
+              style={{ background: "var(--orange-bg)", color: "var(--orange)" }}
+            >
+              <Dumbbell size={22} />
+            </div>
+            <h3 className="text-lg font-extrabold mb-2" style={{ color: "var(--foreground)" }}>
+              Guía del alumno
+            </h3>
+            <p className="text-sm mb-4" style={{ color: "var(--foreground-muted)", lineHeight: "1.55" }}>
+              Cómo ver tu rutina, marcar tus comidas cumplidas, ver tu progreso y contactar a tu coach.
+            </p>
+            <span className="inline-flex items-center gap-1 text-sm font-semibold" style={{ color: "var(--orange)" }}>
+              Leer guía
+              <ChevronRight size={16} className="transition-transform group-hover:translate-x-1" />
+            </span>
+          </Link>
+        </div>
+      </div>
+    </section>
+  )
+}
+
 // ─── CTA Final ───────────────────────────────────────────────────────────────
 
 function CTAFinal() {
@@ -433,7 +511,9 @@ function Footer() {
     >
       <div className="mx-auto max-w-5xl flex flex-col sm:flex-row items-center justify-between gap-4">
         <Brand size="sm" href="/" />
-        <div className="flex items-center gap-5 text-xs" style={{ color: "var(--foreground-muted)" }}>
+        <div className="flex items-center gap-3 sm:gap-5 text-xs flex-wrap justify-center" style={{ color: "var(--foreground-muted)" }}>
+          <Link href="/guia/coach" className="hover:underline">Guía Coach</Link>
+          <Link href="/guia/alumno" className="hover:underline">Guía Alumno</Link>
           <Link href="/terminos" className="hover:underline">Términos</Link>
           <Link href="/privacidad" className="hover:underline">Privacidad</Link>
           <span>© {new Date().getFullYear()} ProFit Manager</span>
@@ -453,6 +533,7 @@ export default function LandingPage() {
       <Hero />
       <Features />
       <Pricing />
+      <Guias />
       <CTAFinal />
       <Footer />
     </div>

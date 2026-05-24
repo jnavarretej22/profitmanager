@@ -9,6 +9,8 @@ import { ThemeToggle } from "@/components/ui/ThemeToggle"
 const LINKS = [
   { href: "#funcionalidades", label: "Funcionalidades" },
   { href: "#precios",         label: "Precios" },
+  { href: "/guia/coach",      label: "Guía Coach" },
+  { href: "/guia/alumno",     label: "Guía Alumno" },
 ]
 
 // Helper: link con animación de texto deslizando hacia arriba en hover.
