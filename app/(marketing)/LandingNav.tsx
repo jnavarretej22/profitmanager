@@ -6,11 +6,13 @@ import { Menu, X } from "lucide-react"
 import { Brand } from "@/components/ui/Brand"
 import { ThemeToggle } from "@/components/ui/ThemeToggle"
 
+// Funcionalidades y Precios son anchors a secciones de la landing — usamos
+// path absoluto + hash para que funcione también desde /guia, /terminos, etc.
 const LINKS = [
-  { href: "#funcionalidades", label: "Funcionalidades" },
-  { href: "#precios",         label: "Precios" },
-  { href: "/guia/coach",      label: "Guía Coach" },
-  { href: "/guia/alumno",     label: "Guía Alumno" },
+  { href: "/#funcionalidades", label: "Funcionalidades" },
+  { href: "/#precios",         label: "Precios" },
+  { href: "/guia/coach",       label: "Guía Coach" },
+  { href: "/guia/alumno",      label: "Guía Alumno" },
 ]
 
 // Helper: link con animación de texto deslizando hacia arriba en hover.

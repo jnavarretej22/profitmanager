@@ -3,7 +3,6 @@ import { Check, Users, Dumbbell, UtensilsCrossed, Calendar, BarChart2, FileDown,
 import { Brand } from "@/components/ui/Brand"
 import { Badge } from "@/components/ui/Badge"
 import { CarruselHero } from "./CarruselHero"
-import { LandingNav } from "./LandingNav"
 
 // ─── Datos de features ──────────────────────────────────────────────────────
 
@@ -528,7 +527,6 @@ function Footer() {
 export default function LandingPage() {
   return (
     <div style={{ background: "var(--background)" }}>
-      <LandingNav />
       <CarruselHero />
       <Hero />
       <Features />
